@@ -2,507 +2,90 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f7f9">
+  <meta name="description" content="HISTI — a private, on-device self-assessment of information sharing.">
   <title>HISTI</title>
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-  <link rel="preload" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/public-sans@5.3.0/files/public-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <style>
-    html,body{margin:0;width:100%;height:100%;background:#fff;color:#292524}
-    body{display:grid;place-items:center;font:16px "Public Sans",system-ui,sans-serif;overflow:hidden}
-    .loading{padding:2rem;text-align:center;opacity:.68}
-  </style>
+  <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <div class="loading">Preparing HISTI…</div>
-  <script src="/histi-payload-clt6.js"></script>
-  <script>
-    (async()=>{
-      const b=window.__HISTI_B64||"";
-      if(!/^[A-Za-z0-9+/=]+$/.test(b)) throw new Error("App payload failed integrity validation");
-      if(b.length!==69668) throw new Error("App payload is incomplete");
+  <div id="app" class="app-shell">
+    <header class="topbar">
+      <div class="brand">HISTI</div>
+      <div id="progress-label" class="progress-label" hidden></div>
+      <button id="reset-btn" class="text-button" type="button">Reset</button>
+    </header>
 
-      const u=Uint8Array.from(atob(b),c=>c.charCodeAt(0));
-      const d=new DecompressionStream("gzip");
-      let t=await new Response(new Blob([u]).stream().pipeThrough(d)).text();
-      const topbarBefore="return `<button id=\"debug-hotspot\" type=\"button\" tabindex=\"-1\" aria-hidden=\"true\"></button>${progress}`;";
-      const topbarAfter="return `<button id=\"debug-hotspot\" type=\"button\" tabindex=\"-1\" aria-hidden=\"true\"></button>${progress}<button id=\"reset-progress\" class=\"reset-progress\" type=\"button\">Reset</button>`;";
-      const checkboxBefore="document.querySelectorAll('[data-rubric]').forEach(cb => cb.addEventListener('change', () => {";
-      const checkboxAfter="document.querySelectorAll('[data-rubric]').forEach(cb => cb.addEventListener('click', (event) => { event.preventDefault();";
-      const selectionBefore="cb.checked ? set.add(idx) : set.delete(idx);";
-      const selectionAfter="set.has(idx) ? set.delete(idx) : set.add(idx);";
-      const savedPillBefore='<div class="saved-pill">Progress saves automatically on this device</div>';
-      const savedPillAfter='';
-      const recipientEntranceBefore="state.screen = 'start'; state.screenMotion = state.animationsEnabled ? 'forward' : 'none'; render();";
-      const recipientEntranceAfter="state.screen = 'start'; state.screenMotion = state.animationsEnabled ? 'forward' : 'none'; document.documentElement.dataset.recipientEntrance = '1'; render(); setTimeout(() => { delete document.documentElement.dataset.recipientEntrance; }, 900);";
-      const saveDelayBefore="if (immediate) write(); else saveTimer = setTimeout(write, 80);";
-      const saveDelayAfter="clearTimeout(saveTimer); saveTimer = null; if (immediate) write(); else saveTimer = setTimeout(() => { saveTimer = null; write(); }, 250);";
-      const themeSeedBefore="const seed = state.screen === 'assessment' ? state.index : state.screen === 'results' ? 271 : state.screen === 'calculating' ? 263 : state.screen === 'start' ? 17 : 3;";
-      const themeSeedAfter="const seed = state.screen === 'assessment' ? 17 : state.screen === 'results' ? 271 : state.screen === 'calculating' ? 263 : state.screen === 'start' ? 17 : 3;";
-      const themePulseBefore=`    const shouldPulse = state.animationsEnabled && (state.motion !== 'none' || state.screenMotion !== 'none');
-    document.body.classList.remove('theme-pulse');
-    if (shouldPulse) {
-      void document.body.offsetWidth;
-      document.body.classList.add('theme-pulse');
-      setTimeout(() => document.body.classList.remove('theme-pulse'), 900);
-    }`;
-      const themePulseAfter=`    const shouldPulse = false;
-    document.body.classList.remove('theme-pulse');`;
-      const appLiveBefore='<div id="app" aria-live="polite"></div>';
-      const appLiveAfter='<div id="app"></div>';
-      const questionMotionBefore="const motionClass = state.animationsEnabled ? (state.motion === 'back' ? 'motion-back' : state.motion === 'forward' ? 'motion-forward' : '') : '';";
-      const questionMotionAfter="const motionClass = '';";
-      const resizeScheduleBefore="requestAnimationFrame(() => animateCardResize(fromHeight));";
-      const resizeScheduleAfter="void fromHeight;";
-      const leaveQuestionBefore=`  function leaveQuestion(direction, next) {
-    if (!state.animationsEnabled) { next(); return; }
-    const stage = document.querySelector('.question-stage');
-    if (!stage) { next(); return; }
-    if (navTransitioning) return;
-    navTransitioning = true;
-    stage.classList.add(direction === 'back' ? 'swipe-out-back' : 'swipe-out-forward');
-    let done = false;
-    const finish = () => {
-      if (done) return; done = true; navTransitioning = false; next();
-    };
-    stage.addEventListener('animationend', finish, { once:true });
-    setTimeout(finish, 280);
-  }`;
-      const leaveQuestionAfter=`  function leaveQuestion(direction, next) {
-    navTransitioning = false;
-    next();
-  }`;
-      const assessmentControlsBefore=`    document.querySelectorAll('[data-status]').forEach(btn => btn.addEventListener('click', () => {
-      a.status = btn.dataset.status;
-      if (a.status !== 'SCORE') a.selected = [];
-      state.motion = 'none';
-      renderAssessment();
-    }));
-    document.querySelectorAll('[data-rubric]').forEach(cb => cb.addEventListener('click', (event) => { event.preventDefault();
-      const idx = Number(cb.dataset.rubric);
-      const set = new Set(a.selected || []);
-      set.has(idx) ? set.delete(idx) : set.add(idx);
-      a.selected = [...set].sort((x,y) => x-y);
-      a.status = 'SCORE';
-      state.motion = 'none';
-      renderAssessment();
-    }));
-    const zero = document.getElementById('zero');
-    if (zero) zero.addEventListener('click', () => {
-      a.status = 'SCORE';
-      a.selected = [];
-      state.motion = 'none';
-      renderAssessment();
-    });`;
-      const assessmentControlsAfter=`    const zero = document.getElementById('zero');
-    const syncAssessmentControls = () => {
-      const selected = new Set(a.selected || []);
-      document.querySelectorAll('[data-rubric]').forEach(cb => {
-        const checked = a.status === 'SCORE' && selected.has(Number(cb.dataset.rubric));
-        cb.checked = checked;
-        cb.closest('.rubric-item')?.classList.toggle('checked', checked);
-      });
-      document.querySelectorAll('[data-status]').forEach(btn => btn.classList.toggle('active', a.status === btn.dataset.status));
-      if (zero) zero.classList.toggle('active', a.status === 'SCORE' && selected.size === 0);
-      document.querySelector('.rubric-box')?.classList.toggle('skipped', a.status !== 'SCORE');
-    };
-    const syncAssessmentChrome = () => {
-      document.querySelectorAll('[data-status]').forEach(btn => btn.classList.toggle('active', a.status === btn.dataset.status));
-      if (zero) zero.classList.toggle('active', a.status === 'SCORE' && (a.selected || []).length === 0);
-      document.querySelector('.rubric-box')?.classList.toggle('skipped', a.status !== 'SCORE');
-    };
-    const appRoot = document.getElementById('app');
-    appRoot.onclick = event => {
-      const statusBtn = event.target.closest('[data-status]');
-      if (statusBtn) {
-        a.status = statusBtn.dataset.status;
-        if (a.status !== 'SCORE') a.selected = [];
-        state.motion = 'none';
-        syncAssessmentControls();
-        return;
-      }
-      if (event.target.closest('#zero')) {
-        a.status = 'SCORE';
-        a.selected = [];
-        state.motion = 'none';
-        syncAssessmentControls();
-      }
-    };
-    appRoot.onchange = event => {
-      const rubric = event.target.closest('input[data-rubric]');
-      if (!rubric) return;
-      const idx = Number(rubric.dataset.rubric);
-      const selected = new Set(a.selected || []);
-      rubric.checked ? selected.add(idx) : selected.delete(idx);
-      a.selected = [...selected].sort((x,y) => x-y);
-      a.status = 'SCORE';
-      state.motion = 'none';
-      rubric.closest('.rubric-item')?.classList.toggle('checked', rubric.checked);
-      syncAssessmentChrome();
-    };`
-      const navigationListenersBefore=`    document.getElementById('back').addEventListener('click', goBack);
-    document.getElementById('next').addEventListener('click', goNext);`;
-      const navigationListenersAfter='';
-      const keyHandlerBefore="  document.addEventListener('keydown', e => {";
-      const keyHandlerAfter=`  document.addEventListener('click', e => {
-    if (!e.target.closest('#reset-progress')) return;
-    if (!window.confirm('Reset this assessment? All answers and current progress will be cleared.')) return;
-    clearTimeout(saveTimer);
-    const appRoot = document.getElementById('app');
-    if (appRoot) { appRoot.onclick = null; appRoot.onchange = null; }
-    clearCurrentProgress();
-    state = freshState();
-    navTransitioning = false;
-    render();
-  });
+    <main id="intro-screen" class="screen card">
+      <p class="eyebrow">Private · on-device</p>
+      <h1>A gentle check-in on what you share.</h1>
+      <p>Choose one person, answer at your own pace, and see your result when you finish. Your progress stays in this browser.</p>
+      <ul class="intro-list">
+        <li>Choose one person or relationship.</li>
+        <li>For each topic, select the details you shared.</li>
+        <li>Use the alternate statuses when the question does not fit.</li>
+      </ul>
+      <button id="begin-btn" class="primary" type="button">Let’s begin</button>
+    </main>
 
-  // Do not replace the clicked button's subtree until its pointer event has
-  // completed. Chromium can otherwise retain detached targets and render layers.
-  document.addEventListener('click', e => {
-    const button = e.target.closest('#back, #next');
-    if (!button || button.disabled || state.screen !== 'assessment') return;
-    e.preventDefault();
-    button.disabled = true;
-    clearTimeout(saveTimer);
-    saveProgress(true);
-    const appRoot = document.getElementById('app');
-    if (appRoot) { appRoot.onclick = null; appRoot.onchange = null; }
-    const action = button.id === 'back' ? goBack : goNext;
-    setTimeout(action, 0);
-  });
+    <main id="recipient-screen" class="screen card" hidden>
+      <p class="eyebrow">Step 1</p>
+      <h1>Who are you thinking about?</h1>
+      <p>Pick one person or audience. Every question will refer to that choice.</p>
+      <div id="recipient-list" class="choice-grid"></div>
+      <label class="field">
+        <span>Optional private label</span>
+        <input id="recipient-label" maxlength="80" autocomplete="off" placeholder="e.g. Alex, close friend">
+      </label>
+      <div class="actions">
+        <button id="recipient-back" class="secondary" type="button">Back</button>
+        <button id="start-btn" class="primary" type="button" disabled>Start questions</button>
+      </div>
+    </main>
 
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') saveProgress(true);
-  });
-  window.addEventListener('pagehide', () => saveProgress(true));
+    <main id="assessment-screen" class="screen assessment" hidden>
+      <section class="card assessment-card">
+        <div class="question-meta">
+          <span id="recipient-context"></span>
+          <span id="question-code"></span>
+        </div>
+        <h1 id="question-title"></h1>
+        <p id="question-help" class="muted"></p>
+        <p id="risk-note" class="risk" hidden>Never enter the actual identifier, password, code, key, or document content here.</p>
 
-  document.addEventListener('keydown', e => {`;
-      const sourcePatches=[
-        [topbarBefore,topbarAfter],
-        [checkboxBefore,checkboxAfter],
-        [selectionBefore,selectionAfter],
-        [savedPillBefore,savedPillAfter],
-        [recipientEntranceBefore,recipientEntranceAfter],
-        [saveDelayBefore,saveDelayAfter],
-        [themeSeedBefore,themeSeedAfter],
-        [themePulseBefore,themePulseAfter],
-        [appLiveBefore,appLiveAfter],
-        [questionMotionBefore,questionMotionAfter],
-        [resizeScheduleBefore,resizeScheduleAfter],
-        [leaveQuestionBefore,leaveQuestionAfter],
-        [assessmentControlsBefore,assessmentControlsAfter],
-        [navigationListenersBefore,navigationListenersAfter],
-        [keyHandlerBefore,keyHandlerAfter]
-      ];
-      for(const [before,after] of sourcePatches){
-        if(!t.includes(before)) throw new Error("HISTI UI patch target is missing");
-        t=t.replace(before,after);
-      }
-      const questionLayoutFix=`
-        @font-face{
-          font-family:"Public Sans";
-          src:url("https://cdn.jsdelivr.net/npm/@fontsource-variable/public-sans@5.3.0/files/public-sans-latin-wght-normal.woff2") format("woff2-variations");
-          font-style:normal;
-          font-weight:100 900;
-          font-display:swap;
-        }
-        :root{
-          --serif:"Public Sans",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-        }
-        html,body,button,input,textarea,select{
-          font-family:"Public Sans",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
-        }
-        /* A solid background avoids allocating any full-screen compositor surfaces. */
-        body{
-          background:#f6f6f8!important;
-        }
-        body::before,body::after{
-          content:none!important;
-          display:none!important;
-          background:none!important;
-          animation:none!important;
-          filter:none!important;
-          transform:none!important;
-        }
-        body.theme-pulse::before,body.theme-pulse::after,
-        body.theme-pulse .quiz-shell,body.theme-pulse .start-card,body.theme-pulse .results-card{
-          animation:none!important;
-        }
-        .start-card,.quiz-shell,.results-card,.calculation-card{
-          background:rgba(255,255,255,.90)!important;
-          backdrop-filter:none!important;
-          -webkit-backdrop-filter:none!important;
-          box-shadow:0 16px 44px rgba(62,47,93,.12),0 3px 12px rgba(62,47,93,.07)!important;
-          transition:none!important;
-        }
-        .motion-toggle,.access-toggle,.access-panel,.page-progress,.page-progress-label,.reset-progress{
-          backdrop-filter:none!important;
-          -webkit-backdrop-filter:none!important;
-        }
-        .question-stage.motion-forward,.question-stage.motion-back,
-        .question-stage.swipe-out-forward,.question-stage.swipe-out-back{
-          animation:none!important;
-          will-change:auto!important;
-        }
-        .progress-fill,.page-progress-fill{
-          transition:none!important;
-        }
-        /* Assessment safe mode: keep the full interactive card out of
-           compositor-heavy paths while responses are toggled repeatedly. */
-        .quiz-shell,
-        .quiz-shell *,
-        .quiz-shell *::before,
-        .quiz-shell *::after{
-          animation:none!important;
-          transition:none!important;
-          filter:none!important;
-          backdrop-filter:none!important;
-          -webkit-backdrop-filter:none!important;
-          transform:none!important;
-          will-change:auto!important;
-          box-shadow:none!important;
-          text-shadow:none!important;
-          perspective:none!important;
-          mix-blend-mode:normal!important;
-        }
-        @keyframes questionNext{
-          from{opacity:0;transform:translate3d(34px,0,0) scale(.99)}
-          to{opacity:1;transform:translate3d(0,0,0) scale(1)}
-        }
-        @keyframes questionBack{
-          from{opacity:0;transform:translate3d(-34px,0,0) scale(.99)}
-          to{opacity:1;transform:translate3d(0,0,0) scale(1)}
-        }
-        @keyframes questionOutForward{
-          from{opacity:1;transform:translate3d(0,0,0) scale(1)}
-          to{opacity:0;transform:translate3d(-30px,0,0) scale(.99)}
-        }
-        @keyframes questionOutBack{
-          from{opacity:1;transform:translate3d(0,0,0) scale(1)}
-          to{opacity:0;transform:translate3d(30px,0,0) scale(.99)}
-        }
-        /* Keep question content and navigation in separate, stable regions. */
-        .quiz-shell{
-          display:flex;
-          flex-direction:column;
-        }
-        .quiz-shell .progress-track{
-          flex:0 0 3px;
-        }
-        .question-stage{
-          flex:1 1 auto;
-          min-height:0;
-          justify-content:flex-start;
-          overflow-x:hidden;
-          overflow-y:auto;
-          scrollbar-gutter:stable;
-        }
-        .nav-row{
-          flex:0 0 auto;
-          align-items:start;
-        }
-        .nav-btn{
-          height:42px;
-          min-height:42px;
-        }
-        .start-mark{
-          font-size:12px;
-        }
-        .start-copy,.intro-copy{
-          font-size:16px;
-          line-height:1.55;
-        }
-        .intro-point{
-          font-size:14px;
-          line-height:1.45;
-        }
-        .choice-title{
-          font-size:15px;
-        }
-        .choice-help{
-          font-size:12px;
-          line-height:1.4;
-        }
-        .privacy-line,.resume-note{
-          font-size:12px;
-          line-height:1.5;
-        }
-        .field label{
-          font-size:12px;
-        }
-        .question-context{
-          font-size:13px;
-        }
-        .question-title{
-          font-size:clamp(30px,4.4vw,44px);
-          line-height:1.08;
-        }
-        .question-help-line{
-          font-size:13px;
-          line-height:1.5;
-        }
-        .zero-btn{
-          min-height:42px;
-          font-size:13px;
-        }
-        .rubric-item{
-          min-height:46px;
-          gap:9px;
-          padding:8px 11px;
-        }
-        .rubric-item input{
-          width:17px;
-          height:17px;
-        }
-        .rubric-text{
-          font-size:13px;
-          line-height:1.35;
-        }
-        .aux-label{
-          font-size:11px;
-          line-height:1.4;
-        }
-        .status-btn{
-          min-height:36px;
-          padding:6px 8px;
-          font-size:12px;
-        }
-        button,
-        .choice-title,
-        .choice-help,
-        .status-btn,
-        .zero-btn,
-        .secondary,
-        .reset-progress,
-        .motion-toggle,
-        .access-toggle,
-        .debug-btn,
-        .access-chip{
-          color:#111!important;
-        }
-        .primary{
-          color:#111!important;
-          background:rgba(255,255,255,.94)!important;
-          border-color:rgba(38,35,48,.28)!important;
-          box-shadow:0 8px 24px rgba(58,45,88,.13);
-        }
-        .primary:hover{
-          background:#fff!important;
-        }
-        .primary:disabled{
-          color:rgba(17,17,17,.5)!important;
-          background:rgba(255,255,255,.58)!important;
-        }
-        html[data-recipient-entrance="1"] .recipient-grid.rich .choice{
-          animation:recipientChoiceIn .5s cubic-bezier(.2,.8,.2,1) both;
-        }
-        html[data-recipient-entrance="1"] .recipient-grid.rich .choice:nth-child(1){animation-delay:40ms}
-        html[data-recipient-entrance="1"] .recipient-grid.rich .choice:nth-child(2){animation-delay:90ms}
-        html[data-recipient-entrance="1"] .recipient-grid.rich .choice:nth-child(3){animation-delay:140ms}
-        html[data-recipient-entrance="1"] .recipient-grid.rich .choice:nth-child(4){animation-delay:190ms}
-        html[data-recipient-entrance="1"] .recipient-grid.rich .choice:nth-child(5){animation-delay:240ms}
-        html[data-recipient-entrance="1"] .recipient-grid.rich .choice:nth-child(6){animation-delay:290ms}
-        .recipient-grid.rich .choice.selected{
-          animation:recipientSelected .32s cubic-bezier(.2,.8,.2,1);
-          box-shadow:0 9px 24px rgba(58,45,88,.16);
-        }
-        @keyframes recipientChoiceIn{
-          from{opacity:0;transform:translateY(12px) scale(.98)}
-          to{opacity:1;transform:translateY(0) scale(1)}
-        }
-        @keyframes recipientSelected{
-          0%{transform:scale(.98)}
-          60%{transform:scale(1.025)}
-          100%{transform:scale(1)}
-        }
-        .page-progress-label{
-          font-size:11.5px;
-        }
-        .motion-toggle,.access-toggle{
-          font-size:12px!important;
-        }
-        button,.rubric-item,.rubric-item *{
-          touch-action:manipulation;
-        }
-        .reset-progress{
-          position:fixed;
-          z-index:68;
-          top:max(18px,env(safe-area-inset-top));
-          right:max(18px,env(safe-area-inset-right));
-          min-height:36px;
-          padding:0 13px;
-          border:1px solid rgba(80,66,110,.14);
-          border-radius:999px;
-          background:rgba(255,255,255,.76);
-          color:var(--text);
-          box-shadow:0 8px 24px rgba(58,45,88,.09);
-          backdrop-filter:blur(18px);
-          -webkit-backdrop-filter:blur(18px);
-          cursor:pointer;
-          font-size:12px;
-        }
-        .reset-progress:hover{
-          background:rgba(255,255,255,.94);
-          transform:translateY(-1px);
-        }
-        @media(prefers-reduced-motion:reduce){
-          html[data-recipient-entrance="1"] .recipient-grid.rich .choice,
-          .recipient-grid.rich .choice.selected{
-            animation:none!important;
-          }
-        }
-        @media(max-width:560px){
-          .start-copy,.intro-copy{
-            font-size:15px;
-          }
-          .intro-point{
-            font-size:13px;
-          }
-          .choice-title{
-            font-size:14px;
-          }
-          .choice-help{
-            display:block;
-            font-size:11px;
-          }
-          .question-context{
-            font-size:11.5px;
-          }
-          .question-title{
-            font-size:clamp(27px,8vw,34px);
-          }
-          .question-help-line{
-            font-size:12px;
-          }
-          .rubric-list{
-            grid-template-columns:1fr;
-          }
-          .rubric-text{
-            font-size:13px;
-          }
-          .aux-status-row{
-            grid-template-columns:repeat(2,minmax(0,1fr));
-          }
-          .status-btn{
-            min-height:38px;
-            font-size:12px;
-          }
-          .reset-progress{
-            top:max(14px,env(safe-area-inset-top));
-            right:max(10px,env(safe-area-inset-right));
-            min-height:34px;
-            padding:0 11px;
-            font-size:11.5px;
-          }
-        }
-      `;
-      t=t.replace("</style>",questionLayoutFix+"</style>");
-      document.open();
-      document.write(t);
-      document.close();
-    })().catch(e=>{
-      document.body.innerHTML='<div style="max-width:34rem;padding:2rem;text-align:center">HISTI could not load.<br><small>'+String(e.message||e)+'</small></div>';
-    });
-  </script>
+        <div id="rubric-list" class="rubric-list" role="group" aria-label="Details shared"></div>
+
+        <div class="status-block">
+          <p class="status-label">If the main choices do not fit:</p>
+          <div id="status-list" class="status-list" role="group" aria-label="Question status">
+            <button type="button" data-status="NQ" aria-pressed="false">Not asked</button>
+            <button type="button" data-status="U" aria-pressed="false">Not sure</button>
+            <button type="button" data-status="NA" aria-pressed="false">Does not apply</button>
+            <button type="button" data-status="PNA" aria-pressed="false">Prefer not to answer</button>
+          </div>
+        </div>
+      </section>
+
+      <nav class="nav-row" aria-label="Question navigation">
+        <button id="back-btn" class="secondary" type="button">Back</button>
+        <button id="next-btn" class="primary" type="button">Next</button>
+      </nav>
+    </main>
+
+    <main id="results-screen" class="screen card" hidden>
+      <p class="eyebrow">Your result</p>
+      <h1 id="result-score" class="score"></h1>
+      <p id="result-note" class="muted"></p>
+      <div id="category-results" class="category-grid"></div>
+      <div class="actions result-actions">
+        <button id="share-btn" class="primary" type="button">Share</button>
+        <button id="review-btn" class="secondary" type="button">Review</button>
+        <button id="restart-btn" class="secondary" type="button">Start over</button>
+      </div>
+      <p id="share-status" class="muted small" aria-live="polite"></p>
+    </main>
+  </div>
+
+  <script type="module" src="/app.js"></script>
 </body>
 </html>
