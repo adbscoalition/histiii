@@ -1355,3 +1355,16 @@ body.reduce-motion *::after{
   .result-card{padding-left:13px;padding-right:13px}
   .warning-card{padding-left:12px;padding-right:12px}
 }
+
+
+/* hard hidden-state guard — must remain last */
+[hidden],
+.screen[hidden],
+.results-screen[hidden],
+.bottom-utility[hidden],
+.finish-sequence[hidden],
+.finish-blackout[hidden],
+.disclosure-sheet[hidden],
+.utility-panel[hidden]{
+  display:none!important
+}
