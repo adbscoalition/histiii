@@ -532,7 +532,8 @@ function toggleRubric(index, button) {
       a.fullByAll = false;
       a.answered = false;
     } else {
-      q.rubric.forEach((_, idx) => selected.add(idx));
+      selected.clear();
+      selected.add(index);
       a.fullByAll = true;
       a.answered = true;
     }
