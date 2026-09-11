@@ -69,3 +69,24 @@ diagnostic += '\n===== GLOBAL LISTENER/TIMER LINES =====\n' +
   ).join('\n');
 
 fs.writeFileSync('dist/diagnostic.txt', diagnostic);
+
+
+const cssTerms = [
+  'rubric-item.checked','rubric-item','status-btn.active','zero-btn.active',
+  'accent-color','box-shadow','backdrop-filter','filter:','transform:',
+  'will-change','theme-pulse','colorMorph','selected'
+];
+let cssdiag = '';
+for (const term of cssTerms) {
+  cssdiag += '\n===== TERM ' + term + ' =====\n';
+  let at = 0, count = 0;
+  while ((at = source.indexOf(term, at)) >= 0 && count < 40) {
+    cssdiag += source.slice(Math.max(0, at - 320), Math.min(source.length, at + 520)) + '\n---\n';
+    at += term.length;
+    count++;
+  }
+}
+cssdiag += '\n===== applyThemeForState =====\n' + extractFunction('applyThemeForState');
+cssdiag += '\n===== progressSnapshot =====\n' + extractFunction('progressSnapshot');
+cssdiag += '\n===== getAnswer =====\n' + extractFunction('getAnswer');
+fs.writeFileSync('dist/css-diagnostic.txt', cssdiag);
