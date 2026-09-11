@@ -90,3 +90,14 @@ cssdiag += '\n===== applyThemeForState =====\n' + extractFunction('applyThemeFor
 cssdiag += '\n===== progressSnapshot =====\n' + extractFunction('progressSnapshot');
 cssdiag += '\n===== getAnswer =====\n' + extractFunction('getAnswer');
 fs.writeFileSync('dist/css-diagnostic.txt', cssdiag);
+
+
+const extraNames = [
+  'debugPanel','accessibilityPanel','animationToggle','randomFillPreviousAndGoLast',
+  'rubricLabel','questionHeading','questionHelp','compute','saveResultSnapshot'
+];
+let extra = '';
+for (const name of extraNames) extra += '\n===== ' + name + ' =====\n' + extractFunction(name);
+extra += '\n===== QUESTIONS REFERENCES =====\n' +
+  source.split('\n').filter(line => line.includes('questions.') || line.includes('questions[') || line.includes('questions.map')).join('\n');
+fs.writeFileSync('dist/ui-diagnostic.txt', extra);
