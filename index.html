@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=public-sans-motion-2a3810d">
+  <link rel="stylesheet" href="/styles.css?v=finish-sequence-debug-jump-v1">
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
@@ -49,6 +49,13 @@
         <button type="button" data-panel-close="debug">Close</button>
       </div>
       <button id="debug-random-last" type="button">Random-fill previous questions → last question</button>
+      <div class="debug-jump">
+        <label for="debug-question">Jump to question</label>
+        <div class="debug-jump-row">
+          <input id="debug-question" type="number" min="1" max="263" step="1" inputmode="numeric" placeholder="1–263">
+          <button id="debug-jump" type="button">Jump</button>
+        </div>
+      </div>
       <p class="utility-note">Local-only test controls.</p>
     </section>
 
@@ -111,6 +118,11 @@
       </nav>
     </main>
 
+    <section id="finish-sequence" class="finish-sequence" hidden aria-live="polite" aria-label="Calculating result">
+      <div id="finish-score" class="finish-score">0</div>
+    </section>
+    <div id="finish-blackout" class="finish-blackout" hidden aria-hidden="true"></div>
+
     <main id="results-screen" class="screen results-screen" hidden>
       <p class="eyebrow">Your result</p>
       <h1 id="result-score" class="score"></h1>
@@ -147,6 +159,6 @@
     </footer>
   </div>
 
-  <script type="module" src="/app.js?v=public-sans-motion-2a3810d"></script>
+  <script type="module" src="/app.js?v=finish-sequence-debug-jump-v1"></script>
 </body>
 </html>
