@@ -690,45 +690,9 @@ async function finishAssessment() {
   els.finishBlackout.hidden = true;
   els.finishCalculating.hidden = false;
   els.finishScore.hidden = true;
-  els.finishScore.textContent = '0';
 
-  // Dedicated 2-second calculating phase.
+  // Dedicated 2-second calculating phase. No result is shown here.
   await wait(2000);
-
-  els.finishCalculating.hidden = true;
-  els.finishScore.hidden = false;
-
-  if (result.overall !== null) {
-    const exactScore = Math.max(0, Math.min(100, Number(result.overall) || 0));
-    const wholeScore = Math.floor(exactScore);
-    const prefix = result.lowerBound ? '≥' : '';
-
-    // Number fades in.
-    await els.finishScore.animate(
-      [
-        { opacity: 0, transform: 'translateY(4px)' },
-        { opacity: 1, transform: 'translateY(0)' }
-      ],
-      { duration: 240, easing: 'cubic-bezier(.22,.72,.24,1)', fill: 'forwards' }
-    ).finished.catch(() => {});
-
-    // 300 ms pause before counting.
-    await wait(300);
-
-    // Count at exactly 10 ms per whole point.
-    for (let value = 1; value <= wholeScore; value += 1) {
-      els.finishScore.textContent = `${prefix}${value}`;
-      await wait(10);
-    }
-    els.finishScore.textContent = `${prefix}${fmt(exactScore)}`;
-  } else {
-    els.finishScore.textContent = 'Not calculated';
-    await els.finishScore.animate(
-      [{ opacity: 0 }, { opacity: 1 }],
-      { duration: 300, easing: 'ease-out', fill: 'forwards' }
-    ).finished.catch(() => {});
-    await wait(300);
-  }
 
   // Fade fully to black for 250 ms.
   els.finishBlackout.hidden = false;
@@ -739,7 +703,14 @@ async function finishAssessment() {
 
   // Cut to the report while the viewport is fully black.
   els.finishSequence.hidden = true;
+  els.finishCalculating.hidden = true;
   showScreen('results');
+
+  // Keep the score hidden until the final report is fully revealed.
+  const finalScoreText = els.resultScore.textContent;
+  els.resultScore.textContent = '';
+  els.resultScore.style.opacity = '0';
+
   els.results.classList.remove('report-enter');
   void els.results.offsetWidth;
   els.results.classList.add('report-enter');
@@ -751,8 +722,40 @@ async function finishAssessment() {
   ).finished.catch(() => {});
 
   els.finishBlackout.hidden = true;
-  window.setTimeout(() => els.results.classList.remove('report-enter'), 360);
 
+  // Only now reveal the result itself.
+  if (result.overall !== null) {
+    const exactScore = Math.max(0, Math.min(100, Number(result.overall) || 0));
+    const wholeScore = Math.floor(exactScore);
+    const prefix = result.lowerBound ? '≥' : '';
+
+    els.resultScore.textContent = `${prefix}0/100`;
+    await els.resultScore.animate(
+      [
+        { opacity: 0, transform: 'translateY(4px)' },
+        { opacity: 1, transform: 'translateY(0)' }
+      ],
+      { duration: 240, easing: 'cubic-bezier(.22,.72,.24,1)', fill: 'forwards' }
+    ).finished.catch(() => {});
+    els.resultScore.style.opacity = '1';
+
+    await wait(300);
+
+    for (let value = 1; value <= wholeScore; value += 1) {
+      els.resultScore.textContent = `${prefix}${value}/100`;
+      await wait(10);
+    }
+    els.resultScore.textContent = finalScoreText;
+  } else {
+    els.resultScore.textContent = finalScoreText;
+    await els.resultScore.animate(
+      [{ opacity: 0 }, { opacity: 1 }],
+      { duration: 240, easing: 'ease-out', fill: 'forwards' }
+    ).finished.catch(() => {});
+    els.resultScore.style.opacity = '1';
+  }
+
+  window.setTimeout(() => els.results.classList.remove('report-enter'), 360);
   finishSequenceRunning = false;
 }
 
