@@ -22,3 +22,50 @@ fs.writeFileSync('dist/source-stats.json', JSON.stringify({
   requestAnimationFrame:(source.match(/requestAnimationFrame/g)||[]).length,
   innerHTML:(source.match(/innerHTML/g)||[]).length
 }, null, 2));
+
+
+function extractFunction(name) {
+  const marker = 'function ' + name;
+  const start = source.indexOf(marker);
+  if (start < 0) return '// ' + name + ' not found\n';
+  const brace = source.indexOf('{', start);
+  if (brace < 0) return '// ' + name + ' malformed\n';
+  let depth = 0;
+  let quote = null;
+  let escape = false;
+  let templateDepth = 0;
+  for (let i = brace; i < source.length; i++) {
+    const c = source[i];
+    if (escape) { escape = false; continue; }
+    if (quote) {
+      if (c === '\\') { escape = true; continue; }
+      if (c === quote) quote = null;
+      continue;
+    }
+    if (c === '"' || c === "'" || c === '`') { quote = c; continue; }
+    if (c === '{') depth++;
+    else if (c === '}') {
+      depth--;
+      if (depth === 0) return source.slice(start, i + 1) + '\n';
+    }
+  }
+  return source.slice(start) + '\n';
+}
+
+const names = [
+  'saveProgress','applyUISettings','wireAnimationToggle','wireAccessibility',
+  'wireDebugPanel','wireSwipeNavigation','animateCardResize','renderAssessment',
+  'render','goNext','goBack','leaveQuestion','topbar'
+];
+let diagnostic = '';
+for (const name of names) diagnostic += '\n===== ' + name + ' =====\n' + extractFunction(name);
+
+diagnostic += '\n===== GLOBAL LISTENER/TIMER LINES =====\n' +
+  source.split('\n').filter(line =>
+    line.includes('addEventListener(') ||
+    line.includes('setTimeout(') ||
+    line.includes('requestAnimationFrame(') ||
+    line.includes('setInterval(')
+  ).join('\n');
+
+fs.writeFileSync('dist/diagnostic.txt', diagnostic);
