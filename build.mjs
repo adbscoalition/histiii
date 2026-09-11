@@ -4,11 +4,10 @@ import vm from 'node:vm';
 const wrapper = fs.readFileSync('index.html', 'utf8');
 const payload = fs.readFileSync('histi-payload-clt6.js', 'utf8');
 
-const scripts = [...wrapper.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)]
-  .map(m => m[1])
-  .filter(s => s.trim());
-if (!scripts.length) throw new Error('Runtime patcher script not found');
-const patcher = scripts.at(-1);
+const open = wrapper.lastIndexOf('<script>');
+const close = wrapper.lastIndexOf('</script>');
+if (open < 0 || close <= open) throw new Error('Runtime patcher script not found');
+const patcher = wrapper.slice(open + '<script>'.length, close);
 
 let written = '';
 const documentMock = {
