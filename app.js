@@ -114,9 +114,22 @@ function scheduleSave() {
 function getAnswer(q) {
   let a = state.answers[q.code];
   if (!a) {
-    a = { status: 'SCORE', selected: [], weight: q.suggestedWeight, visited: false };
+    a = {
+      status: 'SCORE',
+      selected: [],
+      weight: q.suggestedWeight,
+      visited: false,
+      answered: false,
+      explicitNone: false,
+      fullByAll: false
+    };
     state.answers[q.code] = a;
   }
+  if (typeof a.answered !== 'boolean') {
+    a.answered = a.status !== 'SCORE' || (a.selected || []).length > 0 || a.explicitNone === true;
+  }
+  if (typeof a.explicitNone !== 'boolean') a.explicitNone = false;
+  if (typeof a.fullByAll !== 'boolean') a.fullByAll = false;
   return a;
 }
 
@@ -127,8 +140,11 @@ function assignedWeight(a) {
 }
 
 function disclosurePct(q, a) {
-  if (a.status !== 'SCORE') return 0;
+  if (a.status !== 'SCORE' || !a.answered) return 0;
   const selected = new Set(a.selected || []);
+  if (a.fullByAll) return 100;
+  const hasLiteralAll = [...selected].some(idx => /\ball\b/i.test(String(q.rubric[idx]?.trigger || '')));
+  if (hasLiteralAll) return 100;
   return Math.min(100, q.rubric.reduce((sum, item, idx) => sum + (selected.has(idx) ? Number(item.share) : 0), 0));
 }
 
@@ -142,7 +158,7 @@ function compute() {
     for (const q of qs) {
       const a = getAnswer(q);
       const w = assignedWeight(a);
-      if (w === null) continue;
+      if (w === null || !a.answered) continue;
       if (a.status === 'SCORE' || a.status === 'PNA') {
         includedWeight += w;
         if (a.status === 'PNA') pnaCount++;
@@ -182,24 +198,58 @@ function lowerFirst(value) {
   return s ? s[0].toLowerCase() + s.slice(1) : s;
 }
 
-function rubricLabel(q, item, index) {
-  const raw = String(item.trigger || '');
-  if (/Full-detail increment/i.test(raw)) {
-    return 'I shared the exact or complete details.';
-  }
-  if (/Partial\/limited evidence toward:/i.test(raw)) {
-    return `I shared some information about ${lowerFirst(cleanRubricBase(raw))}.`;
-  }
+function humanRubricPhrase(value) {
+  let s = cleanRubricBase(value)
+    .replace(/\//g, ' or ')
+    .replace(/\s+/g, ' ')
+    .trim();
 
-  const base = cleanRubricBase(raw)
-    .replace(/^Confirms\s+/i, '')
+  s = s
+    .replace(/^Confirms\s+/i, 'that ')
     .replace(/^Identifies\s+/i, '')
     .replace(/^Gives\s+/i, '')
     .replace(/^Reveals\s+/i, '')
+    .replace(/^Discloses\s+/i, '')
+    .replace(/^States\s+/i, '')
+    .replace(/^Names\s+/i, '')
     .replace(/^Shares\s+/i, '')
     .replace(/^Includes\s+/i, '');
 
-  return `I shared ${lowerFirst(base).replace(/[.]+$/, '')}.`;
+  return lowerFirst(s).replace(/[.]+$/, '');
+}
+
+function rubricLabel(q, item, index) {
+  const raw = String(item.trigger || '');
+  const phrase = humanRubricPhrase(raw);
+
+  if (/Full-detail increment/i.test(raw)) {
+    const prior = index > 0 ? humanRubricPhrase(q.rubric[index - 1]?.trigger || '') : '';
+    return prior
+      ? `I shared the full details for ${prior}.`
+      : 'I shared the full details.';
+  }
+
+  if (/Partial\/limited evidence toward:/i.test(raw)) {
+    return `I shared some details about ${phrase}.`;
+  }
+
+  if (/\ball\b/i.test(raw)) {
+    return `I shared all of this: ${phrase}.`;
+  }
+
+  if (/^Confirms\b/i.test(cleanRubricBase(raw))) {
+    return `I mentioned ${phrase}.`;
+  }
+
+  if (/^Explains\b/i.test(cleanRubricBase(raw))) {
+    return `I explained ${lowerFirst(cleanRubricBase(raw).replace(/^Explains\s+/i, '')).replace(/[.]+$/, '')}.`;
+  }
+
+  if (/^Links\b/i.test(cleanRubricBase(raw))) {
+    return `I shared how ${lowerFirst(cleanRubricBase(raw).replace(/^Links\s+/i, '')).replace(/[.]+$/, '')}.`;
+  }
+
+  return `I shared ${phrase}.`;
 }
 
 function topicTitle(q) {
@@ -368,6 +418,9 @@ function debugRandomToLast() {
       .map((_, idx) => Math.random() < 0.48 ? idx : null)
       .filter(Number.isInteger);
     a.visited = true;
+    a.answered = true;
+    a.explicitNone = false;
+    a.fullByAll = false;
   }
 
   const last = questions[questions.length - 1];
@@ -376,6 +429,9 @@ function debugRandomToLast() {
   lastAnswer.weight = last.suggestedWeight;
   lastAnswer.selected = [];
   lastAnswer.visited = true;
+  lastAnswer.answered = false;
+  lastAnswer.explicitNone = false;
+  lastAnswer.fullByAll = false;
 
   state.index = questions.length - 1;
   state.completedAt = null;
@@ -416,8 +472,8 @@ function renderQuestion() {
   els.questionCode.textContent = q.code;
   els.questionTitle.textContent = `Did you share anything about ${topicTitle(q)}?`;
   els.questionHelp.textContent = state.accessibility.reading === 'simple'
-    ? 'Pick every answer that is true.'
-    : 'Choose every answer that sounds true.';
+    ? 'Pick what feels true. You can leave this unanswered.'
+    : 'Choose what feels closest to what you actually shared. The wording does not have to match perfectly.';
   els.risk.hidden = q.category !== 'D';
   els.back.disabled = state.index === 0;
   els.next.textContent = state.index === questions.length - 1 ? 'Finish' : 'Next';
@@ -430,7 +486,7 @@ function renderQuestion() {
   none.type = 'button';
   none.className = 'none-button';
   none.dataset.none = 'true';
-  none.setAttribute('aria-pressed', String(a.status === 'SCORE' && selected.size === 0));
+  none.setAttribute('aria-pressed', String(a.status === 'SCORE' && a.explicitNone === true));
   const noneText = document.createElement('span');
   noneText.textContent = 'I didn’t share any of these.';
   none.append(noneText);
@@ -459,7 +515,7 @@ function renderQuestion() {
 
 function syncStatusButtons(a) {
   for (const btn of els.statusList.querySelectorAll('[data-status]')) {
-    btn.setAttribute('aria-pressed', String(a.status === btn.dataset.status));
+    btn.setAttribute('aria-pressed', String(a.answered && a.status === btn.dataset.status));
   }
 }
 
@@ -467,12 +523,42 @@ function toggleRubric(index, button) {
   const q = questions[state.index];
   const a = getAnswer(q);
   const selected = new Set(a.selected || []);
-  if (selected.has(index)) selected.delete(index); else selected.add(index);
+  const raw = String(q.rubric[index]?.trigger || '');
+  const wasSelected = selected.has(index);
+
+  if (/\ball\b/i.test(raw)) {
+    if (a.fullByAll || wasSelected) {
+      selected.clear();
+      a.fullByAll = false;
+      a.answered = false;
+    } else {
+      q.rubric.forEach((_, idx) => selected.add(idx));
+      a.fullByAll = true;
+      a.answered = true;
+    }
+  } else {
+    a.fullByAll = false;
+    if (wasSelected) {
+      selected.delete(index);
+    } else {
+      selected.add(index);
+      // Full-detail increments are cumulative with their paired partial row.
+      if (/Full-detail increment/i.test(raw) && index > 0 && /Partial\/limited evidence/i.test(String(q.rubric[index - 1]?.trigger || ''))) {
+        selected.add(index - 1);
+      }
+    }
+    a.answered = selected.size > 0;
+  }
+
   a.selected = [...selected].sort((x, y) => x - y);
   a.status = 'SCORE';
-  button.setAttribute('aria-pressed', String(selected.has(index)));
+  a.explicitNone = false;
+
+  for (const btn of els.rubricList.querySelectorAll('[data-rubric]')) {
+    btn.setAttribute('aria-pressed', String(selected.has(Number(btn.dataset.rubric))));
+  }
   const none = els.rubricList.querySelector('[data-none]');
-  if (none) none.setAttribute('aria-pressed', String(selected.size === 0));
+  if (none) none.setAttribute('aria-pressed', 'false');
   syncStatusButtons(a);
   scheduleSave();
 }
@@ -480,11 +566,17 @@ function toggleRubric(index, button) {
 function setNone() {
   const q = questions[state.index];
   const a = getAnswer(q);
+  const turningOff = a.status === 'SCORE' && a.explicitNone === true;
+
   a.status = 'SCORE';
   a.selected = [];
+  a.fullByAll = false;
+  a.explicitNone = !turningOff;
+  a.answered = !turningOff;
+
   for (const btn of els.rubricList.querySelectorAll('[data-rubric]')) btn.setAttribute('aria-pressed', 'false');
   const none = els.rubricList.querySelector('[data-none]');
-  if (none) none.setAttribute('aria-pressed', 'true');
+  if (none) none.setAttribute('aria-pressed', String(a.explicitNone));
   syncStatusButtons(a);
   scheduleSave();
 }
@@ -492,8 +584,20 @@ function setNone() {
 function setStatus(status) {
   const q = questions[state.index];
   const a = getAnswer(q);
-  a.status = status;
-  if (status !== 'SCORE') a.selected = [];
+  const turningOff = a.answered && a.status === status;
+
+  a.selected = [];
+  a.explicitNone = false;
+  a.fullByAll = false;
+
+  if (turningOff) {
+    a.status = 'SCORE';
+    a.answered = false;
+  } else {
+    a.status = status;
+    a.answered = true;
+  }
+
   for (const btn of els.rubricList.querySelectorAll('[data-rubric]')) btn.setAttribute('aria-pressed', 'false');
   const none = els.rubricList.querySelector('[data-none]');
   if (none) none.setAttribute('aria-pressed', 'false');
