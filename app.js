@@ -16,6 +16,14 @@ const RECIPIENTS = [
   ['public', 'General public', 'Optional: a separate public-facing profile']
 ];
 
+const D_RISK_THRESHOLDS = {
+  public: { label: 'Public', caution: 0, warning: 0 },
+  acquaintance: { label: 'Acquaintance', caution: 0, warning: 1 },
+  friend: { label: 'Friend', caution: 2, warning: 4 },
+  partner: { label: 'Spouse / Partner', caution: 6, warning: 8 },
+  'close-family': { label: 'Family', caution: 6, warning: 8 }
+};
+
 const $ = id => document.getElementById(id);
 const els = {
   app: $('app'), intro: $('intro-screen'), recipient: $('recipient-screen'), assessment: $('assessment-screen'), results: $('results-screen'),
@@ -33,6 +41,8 @@ const els = {
   recipientBack: $('recipient-back'), start: $('start-btn'), recipientContext: $('recipient-context'), questionCode: $('question-code'),
   questionTitle: $('question-title'), questionHelp: $('question-help'), risk: $('risk-note'), rubricList: $('rubric-list'), statusList: $('status-list'),
   back: $('back-btn'), next: $('next-btn'), resultScore: $('result-score'), resultNote: $('result-note'), categoryResults: $('category-results'),
+  warningCard: $('result-warning-card'), warningLevel: $('result-warning-level'), warningScore: $('result-warning-score'),
+  warningTitle: $('result-warning-title'), warningText: $('result-warning-text'),
   share: $('share-btn'), review: $('review-btn'), restart: $('restart-btn'), shareStatus: $('share-status')
 };
 
@@ -548,6 +558,65 @@ function saveResultSnapshot(result) {
   } catch {}
 }
 
+function updateResultWarning(result) {
+  const d = result.cats.D;
+  const threshold = D_RISK_THRESHOLDS[state.recipientType];
+
+  els.warningCard.classList.remove('warning-safe', 'warning-caution', 'warning-warning');
+
+  if (!d || d.points === null) {
+    els.warningCard.classList.add('warning-safe');
+    els.warningLevel.textContent = 'Category D guidance';
+    els.warningScore.textContent = 'D · N/C';
+    els.warningTitle.textContent = 'No Category D score to compare';
+    els.warningText.textContent = 'Category D was not calculated, so no recipient-specific disclosure warning can be issued.';
+    return;
+  }
+
+  const dPoints = Number(d.points);
+  const scorePrefix = d.pnaCount ? '≥' : '';
+  els.warningScore.textContent = `D · ${scorePrefix}${fmt(dPoints)}/10`;
+
+  if (!threshold) {
+    els.warningCard.classList.add('warning-safe');
+    els.warningLevel.textContent = 'Category D guidance';
+    els.warningTitle.textContent = 'No threshold defined for this recipient';
+    els.warningText.textContent = 'No Category D caution or warning threshold has been defined for “Other individual.” Review the very sensitive information category directly.';
+    return;
+  }
+
+  let level = 'safe';
+  if (dPoints > threshold.warning) level = 'warning';
+  else if (dPoints > threshold.caution) level = 'caution';
+
+  if (level === 'warning') {
+    els.warningCard.classList.add('warning-warning');
+    els.warningLevel.textContent = 'Warning';
+    els.warningTitle.textContent = `High very-sensitive disclosure to ${threshold.label}`;
+    els.warningText.textContent =
+      `Your Category D score is over the Warning threshold of ${threshold.warning.toFixed(2)}. Very sensitive disclosures can create privacy, security, financial, identity, or personal-safety risk. Consider whether each disclosed item is necessary for this recipient.` +
+      (d.pnaCount ? ' This Category D score is a lower bound because at least one item was refused.' : '');
+    return;
+  }
+
+  if (level === 'caution') {
+    els.warningCard.classList.add('warning-caution');
+    els.warningLevel.textContent = 'Caution';
+    els.warningTitle.textContent = `Elevated very-sensitive disclosure to ${threshold.label}`;
+    els.warningText.textContent =
+      `Your Category D score is over the Caution threshold of ${threshold.caution.toFixed(2)}. Review whether the very sensitive information you shared is needed, appropriately limited, and safe with this recipient.` +
+      (d.pnaCount ? ' This Category D score is a lower bound because at least one item was refused.' : '');
+    return;
+  }
+
+  els.warningCard.classList.add('warning-safe');
+  els.warningLevel.textContent = 'No threshold warning';
+  els.warningTitle.textContent = 'No Category D threshold exceeded';
+  els.warningText.textContent =
+    `Your Category D score does not exceed the Caution threshold of ${threshold.caution.toFixed(2)} for ${threshold.label}. This is guidance only; the sensitivity of a specific disclosure can still matter even below the threshold.` +
+    (d.pnaCount ? ' This Category D score is a lower bound because at least one item was refused.' : '');
+}
+
 function populateResults(result) {
   const prefix = result.lowerBound ? '≥' : '';
   els.resultScore.textContent = result.overall === null ? 'Not calculated' : `${prefix}${fmt(result.overall)}/100`;
@@ -570,6 +639,7 @@ function populateResults(result) {
     frag.append(card);
   }
   els.categoryResults.replaceChildren(frag);
+  updateResultWarning(result);
 }
 
 function renderResults() {
@@ -660,25 +730,27 @@ async function finishAssessment() {
     await wait(300);
   }
 
-  // Fade to black for 250 ms, then away from black for 250 ms.
+  // Fade fully to black for 250 ms.
   els.finishBlackout.hidden = false;
   await els.finishBlackout.animate(
-    [
-      { opacity: 0, offset: 0 },
-      { opacity: 1, offset: .5 },
-      { opacity: 0, offset: 1 }
-    ],
-    { duration: 500, easing: 'linear', fill: 'forwards' }
+    [{ opacity: 0 }, { opacity: 1 }],
+    { duration: 250, easing: 'linear', fill: 'forwards' }
   ).finished.catch(() => {});
 
+  // Cut to the report while the viewport is fully black.
   els.finishSequence.hidden = true;
-  els.finishBlackout.hidden = true;
-
-  // Report sheet enters after the blackout completes.
   showScreen('results');
   els.results.classList.remove('report-enter');
   void els.results.offsetWidth;
   els.results.classList.add('report-enter');
+
+  // Reveal the already-switched report over the next 250 ms.
+  await els.finishBlackout.animate(
+    [{ opacity: 1 }, { opacity: 0 }],
+    { duration: 250, easing: 'linear', fill: 'forwards' }
+  ).finished.catch(() => {});
+
+  els.finishBlackout.hidden = true;
   window.setTimeout(() => els.results.classList.remove('report-enter'), 360);
 
   finishSequenceRunning = false;
