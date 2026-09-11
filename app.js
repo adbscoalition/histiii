@@ -22,6 +22,8 @@ const els = {
   progress: $('progress-label'), progressTrack: $('progress-track'), progressFill: $('progress-fill'), reset: $('reset-btn'),
   accessibility: $('accessibility-btn'), accessibilityPanel: $('accessibility-panel'),
   debugHotspot: $('debug-hotspot'), debugPanel: $('debug-panel'), debugRandomLast: $('debug-random-last'),
+  debugQuestion: $('debug-question'), debugJump: $('debug-jump'),
+  finishSequence: $('finish-sequence'), finishCalculating: $('finish-calculating'), finishScore: $('finish-score'), finishBlackout: $('finish-blackout'),
   a11yTextValue: $('a11y-text-value'), a11yReadingValue: $('a11y-reading-value'),
   a11yContrastValue: $('a11y-contrast-value'), a11ySpacingValue: $('a11y-spacing-value'), a11yMotionValue: $('a11y-motion-value'),
   begin: $('begin-btn'), startStatus: $('start-status'), startDisclosure: $('start-disclosure-btn'),
@@ -38,6 +40,7 @@ let questions = [];
 let state = loadState() || freshState();
 let saveTimer = null;
 let saveDirty = false;
+let finishSequenceRunning = false;
 
 function freshState() {
   return {
@@ -372,6 +375,25 @@ function debugRandomToLast() {
   els.debugPanel.hidden = true;
 }
 
+function debugJumpToQuestion() {
+  if (!questions.length) return;
+  const requested = Number.parseInt(els.debugQuestion?.value || '', 10);
+  if (!Number.isFinite(requested) || requested < 1 || requested > questions.length) {
+    els.debugQuestion?.focus();
+    els.debugQuestion?.select();
+    return;
+  }
+
+  if (!state.recipientType) state.recipientType = 'friend';
+  state.completedAt = null;
+  state.index = requested - 1;
+  showScreen('assessment');
+  renderQuestion();
+  saveNow();
+  els.debugPanel.hidden = true;
+}
+
+
 function renderQuestion() {
   const q = questions[state.index];
   if (!q) return;
@@ -526,10 +548,7 @@ function saveResultSnapshot(result) {
   } catch {}
 }
 
-function renderResults() {
-  const result = compute();
-  state.completedAt ||= Date.now();
-  showScreen('results');
+function populateResults(result) {
   const prefix = result.lowerBound ? '≥' : '';
   els.resultScore.textContent = result.overall === null ? 'Not calculated' : `${prefix}${fmt(result.overall)}/100`;
   els.resultNote.textContent = result.overall === null
@@ -540,19 +559,129 @@ function renderResults() {
 
   const frag = document.createDocumentFragment();
   for (const cat of Object.keys(CATEGORY_CAPS)) {
-    const c = result.cats[cat];
+    const catResult = result.cats[cat];
     const card = document.createElement('div');
     card.className = 'category-card';
     const label = document.createElement('span');
     label.textContent = `${cat} · ${CATEGORY_NAMES[cat]}`;
     const value = document.createElement('strong');
-    value.textContent = c.points === null ? 'N/C' : `${c.pnaCount ? '≥' : ''}${fmt(c.points)}/${c.cap}`;
+    value.textContent = catResult.points === null ? 'N/C' : `${catResult.pnaCount ? '≥' : ''}${fmt(catResult.points)}/${catResult.cap}`;
     card.append(label, value);
     frag.append(card);
   }
   els.categoryResults.replaceChildren(frag);
+}
+
+function renderResults() {
+  const result = compute();
+  state.completedAt ||= Date.now();
+  populateResults(result);
+  showScreen('results');
   saveResultSnapshot(result);
   saveNow();
+}
+
+function wait(ms) {
+  return new Promise(resolve => window.setTimeout(resolve, ms));
+}
+
+function finishMotionEnabled() {
+  return state.accessibility.motion !== false &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+async function finishAssessment() {
+  if (finishSequenceRunning || questionTransitioning) return;
+  finishSequenceRunning = true;
+
+  const result = compute();
+  state.completedAt ||= Date.now();
+  populateResults(result);
+  saveResultSnapshot(result);
+  saveNow();
+
+  if (!finishMotionEnabled()) {
+    finishSequenceRunning = false;
+    showScreen('results');
+    return;
+  }
+
+  // Finish overlay owns the viewport until the report is ready.
+  els.intro.hidden = true;
+  els.recipient.hidden = true;
+  els.assessment.hidden = true;
+  els.results.hidden = true;
+  els.progress.hidden = true;
+  els.progressTrack.hidden = true;
+  els.bottomUtility.hidden = true;
+  state.screen = 'results';
+
+  els.finishSequence.hidden = false;
+  els.finishBlackout.hidden = true;
+  els.finishCalculating.hidden = false;
+  els.finishScore.hidden = true;
+  els.finishScore.textContent = '0';
+
+  // Dedicated 2-second calculating phase.
+  await wait(2000);
+
+  els.finishCalculating.hidden = true;
+  els.finishScore.hidden = false;
+
+  if (result.overall !== null) {
+    const exactScore = Math.max(0, Math.min(100, Number(result.overall) || 0));
+    const wholeScore = Math.floor(exactScore);
+    const prefix = result.lowerBound ? '≥' : '';
+
+    // Number fades in.
+    await els.finishScore.animate(
+      [
+        { opacity: 0, transform: 'translateY(8px) scale(.97)' },
+        { opacity: 1, transform: 'translateY(0) scale(1)' }
+      ],
+      { duration: 300, easing: 'cubic-bezier(.22,.72,.24,1)', fill: 'forwards' }
+    ).finished.catch(() => {});
+
+    // 300 ms pause before counting.
+    await wait(300);
+
+    // Count at exactly 10 ms per whole point.
+    for (let value = 1; value <= wholeScore; value += 1) {
+      els.finishScore.textContent = `${prefix}${value}`;
+      await wait(10);
+    }
+    els.finishScore.textContent = `${prefix}${fmt(exactScore)}`;
+  } else {
+    els.finishScore.textContent = 'Not calculated';
+    await els.finishScore.animate(
+      [{ opacity: 0 }, { opacity: 1 }],
+      { duration: 300, easing: 'ease-out', fill: 'forwards' }
+    ).finished.catch(() => {});
+    await wait(300);
+  }
+
+  // Fade to black for 250 ms, then away from black for 250 ms.
+  els.finishBlackout.hidden = false;
+  await els.finishBlackout.animate(
+    [
+      { opacity: 0, offset: 0 },
+      { opacity: 1, offset: .5 },
+      { opacity: 0, offset: 1 }
+    ],
+    { duration: 500, easing: 'linear', fill: 'forwards' }
+  ).finished.catch(() => {});
+
+  els.finishSequence.hidden = true;
+  els.finishBlackout.hidden = true;
+
+  // Report sheet enters after the blackout completes.
+  showScreen('results');
+  els.results.classList.remove('report-enter');
+  void els.results.offsetWidth;
+  els.results.classList.add('report-enter');
+  window.setTimeout(() => els.results.classList.remove('report-enter'), 700);
+
+  finishSequenceRunning = false;
 }
 
 async function shareResult() {
@@ -573,6 +702,9 @@ function resetAll(confirmFirst = true) {
   if (saveTimer !== null) clearTimeout(saveTimer);
   saveTimer = null;
   saveDirty = false;
+  finishSequenceRunning = false;
+  els.finishSequence.hidden = true;
+  els.finishBlackout.hidden = true;
   try { localStorage.removeItem(STORAGE_PROGRESS); } catch {}
   state = freshState();
   els.accessibilityPanel.hidden = true;
@@ -625,6 +757,7 @@ els.app.addEventListener('click', event => {
   }
   else if (id === 'debug-hotspot') tapDebugHotspot();
   else if (id === 'debug-random-last') debugRandomToLast();
+  else if (id === 'debug-jump') debugJumpToQuestion();
   else if (id === 'start-disclosure-btn' || id === 'footer-disclosure-btn') openDisclosure();
   else if (id === 'disclosure-close' || id === 'disclosure-done') closeDisclosure();
   else if (id === 'footer-reset-btn') resetAll(true);
@@ -632,7 +765,7 @@ els.app.addEventListener('click', event => {
   else if (id === 'recipient-back') showScreen('intro');
   else if (id === 'start-btn' && state.recipientType) { state.index = Math.min(Math.max(0, state.index), questions.length - 1); showScreen('assessment'); renderQuestion(); saveNow(); }
   else if (id === 'back-btn') go(-1);
-  else if (id === 'next-btn') { if (state.index >= questions.length - 1) renderResults(); else go(1); }
+  else if (id === 'next-btn') { if (state.index >= questions.length - 1) finishAssessment(); else go(1); }
   else if (id === 'review-btn') { showScreen('assessment'); renderQuestion(); }
   else if (id === 'restart-btn') resetAll(true);
   else if (id === 'reset-btn') resetAll(true);
@@ -642,6 +775,10 @@ els.app.addEventListener('click', event => {
 els.recipientLabel.addEventListener('input', event => {
   state.recipientLabel = event.target.value;
   scheduleSave();
+});
+
+els.debugQuestion?.addEventListener('keydown', event => {
+  if (event.key === 'Enter') debugJumpToQuestion();
 });
 
 window.addEventListener('pagehide', () => { if (saveDirty) saveNow(); });
