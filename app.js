@@ -522,8 +522,8 @@ function go(delta) {
     window.setTimeout(() => {
       card.classList.remove(inClass);
       questionTransitioning = false;
-    }, 300);
-  }, 180);
+    }, 230);
+  }, 150);
 }
 
 function fmt(n) {
@@ -636,10 +636,10 @@ async function finishAssessment() {
     // Number fades in.
     await els.finishScore.animate(
       [
-        { opacity: 0, transform: 'translateY(8px) scale(.97)' },
-        { opacity: 1, transform: 'translateY(0) scale(1)' }
+        { opacity: 0, transform: 'translateY(4px)' },
+        { opacity: 1, transform: 'translateY(0)' }
       ],
-      { duration: 300, easing: 'cubic-bezier(.22,.72,.24,1)', fill: 'forwards' }
+      { duration: 240, easing: 'cubic-bezier(.22,.72,.24,1)', fill: 'forwards' }
     ).finished.catch(() => {});
 
     // 300 ms pause before counting.
@@ -679,7 +679,7 @@ async function finishAssessment() {
   els.results.classList.remove('report-enter');
   void els.results.offsetWidth;
   els.results.classList.add('report-enter');
-  window.setTimeout(() => els.results.classList.remove('report-enter'), 700);
+  window.setTimeout(() => els.results.classList.remove('report-enter'), 360);
 
   finishSequenceRunning = false;
 }
