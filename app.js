@@ -19,7 +19,12 @@ const RECIPIENTS = [
 const $ = id => document.getElementById(id);
 const els = {
   app: $('app'), intro: $('intro-screen'), recipient: $('recipient-screen'), assessment: $('assessment-screen'), results: $('results-screen'),
-  progress: $('progress-label'), progressTrack: $('progress-track'), progressFill: $('progress-fill'), reset: $('reset-btn'), begin: $('begin-btn'), recipientList: $('recipient-list'), recipientLabel: $('recipient-label'),
+  progress: $('progress-label'), progressTrack: $('progress-track'), progressFill: $('progress-fill'), reset: $('reset-btn'),
+  accessibility: $('accessibility-btn'), accessibilityPanel: $('accessibility-panel'),
+  debugHotspot: $('debug-hotspot'), debugPanel: $('debug-panel'), debugRandomLast: $('debug-random-last'),
+  a11yTextValue: $('a11y-text-value'), a11yReadingValue: $('a11y-reading-value'),
+  a11yContrastValue: $('a11y-contrast-value'), a11ySpacingValue: $('a11y-spacing-value'), a11yMotionValue: $('a11y-motion-value'),
+  begin: $('begin-btn'), recipientList: $('recipient-list'), recipientLabel: $('recipient-label'),
   recipientBack: $('recipient-back'), start: $('start-btn'), recipientContext: $('recipient-context'), questionCode: $('question-code'),
   questionTitle: $('question-title'), questionHelp: $('question-help'), risk: $('risk-note'), rubricList: $('rubric-list'), statusList: $('status-list'),
   back: $('back-btn'), next: $('next-btn'), resultScore: $('result-score'), resultNote: $('result-note'), categoryResults: $('category-results'),
@@ -38,7 +43,7 @@ function freshState() {
     recipientLabel: '',
     index: 0,
     answers: {},
-    accessibility: { reading: 'standard', textSize: 'standard', contrast: false, spacing: false },
+    accessibility: { reading: 'standard', textSize: 'standard', contrast: false, spacing: false, motion: true },
     animationsEnabled: false,
     resultReveal: false,
     completedAt: null
@@ -229,6 +234,81 @@ function setRecipient(id) {
   scheduleSave();
 }
 
+function applyAccessibility() {
+  const a = state.accessibility;
+  document.body.classList.toggle('a11y-large', a.textSize === 'large');
+  document.body.classList.toggle('a11y-contrast', !!a.contrast);
+  document.body.classList.toggle('a11y-spacing', !!a.spacing);
+  document.body.classList.toggle('reduce-motion', a.motion === false);
+
+  els.a11yTextValue.textContent = a.textSize === 'large' ? 'Large' : 'Standard';
+  els.a11yReadingValue.textContent = a.reading === 'simple' ? 'Simpler' : 'Standard';
+  els.a11yContrastValue.textContent = a.contrast ? 'On' : 'Off';
+  els.a11ySpacingValue.textContent = a.spacing ? 'On' : 'Off';
+  els.a11yMotionValue.textContent = a.motion === false ? 'Off' : 'On';
+
+  if (state.screen === 'assessment' && questions.length) renderQuestion();
+}
+
+function toggleAccessibilityOption(key) {
+  const a = state.accessibility;
+  if (key === 'textSize') a.textSize = a.textSize === 'large' ? 'standard' : 'large';
+  else if (key === 'reading') a.reading = a.reading === 'simple' ? 'standard' : 'simple';
+  else if (key === 'contrast') a.contrast = !a.contrast;
+  else if (key === 'spacing') a.spacing = !a.spacing;
+  else if (key === 'motion') a.motion = a.motion === false;
+  applyAccessibility();
+  scheduleSave();
+}
+
+let debugTapCount = 0;
+let debugTapTimer = null;
+
+function tapDebugHotspot() {
+  debugTapCount += 1;
+  if (debugTapTimer !== null) clearTimeout(debugTapTimer);
+  debugTapTimer = setTimeout(() => { debugTapCount = 0; }, 3500);
+
+  if (debugTapCount >= 7) {
+    debugTapCount = 0;
+    clearTimeout(debugTapTimer);
+    debugTapTimer = null;
+    els.accessibilityPanel.hidden = true;
+    els.accessibility.setAttribute('aria-expanded', 'false');
+    els.debugPanel.hidden = false;
+  }
+}
+
+function debugRandomToLast() {
+  if (!questions.length) return;
+  if (!state.recipientType) state.recipientType = 'friend';
+
+  for (let i = 0; i < questions.length - 1; i++) {
+    const q = questions[i];
+    const a = getAnswer(q);
+    a.status = 'SCORE';
+    a.weight = q.suggestedWeight;
+    a.selected = q.rubric
+      .map((_, idx) => Math.random() < 0.48 ? idx : null)
+      .filter(Number.isInteger);
+    a.visited = true;
+  }
+
+  const last = questions[questions.length - 1];
+  const lastAnswer = getAnswer(last);
+  lastAnswer.status = 'SCORE';
+  lastAnswer.weight = last.suggestedWeight;
+  lastAnswer.selected = [];
+  lastAnswer.visited = true;
+
+  state.index = questions.length - 1;
+  state.completedAt = null;
+  showScreen('assessment');
+  renderQuestion();
+  saveNow();
+  els.debugPanel.hidden = true;
+}
+
 function renderQuestion() {
   const q = questions[state.index];
   if (!q) return;
@@ -240,7 +320,9 @@ function renderQuestion() {
   els.recipientContext.textContent = recipientName();
   els.questionCode.textContent = q.code;
   els.questionTitle.textContent = `Did you share anything about ${topicTitle(q)}?`;
-  els.questionHelp.textContent = 'Choose every answer that sounds true.';
+  els.questionHelp.textContent = state.accessibility.reading === 'simple'
+    ? 'Pick every answer that is true.'
+    : 'Choose every answer that sounds true.';
   els.risk.hidden = q.category !== 'D';
   els.back.disabled = state.index === 0;
   els.next.textContent = state.index === questions.length - 1 ? 'Finish' : 'Next';
@@ -332,7 +414,7 @@ function go(delta) {
   if (next < 0 || next >= questions.length || questionTransitioning) return;
 
   const card = els.assessment.querySelector('.assessment-card');
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduceMotion = state.accessibility.motion === false || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   if (!card || reduceMotion) {
     state.index = next;
@@ -430,11 +512,32 @@ function resetAll(confirmFirst = true) {
   saveDirty = false;
   try { localStorage.removeItem(STORAGE_PROGRESS); } catch {}
   state = freshState();
+  els.accessibilityPanel.hidden = true;
+  els.debugPanel.hidden = true;
+  els.accessibility.setAttribute('aria-expanded', 'false');
+  applyAccessibility();
   renderRecipientChoices();
   showScreen('intro');
 }
 
 els.app.addEventListener('click', event => {
+  const panelClose = event.target.closest('[data-panel-close]');
+  if (panelClose) {
+    if (panelClose.dataset.panelClose === 'accessibility') {
+      els.accessibilityPanel.hidden = true;
+      els.accessibility.setAttribute('aria-expanded', 'false');
+    } else {
+      els.debugPanel.hidden = true;
+    }
+    return;
+  }
+
+  const a11y = event.target.closest('[data-a11y]');
+  if (a11y) {
+    toggleAccessibilityOption(a11y.dataset.a11y);
+    return;
+  }
+
   const recipient = event.target.closest('[data-recipient]');
   if (recipient) { setRecipient(recipient.dataset.recipient); return; }
 
@@ -449,7 +552,15 @@ els.app.addEventListener('click', event => {
 
   const id = event.target.closest('button')?.id;
   if (!id) return;
-  if (id === 'begin-btn') { showScreen('start'); renderRecipientChoices(); }
+  if (id === 'accessibility-btn') {
+    const willOpen = els.accessibilityPanel.hidden;
+    els.accessibilityPanel.hidden = !willOpen;
+    els.accessibility.setAttribute('aria-expanded', String(willOpen));
+    els.debugPanel.hidden = true;
+  }
+  else if (id === 'debug-hotspot') tapDebugHotspot();
+  else if (id === 'debug-random-last') debugRandomToLast();
+  else if (id === 'begin-btn') { showScreen('start'); renderRecipientChoices(); }
   else if (id === 'recipient-back') showScreen('intro');
   else if (id === 'start-btn' && state.recipientType) { state.index = Math.min(Math.max(0, state.index), questions.length - 1); showScreen('assessment'); renderQuestion(); saveNow(); }
   else if (id === 'back-btn') go(-1);
@@ -476,6 +587,7 @@ async function boot() {
   if (!questions.length) throw new Error('Question catalogue is empty');
   state.index = Math.min(Math.max(0, Number(state.index) || 0), questions.length - 1);
   renderRecipientChoices();
+  applyAccessibility();
 
   if (state.screen === 'assessment') { showScreen('assessment'); renderQuestion(); }
   else if (state.screen === 'results') renderResults();
@@ -498,4 +610,12 @@ async function boot() {
 boot().catch(err => {
   console.error(err);
   els.app.replaceChildren(Object.assign(document.createElement('p'), { textContent: 'HISTI could not load.' }));
+});
+
+
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Escape') return;
+  els.accessibilityPanel.hidden = true;
+  els.debugPanel.hidden = true;
+  els.accessibility.setAttribute('aria-expanded', 'false');
 });
