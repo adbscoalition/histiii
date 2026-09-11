@@ -577,6 +577,7 @@ function resetAll(confirmFirst = true) {
   state = freshState();
   els.accessibilityPanel.hidden = true;
   els.debugPanel.hidden = true;
+  els.disclosurePanel.hidden = true;
   els.accessibility.setAttribute('aria-expanded', 'false');
   applyAccessibility();
   renderRecipientChoices();
