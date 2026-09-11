@@ -24,7 +24,10 @@ const els = {
   debugHotspot: $('debug-hotspot'), debugPanel: $('debug-panel'), debugRandomLast: $('debug-random-last'),
   a11yTextValue: $('a11y-text-value'), a11yReadingValue: $('a11y-reading-value'),
   a11yContrastValue: $('a11y-contrast-value'), a11ySpacingValue: $('a11y-spacing-value'), a11yMotionValue: $('a11y-motion-value'),
-  begin: $('begin-btn'), recipientList: $('recipient-list'), recipientLabel: $('recipient-label'),
+  begin: $('begin-btn'), startStatus: $('start-status'), startDisclosure: $('start-disclosure-btn'),
+  disclosurePanel: $('disclosure-panel'), disclosureClose: $('disclosure-close'), disclosureDone: $('disclosure-done'),
+  bottomUtility: $('bottom-utility'), footerDisclosure: $('footer-disclosure-btn'), footerReset: $('footer-reset-btn'),
+  recipientList: $('recipient-list'), recipientLabel: $('recipient-label'),
   recipientBack: $('recipient-back'), start: $('start-btn'), recipientContext: $('recipient-context'), questionCode: $('question-code'),
   questionTitle: $('question-title'), questionHelp: $('question-help'), risk: $('risk-note'), rubricList: $('rubric-list'), statusList: $('status-list'),
   back: $('back-btn'), next: $('next-btn'), resultScore: $('result-score'), resultNote: $('result-note'), categoryResults: $('category-results'),
@@ -195,6 +198,33 @@ function recipientName() {
   return state.recipientLabel.trim() || fallback;
 }
 
+function hasCurrentProgress() {
+  return !!state.recipientType || state.index > 0 || Object.keys(state.answers || {}).length > 0 || !!state.completedAt;
+}
+
+function updateStartScreen() {
+  const hasProgress = hasCurrentProgress();
+  els.startStatus.hidden = !hasProgress;
+
+  if (!hasProgress) {
+    els.begin.textContent = 'Start assessment';
+    els.startStatus.textContent = '';
+    return;
+  }
+
+  if (state.completedAt) {
+    els.begin.textContent = 'View saved result';
+    els.startStatus.textContent = 'A completed result is saved on this device.';
+    return;
+  }
+
+  const answered = Object.values(state.answers || {}).filter(a => a && a.visited).length;
+  els.begin.textContent = answered > 0 ? 'Resume assessment' : 'Continue setup';
+  els.startStatus.textContent = answered > 0
+    ? `Saved progress · question ${Math.min(state.index + 1, questions.length || 263)} of ${questions.length || 263}`
+    : 'Your setup is saved on this device.';
+}
+
 function showScreen(name) {
   for (const [screen, el] of [['intro', els.intro], ['start', els.recipient], ['assessment', els.assessment], ['results', els.results]]) {
     el.hidden = screen !== name;
@@ -202,7 +232,9 @@ function showScreen(name) {
   const inAssessment = name === 'assessment';
   els.progress.hidden = !inAssessment;
   els.progressTrack.hidden = !inAssessment;
+  els.bottomUtility.hidden = inAssessment;
   state.screen = name;
+  if (name === 'intro') updateStartScreen();
 }
 
 function renderRecipientChoices() {
@@ -259,6 +291,37 @@ function toggleAccessibilityOption(key) {
   else if (key === 'motion') a.motion = a.motion === false;
   applyAccessibility();
   scheduleSave();
+}
+
+function openDisclosure() {
+  els.accessibilityPanel.hidden = true;
+  els.debugPanel.hidden = true;
+  els.disclosurePanel.hidden = true;
+  els.accessibility.setAttribute('aria-expanded', 'false');
+  els.disclosurePanel.hidden = false;
+}
+
+function closeDisclosure() {
+  els.disclosurePanel.hidden = true;
+}
+
+function enterFromStart() {
+  if (state.completedAt) {
+    renderResults();
+    return;
+  }
+
+  const visited = Object.values(state.answers || {}).some(a => a && a.visited);
+  if (state.recipientType && visited) {
+    state.index = Math.min(Math.max(0, Number(state.index) || 0), questions.length - 1);
+    showScreen('assessment');
+    renderQuestion();
+    saveNow();
+    return;
+  }
+
+  showScreen('start');
+  renderRecipientChoices();
 }
 
 let debugTapCount = 0;
@@ -518,6 +581,7 @@ function resetAll(confirmFirst = true) {
   applyAccessibility();
   renderRecipientChoices();
   showScreen('intro');
+  updateStartScreen();
 }
 
 els.app.addEventListener('click', event => {
@@ -560,7 +624,10 @@ els.app.addEventListener('click', event => {
   }
   else if (id === 'debug-hotspot') tapDebugHotspot();
   else if (id === 'debug-random-last') debugRandomToLast();
-  else if (id === 'begin-btn') { showScreen('start'); renderRecipientChoices(); }
+  else if (id === 'start-disclosure-btn' || id === 'footer-disclosure-btn') openDisclosure();
+  else if (id === 'disclosure-close' || id === 'disclosure-done') closeDisclosure();
+  else if (id === 'footer-reset-btn') resetAll(true);
+  else if (id === 'begin-btn') enterFromStart();
   else if (id === 'recipient-back') showScreen('intro');
   else if (id === 'start-btn' && state.recipientType) { state.index = Math.min(Math.max(0, state.index), questions.length - 1); showScreen('assessment'); renderQuestion(); saveNow(); }
   else if (id === 'back-btn') go(-1);
@@ -589,10 +656,9 @@ async function boot() {
   renderRecipientChoices();
   applyAccessibility();
 
-  if (state.screen === 'assessment') { showScreen('assessment'); renderQuestion(); }
-  else if (state.screen === 'results') renderResults();
-  else if (state.screen === 'start') showScreen('start');
-  else showScreen('intro');
+  // Always return to the calm start screen on load. Saved progress remains available to resume.
+  showScreen('intro');
+  updateStartScreen();
 
   window.__HISTI_DIAG__ = () => ({
     screen: state.screen,
@@ -617,5 +683,6 @@ document.addEventListener('keydown', event => {
   if (event.key !== 'Escape') return;
   els.accessibilityPanel.hidden = true;
   els.debugPanel.hidden = true;
+  els.disclosurePanel.hidden = true;
   els.accessibility.setAttribute('aria-expanded', 'false');
 });
