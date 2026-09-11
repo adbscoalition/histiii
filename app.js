@@ -500,8 +500,8 @@ function go(delta) {
     window.setTimeout(() => {
       card.classList.remove(inClass);
       questionTransitioning = false;
-    }, 170);
-  }, 110);
+    }, 300);
+  }, 180);
 }
 
 function fmt(n) {
