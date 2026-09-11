@@ -19,7 +19,7 @@ const RECIPIENTS = [
 const $ = id => document.getElementById(id);
 const els = {
   app: $('app'), intro: $('intro-screen'), recipient: $('recipient-screen'), assessment: $('assessment-screen'), results: $('results-screen'),
-  progress: $('progress-label'), reset: $('reset-btn'), begin: $('begin-btn'), recipientList: $('recipient-list'), recipientLabel: $('recipient-label'),
+  progress: $('progress-label'), progressTrack: $('progress-track'), progressFill: $('progress-fill'), reset: $('reset-btn'), begin: $('begin-btn'), recipientList: $('recipient-list'), recipientLabel: $('recipient-label'),
   recipientBack: $('recipient-back'), start: $('start-btn'), recipientContext: $('recipient-context'), questionCode: $('question-code'),
   questionTitle: $('question-title'), questionHelp: $('question-help'), risk: $('risk-note'), rubricList: $('rubric-list'), statusList: $('status-list'),
   back: $('back-btn'), next: $('next-btn'), resultScore: $('result-score'), resultNote: $('result-note'), categoryResults: $('category-results'),
@@ -156,20 +156,29 @@ function cleanRubricBase(value) {
     .trim();
 }
 
+function lowerFirst(value) {
+  const s = String(value || '').trim();
+  return s ? s[0].toLowerCase() + s.slice(1) : s;
+}
+
 function rubricLabel(q, item, index) {
   const raw = String(item.trigger || '');
   if (/Full-detail increment/i.test(raw)) {
-    const prev = index > 0 ? cleanRubricBase(q.rubric[index - 1].trigger) : 'the previous detail';
-    return `Exact or complete details for: ${prev}`;
+    return 'I shared the exact or complete details.';
   }
-  if (/Partial\/limited evidence toward:/i.test(raw)) return `Some detail about: ${cleanRubricBase(raw)}`;
-  return cleanRubricBase(raw)
-    .replace(/^Confirms\s+/i, 'That ')
-    .replace(/^Identifies\s+/i, 'Who: ')
-    .replace(/^Gives\s+/i, 'Shared ')
-    .replace(/^Reveals\s+/i, 'Shared ')
-    .replace(/^Shares\s+/i, 'Shared ')
-    .replace(/^Includes\s+/i, 'Included ');
+  if (/Partial\/limited evidence toward:/i.test(raw)) {
+    return `I shared some information about ${lowerFirst(cleanRubricBase(raw))}.`;
+  }
+
+  const base = cleanRubricBase(raw)
+    .replace(/^Confirms\s+/i, '')
+    .replace(/^Identifies\s+/i, '')
+    .replace(/^Gives\s+/i, '')
+    .replace(/^Reveals\s+/i, '')
+    .replace(/^Shares\s+/i, '')
+    .replace(/^Includes\s+/i, '');
+
+  return `I shared ${lowerFirst(base).replace(/[.]+$/, '')}.`;
 }
 
 function topicTitle(q) {
@@ -185,7 +194,9 @@ function showScreen(name) {
   for (const [screen, el] of [['intro', els.intro], ['start', els.recipient], ['assessment', els.assessment], ['results', els.results]]) {
     el.hidden = screen !== name;
   }
-  els.progress.hidden = name !== 'assessment';
+  const inAssessment = name === 'assessment';
+  els.progress.hidden = !inAssessment;
+  els.progressTrack.hidden = !inAssessment;
   state.screen = name;
 }
 
@@ -225,10 +236,11 @@ function renderQuestion() {
   a.visited = true;
 
   els.progress.textContent = `Question ${state.index + 1} of ${questions.length}`;
-  els.recipientContext.textContent = `Thinking about ${recipientName()}`;
+  els.progressFill.style.width = `${((state.index + 1) / questions.length) * 100}%`;
+  els.recipientContext.textContent = recipientName();
   els.questionCode.textContent = q.code;
-  els.questionTitle.textContent = `What did you share about ${topicTitle(q)}?`;
-  els.questionHelp.textContent = 'Pick the details you remember sharing. If none fit, leave every detail unselected.';
+  els.questionTitle.textContent = `Did you share anything about ${topicTitle(q)}?`;
+  els.questionHelp.textContent = 'Choose every answer that sounds true.';
   els.risk.hidden = q.category !== 'D';
   els.back.disabled = state.index === 0;
   els.next.textContent = state.index === questions.length - 1 ? 'Finish' : 'Next';
@@ -236,6 +248,17 @@ function renderQuestion() {
   const selected = new Set(a.selected || []);
   const enabled = assignedWeight(a) !== null;
   const frag = document.createDocumentFragment();
+
+  const none = document.createElement('button');
+  none.type = 'button';
+  none.className = 'none-button';
+  none.dataset.none = 'true';
+  none.setAttribute('aria-pressed', String(a.status === 'SCORE' && selected.size === 0));
+  const noneText = document.createElement('span');
+  noneText.textContent = 'I didn’t share any of these.';
+  none.append(noneText);
+  frag.append(none);
+
   q.rubric.forEach((item, idx) => {
     const btn = document.createElement('button');
     btn.type = 'button';
@@ -248,7 +271,12 @@ function renderQuestion() {
     btn.append(span);
     frag.append(btn);
   });
+  els.rubricList.style.setProperty('--answer-count', String(q.rubric.length + 1));
   els.rubricList.replaceChildren(frag);
+
+  const card = els.assessment.querySelector('.assessment-card');
+  card.classList.toggle('compact', q.rubric.length >= 8);
+  card.classList.toggle('ultra-compact', q.rubric.length >= 11);
   syncStatusButtons(a);
 }
 
@@ -266,6 +294,20 @@ function toggleRubric(index, button) {
   a.selected = [...selected].sort((x, y) => x - y);
   a.status = 'SCORE';
   button.setAttribute('aria-pressed', String(selected.has(index)));
+  const none = els.rubricList.querySelector('[data-none]');
+  if (none) none.setAttribute('aria-pressed', String(selected.size === 0));
+  syncStatusButtons(a);
+  scheduleSave();
+}
+
+function setNone() {
+  const q = questions[state.index];
+  const a = getAnswer(q);
+  a.status = 'SCORE';
+  a.selected = [];
+  for (const btn of els.rubricList.querySelectorAll('[data-rubric]')) btn.setAttribute('aria-pressed', 'false');
+  const none = els.rubricList.querySelector('[data-none]');
+  if (none) none.setAttribute('aria-pressed', 'true');
   syncStatusButtons(a);
   scheduleSave();
 }
@@ -276,17 +318,45 @@ function setStatus(status) {
   a.status = status;
   if (status !== 'SCORE') a.selected = [];
   for (const btn of els.rubricList.querySelectorAll('[data-rubric]')) btn.setAttribute('aria-pressed', 'false');
+  const none = els.rubricList.querySelector('[data-none]');
+  if (none) none.setAttribute('aria-pressed', 'false');
   syncStatusButtons(a);
   scheduleSave();
 }
 
+let questionTransitioning = false;
+
 function go(delta) {
   saveNow();
   const next = state.index + delta;
-  if (next < 0 || next >= questions.length) return;
-  state.index = next;
-  renderQuestion();
-  window.scrollTo(0, 0);
+  if (next < 0 || next >= questions.length || questionTransitioning) return;
+
+  const card = els.assessment.querySelector('.assessment-card');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!card || reduceMotion) {
+    state.index = next;
+    renderQuestion();
+    return;
+  }
+
+  questionTransitioning = true;
+  const outClass = delta > 0 ? 'question-out-left' : 'question-out-right';
+  const inClass = delta > 0 ? 'question-in-right' : 'question-in-left';
+
+  card.classList.remove('question-out-left', 'question-out-right', 'question-in-left', 'question-in-right');
+  card.classList.add(outClass);
+
+  window.setTimeout(() => {
+    state.index = next;
+    renderQuestion();
+    card.classList.remove(outClass);
+    card.classList.add(inClass);
+    window.setTimeout(() => {
+      card.classList.remove(inClass);
+      questionTransitioning = false;
+    }, 170);
+  }, 110);
 }
 
 function fmt(n) {
@@ -320,7 +390,7 @@ function renderResults() {
   els.resultNote.textContent = result.overall === null
     ? 'No scored items were included.'
     : result.lowerBound
-      ? 'This is a lower bound because one or more items were marked “Prefer not to answer.”'
+      ? 'This is a lower bound because one or more items were marked “I refuse to answer.”'
       : 'Your score is calculated locally in this browser.';
 
   const frag = document.createDocumentFragment();
@@ -367,6 +437,9 @@ function resetAll(confirmFirst = true) {
 els.app.addEventListener('click', event => {
   const recipient = event.target.closest('[data-recipient]');
   if (recipient) { setRecipient(recipient.dataset.recipient); return; }
+
+  const none = event.target.closest('[data-none]');
+  if (none) { setNone(); return; }
 
   const rubric = event.target.closest('[data-rubric]');
   if (rubric && !rubric.disabled) { toggleRubric(Number(rubric.dataset.rubric), rubric); return; }
