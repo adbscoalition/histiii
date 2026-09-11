@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap");
+
 :root{
   color-scheme:light;
   --bg:#fbfaf8;
@@ -13,7 +15,10 @@
   --danger:#9a5f6b;
   --content:940px;
   --chrome:1120px;
-  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif
+  --ease-out:cubic-bezier(.22,.72,.24,1);
+  --ease-soft:cubic-bezier(.25,.7,.3,1);
+  --ease-spring:cubic-bezier(.2,.9,.25,1.15);
+  font-family:"Public Sans",ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif
 }
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text)}
@@ -597,4 +602,251 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
   .debug-panel{left:auto}
   .disclosure-sheet{padding:10px}
   .disclosure-card{border-radius:21px}
+}
+
+
+/* coordinated motion system */
+body::before{
+  animation:backgroundBreathe 18s ease-in-out infinite alternate;
+  transform-origin:50% 50%;
+}
+@keyframes backgroundBreathe{
+  from{opacity:.82;transform:scale(1)}
+  to{opacity:1;transform:scale(1.035)}
+}
+
+.topbar{
+  animation:topbarEnter .55s var(--ease-out) both;
+}
+@keyframes topbarEnter{
+  from{opacity:0;transform:translateY(-10px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.brand-logo{
+  animation:logoSettle .72s var(--ease-spring) both;
+  transition:transform .28s var(--ease-out),filter .28s ease;
+}
+.brand-logo:hover{
+  transform:translateY(-1px) scale(1.025);
+  filter:drop-shadow(0 8px 18px rgba(37,34,48,.11));
+}
+@keyframes logoSettle{
+  0%{opacity:0;transform:translateY(-7px) scale(.94)}
+  70%{opacity:1;transform:translateY(1px) scale(1.015)}
+  100%{opacity:1;transform:translateY(0) scale(1)}
+}
+
+.accessibility-button,
+.primary,
+.secondary,
+.nav-primary,
+.choice-button,
+.status-list button,
+.bottom-utility button,
+.start-link,
+.utility-panel button,
+.disclosure-head button{
+  transition:
+    transform .18s var(--ease-out),
+    box-shadow .22s ease,
+    background-color .22s ease,
+    border-color .22s ease,
+    color .22s ease,
+    opacity .18s ease;
+}
+.accessibility-button:hover,
+.primary:hover:not(:disabled),
+.nav-primary:hover:not(:disabled){
+  transform:translateY(-1px);
+}
+.accessibility-button:active,
+.primary:active:not(:disabled),
+.nav-primary:active:not(:disabled){
+  transform:translateY(1px) scale(.985);
+}
+.secondary:hover,
+.choice-button:hover,
+.status-list button:hover,
+.bottom-utility button:hover,
+.start-link:hover{
+  transform:translateY(-1px);
+}
+.secondary:active,
+.choice-button:active,
+.status-list button:active,
+.bottom-utility button:active,
+.start-link:active{
+  transform:scale(.985);
+}
+
+/* every screen gets a soft reveal when it becomes visible */
+.screen:not([hidden]){
+  animation:screenReveal .42s var(--ease-out) both;
+}
+@keyframes screenReveal{
+  from{opacity:0;transform:translateY(9px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* home card + its content arrive in a calm sequence */
+.start-card{
+  animation:startCardIn .58s var(--ease-out) both;
+}
+.start-card .eyebrow{animation:fadeUp .42s .08s var(--ease-out) both}
+.start-card h1{animation:fadeUp .48s .13s var(--ease-out) both}
+.start-card .start-lede{animation:fadeUp .48s .19s var(--ease-out) both}
+.start-card .start-status:not([hidden]){animation:fadeUp .4s .22s var(--ease-out) both}
+.start-card .start-primary{animation:fadeUp .46s .25s var(--ease-out) both}
+.start-card .start-link{animation:fadeUp .4s .30s var(--ease-out) both}
+@keyframes startCardIn{
+  from{opacity:0;transform:translateY(14px) scale(.985);filter:blur(3px)}
+  to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+}
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* recipient choices cascade gently */
+.recipient-screen:not([hidden]) .screen-heading{
+  animation:fadeUp .42s var(--ease-out) both;
+}
+.recipient-screen:not([hidden]) .choice-button{
+  animation:choiceIn .38s var(--ease-out) both;
+}
+.recipient-screen:not([hidden]) .choice-button:nth-child(1){animation-delay:.04s}
+.recipient-screen:not([hidden]) .choice-button:nth-child(2){animation-delay:.07s}
+.recipient-screen:not([hidden]) .choice-button:nth-child(3){animation-delay:.10s}
+.recipient-screen:not([hidden]) .choice-button:nth-child(4){animation-delay:.13s}
+.recipient-screen:not([hidden]) .choice-button:nth-child(5){animation-delay:.16s}
+.recipient-screen:not([hidden]) .choice-button:nth-child(6){animation-delay:.19s}
+@keyframes choiceIn{
+  from{opacity:0;transform:translateY(7px) scale(.99)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+.choice-button[aria-pressed="true"]{
+  animation:selectedPulse .28s var(--ease-out);
+}
+@keyframes selectedPulse{
+  0%{transform:scale(1)}
+  55%{transform:scale(.985)}
+  100%{transform:scale(1)}
+}
+
+/* answer selection gets a subtle, fast confirmation */
+.rubric-button,
+.none-button{
+  transition:
+    background-color .18s ease,
+    color .18s ease,
+    transform .16s var(--ease-out);
+}
+.rubric-button::before,
+.none-button::before{
+  transition:
+    border-color .17s ease,
+    background-color .17s ease,
+    transform .18s var(--ease-spring),
+    box-shadow .18s ease;
+}
+.rubric-button:hover,
+.none-button:hover{
+  transform:translateX(2px);
+}
+.rubric-button:active,
+.none-button:active{
+  transform:translateX(2px) scale(.992);
+}
+.rubric-button[aria-pressed="true"]::before,
+.none-button[aria-pressed="true"]::before{
+  transform:scale(1.08);
+  box-shadow:inset 0 0 0 4px #fff,0 0 0 4px rgba(119,113,216,.08);
+}
+
+/* make question directional motion a little more luxurious */
+.assessment-card.question-out-left{animation:questionOutLeft .18s ease-in forwards}
+.assessment-card.question-out-right{animation:questionOutRight .18s ease-in forwards}
+.assessment-card.question-in-right{animation:questionInRight .28s var(--ease-out) both}
+.assessment-card.question-in-left{animation:questionInLeft .28s var(--ease-out) both}
+@keyframes questionOutLeft{to{transform:translateX(-5%);opacity:0;filter:blur(1.5px)}}
+@keyframes questionOutRight{to{transform:translateX(5%);opacity:0;filter:blur(1.5px)}}
+@keyframes questionInRight{from{transform:translateX(5%);opacity:0;filter:blur(1.5px)}to{transform:translateX(0);opacity:1;filter:blur(0)}}
+@keyframes questionInLeft{from{transform:translateX(-5%);opacity:0;filter:blur(1.5px)}to{transform:translateX(0);opacity:1;filter:blur(0)}}
+
+/* progress bar glides instead of snapping */
+.progress-track span{
+  transition:width .38s var(--ease-out);
+}
+
+/* footer chrome enters from its edge */
+.quiz-nav{
+  animation:footerRise .38s var(--ease-out) both;
+}
+.bottom-utility{
+  animation:footerRise .42s var(--ease-out) both;
+}
+@keyframes footerRise{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* accessibility + debug popovers */
+.utility-panel:not([hidden]){
+  animation:panelIn .24s var(--ease-out) both;
+  transform-origin:top left;
+}
+.debug-panel:not([hidden]){
+  transform-origin:top right;
+}
+@keyframes panelIn{
+  from{opacity:0;transform:translateY(-5px) scale(.975)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+/* disclosure gets a layered reveal */
+.disclosure-sheet:not([hidden]){
+  animation:scrimIn .24s ease both;
+}
+.disclosure-sheet:not([hidden]) .disclosure-card{
+  animation:dialogIn .34s var(--ease-out) both;
+}
+@keyframes scrimIn{
+  from{opacity:0}
+  to{opacity:1}
+}
+@keyframes dialogIn{
+  from{opacity:0;transform:translateY(12px) scale(.975)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+/* results appear in sequence */
+.results-screen:not([hidden]) .eyebrow{animation:fadeUp .35s .03s var(--ease-out) both}
+.results-screen:not([hidden]) .score{animation:resultScoreIn .52s .08s var(--ease-spring) both}
+.results-screen:not([hidden]) #result-note{animation:fadeUp .38s .16s var(--ease-out) both}
+.results-screen:not([hidden]) .category-card{animation:choiceIn .38s var(--ease-out) both}
+.results-screen:not([hidden]) .category-card:nth-child(1){animation-delay:.18s}
+.results-screen:not([hidden]) .category-card:nth-child(2){animation-delay:.22s}
+.results-screen:not([hidden]) .category-card:nth-child(3){animation-delay:.26s}
+.results-screen:not([hidden]) .category-card:nth-child(4){animation-delay:.30s}
+.results-screen:not([hidden]) .result-actions{animation:fadeUp .38s .32s var(--ease-out) both}
+@keyframes resultScoreIn{
+  from{opacity:0;transform:translateY(8px) scale(.97)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+/* stronger motion-off guard */
+body.reduce-motion *,
+body.reduce-motion *::before,
+body.reduce-motion *::after{
+  animation:none!important;
+  transition:none!important;
+  scroll-behavior:auto!important
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation:none!important;
+    transition:none!important;
+    scroll-behavior:auto!important
+  }
 }
