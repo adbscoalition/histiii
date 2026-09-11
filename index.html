@@ -103,30 +103,36 @@
       document.querySelectorAll('[data-status]').forEach(btn => btn.classList.toggle('active', a.status === btn.dataset.status));
       if (zero) zero.classList.toggle('active', a.status === 'SCORE' && selected.size === 0);
       document.querySelector('.rubric-box')?.classList.toggle('skipped', a.status !== 'SCORE');
-      saveProgress();
     };
-    document.querySelectorAll('[data-status]').forEach(btn => btn.addEventListener('click', () => {
-      a.status = btn.dataset.status;
-      if (a.status !== 'SCORE') a.selected = [];
-      state.motion = 'none';
-      syncAssessmentControls();
-    }));
-    document.querySelectorAll('[data-rubric]').forEach(cb => cb.addEventListener('click', event => {
-      event.preventDefault();
-      const idx = Number(cb.dataset.rubric);
-      const selected = new Set(a.selected || []);
-      selected.has(idx) ? selected.delete(idx) : selected.add(idx);
-      a.selected = [...selected].sort((x,y) => x-y);
-      a.status = 'SCORE';
-      state.motion = 'none';
-      syncAssessmentControls();
-    }));
-    if (zero) zero.addEventListener('click', () => {
-      a.status = 'SCORE';
-      a.selected = [];
-      state.motion = 'none';
-      syncAssessmentControls();
-    });`;
+    const appRoot = document.getElementById('app');
+    appRoot.onclick = event => {
+      const statusBtn = event.target.closest('[data-status]');
+      if (statusBtn) {
+        a.status = statusBtn.dataset.status;
+        if (a.status !== 'SCORE') a.selected = [];
+        state.motion = 'none';
+        syncAssessmentControls();
+        return;
+      }
+      const rubric = event.target.closest('[data-rubric]');
+      if (rubric) {
+        event.preventDefault();
+        const idx = Number(rubric.dataset.rubric);
+        const selected = new Set(a.selected || []);
+        selected.has(idx) ? selected.delete(idx) : selected.add(idx);
+        a.selected = [...selected].sort((x,y) => x-y);
+        a.status = 'SCORE';
+        state.motion = 'none';
+        syncAssessmentControls();
+        return;
+      }
+      if (event.target.closest('#zero')) {
+        a.status = 'SCORE';
+        a.selected = [];
+        state.motion = 'none';
+        syncAssessmentControls();
+      }
+    };`
       const navigationListenersBefore=`    document.getElementById('back').addEventListener('click', goBack);
     document.getElementById('next').addEventListener('click', goNext);`;
       const navigationListenersAfter='';
@@ -135,6 +141,8 @@
     if (!e.target.closest('#reset-progress')) return;
     if (!window.confirm('Reset this assessment? All answers and current progress will be cleared.')) return;
     clearTimeout(saveTimer);
+    const appRoot = document.getElementById('app');
+    if (appRoot) appRoot.onclick = null;
     clearCurrentProgress();
     state = freshState();
     navTransitioning = false;
@@ -148,6 +156,10 @@
     if (!button || button.disabled || state.screen !== 'assessment') return;
     e.preventDefault();
     button.disabled = true;
+    clearTimeout(saveTimer);
+    saveProgress(true);
+    const appRoot = document.getElementById('app');
+    if (appRoot) appRoot.onclick = null;
     const action = button.id === 'back' ? goBack : goNext;
     setTimeout(action, 0);
   });
@@ -226,6 +238,18 @@
         }
         .progress-fill,.page-progress-fill{
           transition:none!important;
+        }
+        /* Keep answer toggles on the main-thread DOM path; avoid allocating
+           transient animation/filter/compositor layers on repeated clicks. */
+        .question-stage *,
+        .question-stage *::before,
+        .question-stage *::after{
+          animation:none!important;
+          transition:none!important;
+          filter:none!important;
+          backdrop-filter:none!important;
+          -webkit-backdrop-filter:none!important;
+          will-change:auto!important;
         }
         @keyframes questionNext{
           from{opacity:0;transform:translate3d(34px,0,0) scale(.99)}
