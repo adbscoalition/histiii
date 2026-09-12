@@ -468,8 +468,8 @@ function renderQuestion() {
 
   els.progress.textContent = `Question ${state.index + 1} of ${questions.length}`;
   els.progressFill.style.width = `${((state.index + 1) / questions.length) * 100}%`;
-  els.recipientContext.textContent = recipientName();
-  els.questionCode.textContent = q.code;
+  els.recipientContext.textContent = `With ${recipientName()}`;
+  els.questionCode.textContent = `${q.code} · ${state.index + 1}/${questions.length}`;
   els.questionTitle.textContent = `Did you share anything about ${topicTitle(q)}?`;
   els.questionHelp.textContent = state.accessibility.reading === 'simple'
     ? 'Pick what feels true. You can leave this unanswered.'
@@ -479,6 +479,15 @@ function renderQuestion() {
   els.next.textContent = state.index === questions.length - 1 ? 'Finish' : 'Next';
 
   const selected = new Set(a.selected || []);
+
+  // Repair any legacy/inconsistent saved state: Full always implies its paired Partial.
+  q.rubric.forEach((item, idx) => {
+    if (!selected.has(idx) || !/Full-detail increment/i.test(String(item?.trigger || '')) || idx <= 0) return;
+    const previous = String(q.rubric[idx - 1]?.trigger || '');
+    if (/Partial\/limited evidence/i.test(previous)) selected.add(idx - 1);
+  });
+  a.selected = [...selected].sort((x, y) => x - y);
+
   const enabled = assignedWeight(a) !== null;
   const frag = document.createDocumentFragment();
 
@@ -508,8 +517,8 @@ function renderQuestion() {
   els.rubricList.replaceChildren(frag);
 
   const card = els.assessment.querySelector('.assessment-card');
-  card.classList.toggle('compact', q.rubric.length >= 8);
-  card.classList.toggle('ultra-compact', q.rubric.length >= 11);
+  card.classList.toggle('compact', q.rubric.length >= 7);
+  card.classList.toggle('ultra-compact', q.rubric.length >= 10);
   syncStatusButtons(a);
 }
 
@@ -517,6 +526,20 @@ function syncStatusButtons(a) {
   for (const btn of els.statusList.querySelectorAll('[data-status]')) {
     btn.setAttribute('aria-pressed', String(a.answered && a.status === btn.dataset.status));
   }
+}
+
+function pairedFullIndex(q, partialIndex) {
+  const partialRaw = String(q.rubric[partialIndex]?.trigger || '');
+  const match = partialRaw.match(/^(\d+)A\.\s*/i);
+  if (!match || !/Partial\/limited evidence/i.test(partialRaw)) return -1;
+
+  const pairPrefix = match[1];
+  return q.rubric.findIndex((item, itemIndex) => {
+    if (itemIndex <= partialIndex) return false;
+    const raw = String(item?.trigger || '');
+    return new RegExp(`^${pairPrefix}B\\.\\s*`, 'i').test(raw) &&
+      /Full-detail increment/i.test(raw);
+  });
 }
 
 function toggleRubric(index, button) {
@@ -541,6 +564,11 @@ function toggleRubric(index, button) {
     a.fullByAll = false;
     if (wasSelected) {
       selected.delete(index);
+
+      // Partial is the prerequisite for its paired Full condition.
+      // Removing Partial must also remove Full so state cannot become contradictory.
+      const fullIndex = pairedFullIndex(q, index);
+      if (fullIndex >= 0) selected.delete(fullIndex);
     } else {
       selected.add(index);
       // Full-detail increments are cumulative with their paired partial row.
