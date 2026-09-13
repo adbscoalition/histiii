@@ -2461,3 +2461,14 @@ body.a11y-contrast{
 .utility-panel[hidden]{
   display:none!important
 }
+
+
+/* ===== Two-option status dock · did/would update ===== */
+.status-list{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important
+}
+@media(max-width:620px){
+  .status-list{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important
+  }
+}

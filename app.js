@@ -125,6 +125,15 @@ function getAnswer(q) {
     };
     state.answers[q.code] = a;
   }
+  // "Not yet" was removed from the UI. Normalize legacy NA answers back to
+  // unanswered SCORE state so a hidden old status cannot affect scoring.
+  if (a.status === 'NA') {
+    a.status = 'SCORE';
+    a.selected = [];
+    a.answered = false;
+    a.explicitNone = false;
+    a.fullByAll = false;
+  }
   if (typeof a.answered !== 'boolean') {
     a.answered = a.status !== 'SCORE' || (a.selected || []).length > 0 || a.explicitNone === true;
   }
@@ -470,10 +479,10 @@ function renderQuestion() {
   els.progressFill.style.width = `${((state.index + 1) / questions.length) * 100}%`;
   els.recipientContext.textContent = `With ${recipientName()}`;
   els.questionCode.textContent = `${q.code} · ${state.index + 1}/${questions.length}`;
-  els.questionTitle.textContent = `Did you share anything about ${topicTitle(q)}?`;
+  els.questionTitle.textContent = `Did you / would you share anything about ${topicTitle(q)}?`;
   els.questionHelp.textContent = state.accessibility.reading === 'simple'
-    ? 'Pick what feels true. You can leave this unanswered.'
-    : 'Choose what feels closest to what you actually shared. The wording does not have to match perfectly.';
+    ? 'Pick what feels true for what you did or would do. You can leave this unanswered.'
+    : 'Choose what feels closest to what you shared or would share. The wording does not have to match perfectly.';
   els.risk.hidden = q.category !== 'D';
   els.back.disabled = state.index === 0;
   els.next.textContent = state.index === questions.length - 1 ? 'Finish' : 'Next';
