@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=condition-ui-v2">
+  <link rel="stylesheet" href="/styles.css?v=question-ui-v3">
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
@@ -99,7 +99,13 @@
           <p id="risk-note" class="risk" hidden>Do not enter the actual identifier, password, code, key, or document content.</p>
         </div>
 
-        <div id="rubric-list" class="rubric-list" role="group" aria-label="Your answer"></div>
+        <div class="answer-panel">
+          <div class="answer-panel-heading">
+            <strong>What did you share?</strong>
+            <span>Select every answer that applies</span>
+          </div>
+          <div id="rubric-list" class="rubric-list" role="group" aria-label="Your answer"></div>
+        </div>
       </section>
 
       <nav class="quiz-nav" aria-label="Question navigation">
@@ -173,6 +179,6 @@
     </footer>
   </div>
 
-  <script type="module" src="/app.js?v=condition-ui-v2"></script>
+  <script type="module" src="/app.js?v=question-ui-v3"></script>
 </body>
 </html>
