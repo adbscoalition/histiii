@@ -5,9 +5,9 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; form-action 'none'; object-src 'none'; base-uri 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; media-src 'none'; img-src 'self' data: blob:; font-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#090907">
-  <meta name="description" content="HISTI — a private, on-device self-assessment of information sharing.">
+  <meta name="description" content="HISTI — a private, on-device reflection on information sharing.">
   <title>HISTI</title>
-<link rel="stylesheet" href="/styles-boundary-warnings.css">
+<link rel="stylesheet" href="/styles-rights-motion.css">
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
@@ -38,7 +38,7 @@
       <button type="button" data-a11y="contrast"><span>High contrast</span><strong id="a11y-contrast-value">Off</strong></button>
       <button type="button" data-a11y="spacing"><span>Extra spacing</span><strong id="a11y-spacing-value">Off</strong></button>
       <button type="button" data-a11y="motion"><span>Question motion</span><strong id="a11y-motion-value">On</strong></button>
-      <button id="reset-btn" class="panel-danger" type="button">Reset assessment</button>
+      <button id="reset-btn" class="panel-danger" type="button">Reset check-in</button>
     </section>
 
     <section id="debug-panel" class="utility-panel debug-panel" hidden aria-label="Debug controls">
@@ -78,9 +78,21 @@
       <section class="start-card" aria-labelledby="start-title">
         <p class="eyebrow">Human Information-Sharing Transparency Index</p>
         <h1 id="start-title">A quieter way to understand what you share.</h1>
-        <p class="start-lede">Think about one person. HISTI will guide you through one question at a time and build a private picture of what you disclose to them.</p>
+        <p class="start-lede">Think about one person or audience. HISTI will guide you through one question at a time and help you reflect on what you share or would share. You never need to enter the real private information.</p>
+
+        <div class="start-rights-card" role="note" aria-label="Know your rights">
+          <strong>Know your rights</strong>
+          <div class="start-rights-grid">
+            <span>Keep real private information to yourself.</span>
+            <span>Skip, refuse, go back, or stop at any time.</span>
+            <span>Review or change your answers whenever you want.</span>
+            <span>Share your result only if you choose.</span>
+          </div>
+        </div>
+        <p class="start-disclaimer"><strong>HISTI is a reflection tool.</strong> It is not a diagnosis, legal opinion, safety certificate, or measure of your character.</p>
+
         <div id="start-status" class="start-status" hidden></div>
-        <button id="begin-btn" class="primary start-primary" type="button">Start assessment</button>
+        <button id="begin-btn" class="primary start-primary" type="button">Start check-in</button>
         <button id="start-disclosure-btn" class="start-link" type="button">Read disclosure &amp; privacy</button>
       </section>
     </main>
@@ -89,7 +101,7 @@
       <div class="screen-heading">
         <p class="eyebrow">Before we start</p>
         <h1>Who are you thinking about?</h1>
-        <p>Pick one person or audience. Every question will be about what you shared with them.</p>
+        <p>Pick one person or audience. You can use a private nickname; you never need to enter anyone’s real name.</p>
       </div>
       <div id="recipient-list" class="choice-grid"></div>
       <label class="field">
@@ -123,7 +135,7 @@
         <p id="boundary-copy" class="boundary-copy">Take a moment before continuing. HISTI only needs you to choose descriptions; it never needs the real private information.</p>
 
         <div class="rights-card">
-          <span class="rights-heading">Your rights</span>
+          <span class="rights-heading">Know your rights</span>
           <ul>
             <li><strong>Keep private information private.</strong> Your actual private information should not be disclosed to HISTI. Keep the real details to yourself; the question answers do not provide a field for entering them.</li>
             <li><strong>You can refuse.</strong> You have the absolute right to refuse to answer any question or all remaining questions.</li>
@@ -244,9 +256,13 @@
         <div class="result-disclaimer">
           <img src="/histi-logo.webp?v=facelift-1" alt="HISTI">
           <div>
-            <strong>HISTI</strong>
-            <p>The score is not fully accurate to true privacy and openness values.</p>
+            <strong>WHAT THIS RESULT MEANS</strong>
+            <p>HISTI is a reflection tool. This number is not a diagnosis, legal judgment, safety verdict, or measure of your character. It only summarizes your answers using HISTI’s scoring rules.</p>
           </div>
+        </div>
+        <div class="result-rights" role="note">
+          <strong>Know your rights</strong>
+          <p>You can review or change answers, keep this result private, reset the local data, or stop here. Share only if you choose.</p>
         </div>
         <div class="actions result-actions">
           <button id="share-btn" class="primary" type="button">Share result image</button>
@@ -258,11 +274,11 @@
 
       <section id="result-warning-card" class="warning-card warning-safe" aria-live="polite">
         <div class="warning-card-head">
-          <span id="result-warning-level" class="warning-level">Category D guidance</span>
+          <span id="result-warning-level" class="warning-level">Privacy reminder</span>
           <span id="result-warning-score" class="warning-score"></span>
         </div>
-        <h2 id="result-warning-title">Disclosure risk guidance</h2>
-        <p id="result-warning-text">Your Category D result will be compared with guidance for the recipient you selected.</p>
+        <h2 id="result-warning-title">A note about very sensitive information</h2>
+        <p id="result-warning-text">This is a rule-of-thumb reminder based on your answers, not a judgment about what is safe or unsafe.</p>
       </section>
     </main>
 
@@ -324,7 +340,17 @@
           </ol>
         </details>
 
-        <p class="proof-boundary"><strong>What Vercel still sees:</strong> ordinary requests needed to load the static site itself (for example HTML, JavaScript, CSS, the logo, and the static question module). Those requests happen independently of your answers and contain no assessment state. If you explicitly use <strong>Share</strong>, your browser/OS hands the generated result to the destination you choose.</p>
+        <div class="proof-rights" role="note">
+          <strong>Know your rights while using HISTI</strong>
+          <ul>
+            <li>You may refuse any question or all questions.</li>
+            <li>You may skip sensitive sections, go back, stop, or reset.</li>
+            <li>You never need to enter the real private or sensitive value.</li>
+            <li>Your result stays private unless you choose to share it.</li>
+          </ul>
+        </div>
+
+        <p class="proof-boundary"><strong>What Vercel still sees:</strong> ordinary requests needed to load the static site itself (for example HTML, JavaScript, CSS, the logo, and the static question module). Those requests happen independently of your answers and contain no check-in state. If you explicitly use <strong>Share</strong>, your browser/OS hands the generated result to the destination you choose.</p>
 
         <div class="proof-actions">
           <a class="disclosure-policy-link" href="/privacy">Read the full privacy policy</a>
@@ -345,6 +371,6 @@
     </footer>
   </div>
 
-  <script type="module" src="/app-boundary-warnings.js"></script>
+  <script type="module" src="/app-rights-motion.js"></script>
 </body>
 </html>

@@ -5,9 +5,9 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; form-action 'none'; object-src 'none'; base-uri 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; media-src 'none'; img-src 'self' data: blob:; font-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#090907">
-  <meta name="description" content="How HISTI handles assessment data and ordinary website request information.">
+  <meta name="description" content="How HISTI handles check-in data and ordinary website request information.">
   <title>Privacy Policy · HISTI</title>
-<link rel="stylesheet" href="/styles-boundary-warnings.css">
+<link rel="stylesheet" href="/styles-rights-motion.css">
 </head>
 <body class="policy-page">
   <div class="policy-shell">
@@ -23,84 +23,96 @@
       <header class="policy-hero">
         <p class="eyebrow">Your data, plainly explained</p>
         <h1>Privacy policy</h1>
-        <p class="policy-summary">HISTI is designed so assessment data never needs to leave your browser. Production enforces <code>connect-src 'none'</code>, which blocks browser connection APIs from uploading answers, recipient labels, progress, or scores.</p>
+        <p class="policy-summary">HISTI is designed so check-in data never needs to leave your browser. Production enforces <code>connect-src 'none'</code>, which blocks browser connection APIs from uploading answers, recipient labels, progress, or scores.</p>
         <p class="policy-date">Effective September 13, 2026</p>
       </header>
 
       <section class="policy-section" aria-labelledby="scope-heading">
         <h2 id="scope-heading">1. Scope</h2>
-        <p>This policy explains how the HISTI website handles information when you visit the site or use the Human Information-Sharing Transparency Index assessment.</p>
+        <p>This policy explains how the HISTI website handles information when you visit the site or use the Human Information-Sharing Transparency Index check-in.</p>
       </section>
 
       <section class="policy-section" aria-labelledby="assessment-heading">
-        <h2 id="assessment-heading">2. Assessment data stays on your device</h2>
-        <p>HISTI processes the assessment in your browser. The app may save the following information in your browser’s local storage so you can continue later:</p>
+        <h2 id="assessment-heading">2. Your check-in data stays on your device</h2>
+        <p>HISTI processes the check-in in your browser. The app may save the following information in your browser’s local storage so you can continue later:</p>
         <ul>
           <li>the recipient type and any optional private recipient label you enter;</li>
           <li>your selected answers and answer statuses;</li>
           <li>your current question, completion time, and accessibility preferences; and</li>
           <li>your calculated score and up to 12 completed-result snapshots.</li>
         </ul>
-        <p class="policy-callout"><strong>HISTI does not send this assessment data to its servers.</strong> It remains available to the browser profile and device where you completed the assessment.</p>
+        <p class="policy-callout"><strong>HISTI does not send this check-in data to its servers.</strong> It remains available to the browser profile and device where you completed the assessment.</p>
       </section>
 
       <section class="policy-section" aria-labelledby="collection-heading">
         <h2 id="collection-heading">3. What the app does not collect</h2>
-        <p>HISTI does not require an account and does not include an assessment-submission form. The app does not use advertising trackers or a first-party analytics service, and it does not sell or rent assessment data.</p>
+        <p>HISTI does not require an account and does not include a check-in submission form. The app does not use advertising trackers or a first-party analytics service, and it does not sell or rent check-in data.</p>
         <p>The app does not ask you to enter the actual contents of passwords, account numbers, government identifiers, security codes, keys, or documents. Please do not enter those details.</p>
       </section>
 
+      <section class="policy-section policy-rights-section" aria-labelledby="rights-heading">
+        <h2 id="rights-heading">4. Your choices and rights</h2>
+        <ul>
+          <li><strong>Keep real private information to yourself.</strong> HISTI only needs you to choose descriptions. Do not type or paste the real sensitive value.</li>
+          <li><strong>Refuse any question.</strong> You may choose “I’d rather not answer” for one question or refuse the rest.</li>
+          <li><strong>Skip sensitive sections.</strong> Categories C and D can be skipped from their warning screens.</li>
+          <li><strong>Go back, review, stop, or reset.</strong> You remain in control of the check-in and locally saved data.</li>
+          <li><strong>Share only if you choose.</strong> A result stays on your device unless you explicitly use Share.</li>
+        </ul>
+        <p class="policy-callout"><strong>HISTI is not a diagnosis, legal opinion, safety certificate, or measure of your character.</strong> It is a reflection tool based on your answers and its published scoring rules.</p>
+      </section>
+
       <section class="policy-section policy-proof-section" aria-labelledby="proof-heading">
-        <h2 id="proof-heading">4. How this is technically enforced</h2>
+        <h2 id="proof-heading">5. How this is technically enforced</h2>
         <p>This is not only a policy promise. The production page uses browser security controls and an architecture that you can inspect:</p>
         <ul>
           <li><strong>Connection APIs are disabled:</strong> the Content Security Policy sets <code>connect-src 'none'</code>. That blocks fetch, XMLHttpRequest, WebSocket, EventSource, and sendBeacon connections from the page.</li>
           <li><strong>Forms cannot submit:</strong> the policy also sets <code>form-action 'none'</code>.</li>
           <li><strong>The question catalogue is static:</strong> questions are loaded as a same-origin JavaScript module. The assessment does not fetch question data after it starts.</li>
-          <li><strong>Assessment state is local:</strong> progress and completed-result snapshots are stored in localStorage under <code>histi.progress.v3</code> and <code>histi.results.v3</code>.</li>
+          <li><strong>Check-in state is local:</strong> progress and completed-result snapshots are stored in localStorage under <code>histi.progress.v3</code> and <code>histi.results.v3</code>.</li>
           <li><strong>No automatic third-party runtime resources:</strong> the assessment does not require analytics, advertising trackers, Google Fonts, or another third-party CDN.</li>
         </ul>
-        <p class="policy-callout"><strong>Result:</strong> ordinary static site requests still reach the hosting infrastructure, but HISTI does not place your assessment answers, recipient label, progress, or score into those requests.</p>
+        <p class="policy-callout"><strong>Result:</strong> ordinary static site requests still reach the hosting infrastructure, but HISTI does not place your check-in answers, recipient label, progress, or score into those requests.</p>
         <p>You can independently verify the implementation in the <a href="https://github.com/adbscoalition/histiii" rel="noopener noreferrer">public source repository</a> and by using your browser’s Network, Application, and response-header tools.</p>
       </section>
 
       <section class="policy-section" aria-labelledby="requests-heading">
-        <h2 id="requests-heading">5. Website requests and hosting</h2>
+        <h2 id="requests-heading">6. Website requests and hosting</h2>
         <p>Loading HISTI still requires ordinary static website requests. Those requests can expose technical information such as your IP address, browser/device information, requested static file, and request time to the hosting infrastructure. They do not contain your assessment answers, recipient label, progress, or score.</p>
         <h3>Vercel</h3>
         <p>HISTI is hosted on Vercel. Vercel may process ordinary website traffic and service-generated information to deliver, secure, diagnose, and operate its infrastructure. Its handling of that technical traffic is described in the <a href="https://vercel.com/legal/privacy-notice" rel="noopener noreferrer">Vercel Privacy Notice</a>.</p>
         <h3>No automatic third-party font or analytics request</h3>
-        <p>The assessment uses system fonts and does not automatically load Google Fonts, an analytics SDK, an ad tracker, or another third-party runtime resource.</p>
+        <p>The check-in uses system fonts and does not automatically load Google Fonts, an analytics SDK, an ad tracker, or another third-party runtime resource.</p>
       </section>
 
       <section class="policy-section" aria-labelledby="sharing-heading">
-        <h2 id="sharing-heading">6. Sharing a result</h2>
+        <h2 id="sharing-heading">7. Sharing a result</h2>
         <p>The Share button uses your browser or operating system’s share feature, or copies a short result summary to your clipboard. Nothing is shared until you choose that action and select a destination. Once you send a result to another service or person, their privacy practices apply.</p>
       </section>
 
       <section class="policy-section" aria-labelledby="controls-heading">
-        <h2 id="controls-heading">7. Retention and your controls</h2>
+        <h2 id="controls-heading">8. Retention and your controls</h2>
         <p>Assessment data stays in local storage until you reset HISTI, clear this site’s browser data, or your browser removes it. Selecting <strong>Reset</strong> and confirming the prompt clears the assessment data and saved results created by HISTI on that browser profile.</p>
         <p>HISTI cannot retrieve, correct, or delete assessment data stored on your device because the app does not receive it. You control that data through HISTI’s Reset option and your browser’s site-data settings.</p>
       </section>
 
       <section class="policy-section" aria-labelledby="security-heading">
-        <h2 id="security-heading">8. Security</h2>
+        <h2 id="security-heading">9. Security</h2>
         <p>Keeping assessment data on-device limits transmission, but local storage is not a secure vault. Other people with access to your unlocked browser profile or device may be able to view stored data. Consider resetting HISTI after use on a shared device.</p>
       </section>
 
       <section class="policy-section" aria-labelledby="children-heading">
-        <h2 id="children-heading">9. Children’s privacy</h2>
+        <h2 id="children-heading">10. Children’s privacy</h2>
         <p>HISTI is not directed to children under 13, and the app does not knowingly collect assessment data from children on a server. If you believe the site is being used inappropriately by a child, please use the contact method below.</p>
       </section>
 
       <section class="policy-section" aria-labelledby="changes-heading">
-        <h2 id="changes-heading">10. Changes to this policy</h2>
+        <h2 id="changes-heading">11. Changes to this policy</h2>
         <p>This policy may be updated when HISTI’s features or service providers change. The effective date at the top of this page will show when the current version took effect.</p>
       </section>
 
       <section id="contact" class="policy-section" aria-labelledby="contact-heading">
-        <h2 id="contact-heading">11. Contact</h2>
+        <h2 id="contact-heading">12. Contact</h2>
         <p>For privacy questions, open an issue in the <a href="https://github.com/adbscoalition/histiii/issues" rel="noopener noreferrer">HISTI GitHub repository</a>. GitHub issues are public, so do not include assessment answers or other sensitive personal information.</p>
       </section>
 

@@ -3339,3 +3339,309 @@ body.reduce-motion .handoff-next{animation:none!important}
 .section-skip-dialog[hidden],
 #boundary-skip-right[hidden],
 #boundary-skip[hidden]{display:none!important}
+
+
+/* ===== Result containment, rights language, and lightweight motion ===== */
+
+/* Hard viewport containment for the results bug shown in the desktop screenshot. */
+html,
+body,
+.app-shell{
+  max-width:100%!important;
+  overflow-x:hidden!important
+}
+.results-screen{
+  width:min(100%,980px)!important;
+  max-width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+  padding-left:clamp(8px,1.5vw,16px)!important;
+  padding-right:clamp(8px,1.5vw,16px)!important
+}
+.results-screen>*,
+.result-card,
+.result-card>*,
+.result-hero,
+.result-hero>*,
+.result-spectrum,
+.spectrum-labels,
+.spectrum-values,
+.spectrum-track,
+.result-score-line,
+.subscore-section,
+.subscore-heading,
+.result-card .category-grid,
+.result-card .category-card,
+.result-disclaimer,
+.result-rights,
+.results-screen .warning-card{
+  min-width:0!important;
+  max-width:100%!important;
+  box-sizing:border-box!important
+}
+.result-card,
+.results-screen .warning-card{
+  width:100%!important
+}
+.result-hero,
+.result-spectrum,
+.spectrum-track{
+  width:100%!important;
+  overflow:hidden!important
+}
+.result-card .result-title{
+  width:100%!important;
+  max-width:100%!important;
+  font-size:clamp(28px,4vw,46px)!important;
+  overflow-wrap:anywhere!important;
+  word-break:normal!important;
+  white-space:normal!important;
+  text-wrap:pretty!important
+}
+.spectrum-labels,
+.spectrum-values{
+  width:100%!important;
+  overflow:hidden!important
+}
+.spectrum-labels span,
+.spectrum-values span{
+  min-width:0!important
+}
+.result-score-line{
+  flex-wrap:wrap!important
+}
+.results-screen .warning-card{
+  overflow-wrap:anywhere!important
+}
+
+/* Rights and disclaimers: compact, visible, and plain-language. */
+.start-rights-card{
+  width:min(100%,660px);
+  margin:18px auto 0;
+  padding:13px 14px;
+  border:1px solid rgba(238,183,42,.23);
+  border-radius:14px;
+  background:rgba(238,183,42,.055);
+  text-align:left
+}
+.start-rights-card>strong{
+  display:block;
+  margin-bottom:8px;
+  color:#efbd39;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.09em;
+  text-transform:uppercase
+}
+.start-rights-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px 14px
+}
+.start-rights-grid span{
+  position:relative;
+  padding-left:15px;
+  color:#b9b09d;
+  font-size:10.5px;
+  line-height:1.35
+}
+.start-rights-grid span::before{
+  content:"✓";
+  position:absolute;
+  left:0;
+  color:#eeb72a;
+  font-weight:900
+}
+.start-disclaimer{
+  width:min(100%,650px);
+  margin:10px auto 0;
+  color:#8f897d;
+  font-size:10.5px;
+  line-height:1.4
+}
+.start-disclaimer strong{color:#b9b09d}
+
+.result-disclaimer{
+  min-width:0!important
+}
+.result-disclaimer>div{
+  min-width:0!important
+}
+.result-disclaimer p{
+  overflow-wrap:anywhere
+}
+.result-rights{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:start;
+  gap:13px;
+  padding:14px clamp(20px,5vw,54px);
+  border-top:1px solid rgba(255,255,255,.08);
+  color:#a8a093;
+  background:#11110f
+}
+.result-rights strong{
+  color:#eeb72a;
+  font-size:10.5px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  white-space:nowrap
+}
+.result-rights p{
+  margin:0;
+  font-size:10.8px;
+  line-height:1.42
+}
+.proof-rights{
+  margin-top:13px;
+  padding:12px 14px;
+  border:1px solid rgba(238,183,42,.22);
+  border-radius:12px;
+  background:rgba(238,183,42,.05)
+}
+.proof-rights>strong{
+  display:block;
+  margin-bottom:7px;
+  color:#f0c45b;
+  font-size:11px
+}
+.proof-rights ul{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:6px 18px;
+  margin:0;
+  padding:0;
+  list-style:none
+}
+.proof-rights li{
+  position:relative;
+  padding-left:14px;
+  color:#a79e8f;
+  font-size:10.5px;
+  line-height:1.35
+}
+.proof-rights li::before{
+  content:"✓";
+  position:absolute;
+  left:0;
+  color:#75d48e;
+  font-weight:900
+}
+
+/* Lightweight one-shot motion only: transform + opacity, no animated blur/filter. */
+@keyframes histiPopIn{
+  0%{opacity:0;transform:translateY(10px) scale(.975)}
+  100%{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes histiSlideIn{
+  0%{opacity:0;transform:translateY(16px)}
+  100%{opacity:1;transform:translateY(0)}
+}
+@keyframes histiFadeIn{
+  from{opacity:0}
+  to{opacity:1}
+}
+@keyframes histiChoiceIn{
+  0%{opacity:0;transform:translateY(6px)}
+  100%{opacity:1;transform:translateY(0)}
+}
+@keyframes histiNoticeIn{
+  0%{opacity:0;transform:translateX(-7px)}
+  100%{opacity:1;transform:translateX(0)}
+}
+
+.landing-screen:not([hidden]) .start-card{
+  animation:histiSlideIn .42s cubic-bezier(.22,.72,.24,1) both
+}
+.recipient-screen:not([hidden]) .screen-heading{
+  animation:histiSlideIn .34s cubic-bezier(.22,.72,.24,1) both
+}
+.recipient-screen:not([hidden]) .choice-button{
+  animation:histiChoiceIn .28s cubic-bezier(.22,.72,.24,1) both
+}
+.recipient-screen:not([hidden]) .choice-button:nth-child(2){animation-delay:30ms}
+.recipient-screen:not([hidden]) .choice-button:nth-child(3){animation-delay:60ms}
+.recipient-screen:not([hidden]) .choice-button:nth-child(4){animation-delay:90ms}
+.recipient-screen:not([hidden]) .choice-button:nth-child(5){animation-delay:120ms}
+.recipient-screen:not([hidden]) .choice-button:nth-child(6){animation-delay:150ms}
+
+.boundary-screen:not([hidden]) .boundary-card{
+  animation:histiSlideIn .40s cubic-bezier(.22,.72,.24,1) both
+}
+.section-skip-dialog:not([hidden]),
+.disclosure-sheet:not([hidden]){
+  animation:histiFadeIn .20s ease-out both
+}
+.section-skip-dialog:not([hidden]) .section-skip-card,
+.disclosure-sheet:not([hidden]) .disclosure-card{
+  animation:histiPopIn .30s cubic-bezier(.22,.72,.24,1) both
+}
+.utility-panel:not([hidden]){
+  transform-origin:top left;
+  animation:histiPopIn .22s cubic-bezier(.22,.72,.24,1) both
+}
+.privacy-warning:not([hidden]){
+  animation:histiNoticeIn .30s cubic-bezier(.22,.72,.24,1) both
+}
+.results-screen:not([hidden]) .result-card{
+  animation:histiSlideIn .42s cubic-bezier(.22,.72,.24,1) both
+}
+.results-screen:not([hidden]) .warning-card{
+  animation:histiSlideIn .42s .11s cubic-bezier(.22,.72,.24,1) both
+}
+.start-rights-card,
+.result-rights,
+.proof-rights{
+  animation:histiChoiceIn .36s .08s cubic-bezier(.22,.72,.24,1) both
+}
+
+.rubric-button,
+.none-button,
+.choice-button,
+.status-list button,
+.primary,
+.secondary{
+  transition:transform .14s ease,border-color .18s ease,background-color .18s ease,box-shadow .18s ease!important
+}
+.rubric-button:not(:disabled):active,
+.none-button:not(:disabled):active,
+.choice-button:not(:disabled):active,
+.status-list button:not(:disabled):active,
+.primary:not(:disabled):active,
+.secondary:not(:disabled):active{
+  transform:translateY(1px) scale(.992)
+}
+
+@media(max-width:620px){
+  .result-card .result-title{
+    font-size:clamp(27px,8vw,38px)!important
+  }
+  .start-rights-grid,
+  .proof-rights ul{
+    grid-template-columns:1fr
+  }
+  .result-rights{
+    grid-template-columns:1fr;
+    gap:5px;
+    padding:13px 14px
+  }
+  .result-rights strong{white-space:normal}
+}
+
+body.reduce-motion .landing-screen:not([hidden]) .start-card,
+body.reduce-motion .recipient-screen:not([hidden]) .screen-heading,
+body.reduce-motion .recipient-screen:not([hidden]) .choice-button,
+body.reduce-motion .boundary-screen:not([hidden]) .boundary-card,
+body.reduce-motion .section-skip-dialog:not([hidden]),
+body.reduce-motion .section-skip-dialog:not([hidden]) .section-skip-card,
+body.reduce-motion .disclosure-sheet:not([hidden]),
+body.reduce-motion .disclosure-sheet:not([hidden]) .disclosure-card,
+body.reduce-motion .utility-panel:not([hidden]),
+body.reduce-motion .privacy-warning:not([hidden]),
+body.reduce-motion .results-screen:not([hidden]) .result-card,
+body.reduce-motion .results-screen:not([hidden]) .warning-card,
+body.reduce-motion .start-rights-card,
+body.reduce-motion .result-rights,
+body.reduce-motion .proof-rights{
+  animation:none!important
+}

@@ -9,7 +9,7 @@ const CATEGORY_NAMES = {
   C: 'Sensitive Information',
   D: 'Very Sensitive Information'
 };
-const RESULT_DISCLAIMER = 'The score is not fully accurate to true privacy and openness values.';
+const RESULT_DISCLAIMER = 'HISTI is a reflection tool, not a diagnosis, legal judgment, safety verdict, or measure of character. It summarizes your answers using HISTI scoring rules.';
 const RECIPIENTS = [
   ['close-family', 'Close family member', 'A parent, sibling, child, or another close relative'],
   ['partner', 'Spouse or partner', 'A spouse, romantic partner, or long-term partner'],
@@ -52,7 +52,7 @@ const CATEGORY_BOUNDARIES = {
     level: 'warning-strong',
     label: 'Warning',
     title: 'You’re about to be asked about very sensitive information.',
-    copy: 'The next section includes high-risk topics such as credentials, identifiers, financial details, security information, and other very sensitive data. Keep every real value private; choose descriptions only.',
+    copy: 'The next section includes especially sensitive topics such as credentials, identifiers, financial details, security information, and other very sensitive data. Keep every real value private; choose descriptions only.',
     skippable: true
   }
 };
@@ -387,7 +387,7 @@ function updateStartScreen() {
   els.startStatus.hidden = !hasProgress;
 
   if (!hasProgress) {
-    els.begin.textContent = 'Start assessment';
+    els.begin.textContent = 'Start check-in';
     els.startStatus.textContent = '';
     return;
   }
@@ -399,7 +399,7 @@ function updateStartScreen() {
   }
 
   const answered = Object.values(state.answers || {}).filter(a => a && a.visited).length;
-  els.begin.textContent = answered > 0 ? 'Resume assessment' : 'Continue setup';
+  els.begin.textContent = answered > 0 ? 'Resume check-in' : 'Continue setup';
   els.startStatus.textContent = answered > 0
     ? `Saved progress · question ${Math.min(state.index + 1, questions.length || 263)} of ${questions.length || 263}`
     : 'Your setup is saved on this device.';
@@ -1131,7 +1131,7 @@ function directionalScore(score) {
 }
 
 function resultPreference(score) {
-  if (score === null || !Number.isFinite(Number(score))) return 'Your preference could not be calculated.';
+  if (score === null || !Number.isFinite(Number(score))) return 'There is not enough information for a result.';
   const value = directionalValue(score);
   const magnitude = Math.abs(value);
   const direction = value < 0 ? 'private' : 'open';
@@ -1139,8 +1139,8 @@ function resultPreference(score) {
   if (magnitude >= 75) degree = 'strongly';
   else if (magnitude >= 40) degree = 'moderately';
   else if (magnitude >= 12) degree = 'somewhat';
-  if (magnitude < 12) return `You balance privacy and openness towards ${answerRecipientPhrase()}.`;
-  return `You prefer to be ${degree} ${direction} towards ${answerRecipientPhrase()}.`;
+  if (magnitude < 12) return `Your answers sit near the middle for ${answerRecipientPhrase()}.`;
+  return `Your answers lean ${degree} ${direction} with ${answerRecipientPhrase()}.`;
 }
 
 function saveResultSnapshot(result) {
@@ -1169,10 +1169,10 @@ function updateResultWarning(result) {
 
   if (!d || d.points === null) {
     els.warningCard.classList.add('warning-safe');
-    els.warningLevel.textContent = 'Category D guidance';
+    els.warningLevel.textContent = 'Privacy reminder';
     els.warningScore.textContent = 'D · N/C';
-    els.warningTitle.textContent = 'No Category D score to compare';
-    els.warningText.textContent = 'Category D was not calculated, so no recipient-specific disclosure warning can be issued.';
+    els.warningTitle.textContent = 'No Category D comparison';
+    els.warningText.textContent = 'You skipped or did not calculate Category D, so HISTI is not showing an extra very-sensitive-information reminder.';
     return;
   }
 
@@ -1182,9 +1182,9 @@ function updateResultWarning(result) {
 
   if (!threshold) {
     els.warningCard.classList.add('warning-safe');
-    els.warningLevel.textContent = 'Category D guidance';
-    els.warningTitle.textContent = 'No threshold defined for this recipient';
-    els.warningText.textContent = 'No Category D caution or warning threshold has been defined for “Other individual.” Review the very sensitive information category directly.';
+    els.warningLevel.textContent = 'Privacy reminder';
+    els.warningTitle.textContent = 'Review Category D in context';
+    els.warningText.textContent = 'HISTI does not have a comparison rule for this audience. Use your own judgment, keep real sensitive values private, and review any item that matters to you.';
     return;
   }
 
@@ -1192,32 +1192,36 @@ function updateResultWarning(result) {
   if (dPoints > threshold.warning) level = 'warning';
   else if (dPoints > threshold.caution) level = 'caution';
 
+  const lowerBoundNote = d.pnaCount
+    ? ' Because you chose “I’d rather not answer” at least once, your Category D number may be lower than the full picture.'
+    : '';
+
   if (level === 'warning') {
     els.warningCard.classList.add('warning-warning');
-    els.warningLevel.textContent = 'Warning';
-    els.warningTitle.textContent = `High very-sensitive disclosure to ${threshold.label}`;
+    els.warningLevel.textContent = 'Privacy warning';
+    els.warningTitle.textContent = `Consider reviewing what you shared with ${threshold.label}`;
     els.warningText.textContent =
-      `Your Category D score is over the Warning threshold of ${threshold.warning.toFixed(2)}. Very sensitive disclosures can create privacy, security, financial, identity, or personal-safety risk. Consider whether each disclosed item is necessary for this recipient.` +
-      (d.pnaCount ? ' This Category D score is a lower bound because at least one item was refused.' : '');
+      'Your answers suggest that more very sensitive information may have been shared. HISTI cannot tell whether any specific disclosure was necessary, safe, unsafe, helpful, or harmful. If you want, review Category D and keep every real value private.' +
+      lowerBoundNote;
     return;
   }
 
   if (level === 'caution') {
     els.warningCard.classList.add('warning-caution');
-    els.warningLevel.textContent = 'Caution';
-    els.warningTitle.textContent = `Elevated very-sensitive disclosure to ${threshold.label}`;
+    els.warningLevel.textContent = 'Privacy caution';
+    els.warningTitle.textContent = 'This may be worth another look';
     els.warningText.textContent =
-      `Your Category D score is over the Caution threshold of ${threshold.caution.toFixed(2)}. Review whether the very sensitive information you shared is needed, appropriately limited, and safe with this recipient.` +
-      (d.pnaCount ? ' This Category D score is a lower bound because at least one item was refused.' : '');
+      `Your answers suggest some very sensitive information may have been shared with ${threshold.label}. This is only a prompt to reflect — not a safety judgment. Review Category D if that would help.` +
+      lowerBoundNote;
     return;
   }
 
   els.warningCard.classList.add('warning-safe');
-  els.warningLevel.textContent = 'No threshold warning';
-  els.warningTitle.textContent = 'No Category D threshold exceeded';
+  els.warningLevel.textContent = 'Privacy note';
+  els.warningTitle.textContent = 'No extra Category D alert';
   els.warningText.textContent =
-    `Your Category D score does not exceed the Caution threshold of ${threshold.caution.toFixed(2)} for ${threshold.label}. This is guidance only; the sensitivity of a specific disclosure can still matter even below the threshold.` +
-    (d.pnaCount ? ' This Category D score is a lower bound because at least one item was refused.' : '');
+    `Your answers do not trigger HISTI’s extra Category D reminder for ${threshold.label}. That does not certify that any specific disclosure was safe; context still matters.` +
+    lowerBoundNote;
 }
 
 function populateResults(result) {
@@ -1229,7 +1233,7 @@ function populateResults(result) {
     ? 'No scored items were included.'
     : result.lowerBound
       ? 'This is a lower bound because one or more items were marked “I’d rather not answer.”'
-      : 'Your score is calculated locally in this browser.';
+      : 'This reflection is calculated locally in this browser.';
 
   const frag = document.createDocumentFragment();
   for (const cat of Object.keys(CATEGORY_CAPS)) {
