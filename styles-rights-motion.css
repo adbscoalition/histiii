@@ -3645,3 +3645,81 @@ body.reduce-motion .result-rights,
 body.reduce-motion .proof-rights{
   animation:none!important
 }
+
+
+/* ===== Larger, clearer check-in controls ===== */
+.quiz-nav-inner{
+  grid-template-columns:minmax(108px,.72fr) minmax(0,2.5fr) minmax(132px,.9fr)!important;
+  gap:8px!important
+}
+.nav-primary{
+  min-height:56px!important;
+  padding-inline:16px!important;
+  font-size:15px!important;
+  line-height:1.1!important;
+  font-weight:900!important;
+  letter-spacing:.01em!important
+}
+.status-list button{
+  min-height:56px!important;
+  padding:8px 12px!important;
+  font-size:13.5px!important;
+  line-height:1.15!important;
+  font-weight:850!important;
+  letter-spacing:0!important
+}
+.nav-primary.previous{
+  color:#f2eee5!important;
+  border-color:rgba(255,255,255,.18)!important
+}
+.nav-primary.next{
+  font-size:16px!important
+}
+.quiz-nav{
+  min-height:78px!important
+}
+.footer-links a,
+.bottom-utility .footer-links button{
+  font-size:13px!important
+}
+
+/* Supporting copy: improve legibility without making dense questions overflow. */
+.question-top .muted{
+  font-size:12.5px!important;
+  line-height:1.45!important
+}
+.answer-panel-heading strong{font-size:13px!important}
+.answer-panel-heading span{font-size:11.5px!important}
+
+@media(max-height:700px) and (min-width:621px){
+  .nav-primary{min-height:50px!important;font-size:14px!important}
+  .status-list button{min-height:50px!important;font-size:12.5px!important}
+  .quiz-nav{min-height:70px!important}
+}
+
+@media(max-width:620px){
+  .quiz-nav{
+    min-height:108px!important;
+    padding:6px 8px max(6px,env(safe-area-inset-bottom))!important
+  }
+  .quiz-nav-inner{
+    grid-template-columns:88px minmax(0,1fr) 114px!important;
+    grid-template-rows:44px 50px!important;
+    gap:6px!important
+  }
+  .nav-primary{
+    min-height:0!important;
+    height:100%!important;
+    padding-inline:9px!important;
+    font-size:14px!important
+  }
+  .nav-primary.next{font-size:15px!important}
+  .status-list button{
+    min-height:0!important;
+    height:100%!important;
+    padding:5px 7px!important;
+    font-size:12px!important;
+    line-height:1.12!important
+  }
+  .question-top .muted{font-size:10.5px!important}
+}
