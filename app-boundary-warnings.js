@@ -753,6 +753,7 @@ function debugJumpToSection(category) {
   if (!state.recipientType) state.recipientType = 'friend';
   state.completedAt = null;
   state.pendingBoundary = null;
+  if (state.categorySkips?.[category]) delete state.categorySkips[category];
   state.index = target;
   showScreen('assessment');
   renderQuestion();
@@ -1653,6 +1654,7 @@ function resetAll(confirmFirst = true) {
   els.accessibilityPanel.hidden = true;
   els.debugPanel.hidden = true;
   els.disclosurePanel.hidden = true;
+  els.sectionSkipDialog.hidden = true;
   els.accessibility.setAttribute('aria-expanded', 'false');
   applyAccessibility();
   renderRecipientChoices();
