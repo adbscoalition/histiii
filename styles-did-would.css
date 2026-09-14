@@ -2506,10 +2506,16 @@ body.a11y-contrast{
   margin-top:2px
 }
 
+.policy-document{
+  min-height:100%;
+  height:auto;
+  overflow-x:hidden;
+  overflow-y:auto
+}
 .policy-page{
   min-height:100%;
   height:auto;
-  overflow:auto;
+  overflow:visible;
   background:#090907!important
 }
 .policy-page::before{display:none}
