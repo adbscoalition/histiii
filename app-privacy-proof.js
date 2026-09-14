@@ -1,3 +1,5 @@
+import questionData from './questions-data-private-v1.js';
+
 const STORAGE_PROGRESS = 'histi.progress.v3';
 const STORAGE_RESULTS = 'histi.results.v3';
 const CATEGORY_CAPS = { A: 50, B: 20, C: 20, D: 10 };
@@ -36,7 +38,7 @@ const els = {
   a11yTextValue: $('a11y-text-value'), a11yReadingValue: $('a11y-reading-value'),
   a11yContrastValue: $('a11y-contrast-value'), a11ySpacingValue: $('a11y-spacing-value'), a11yMotionValue: $('a11y-motion-value'),
   begin: $('begin-btn'), startStatus: $('start-status'), startDisclosure: $('start-disclosure-btn'),
-  disclosurePanel: $('disclosure-panel'), disclosureClose: $('disclosure-close'), disclosureDone: $('disclosure-done'),
+  disclosurePanel: $('disclosure-panel'), disclosureClose: $('disclosure-close'), disclosureDone: $('disclosure-done'), privacyProofRun: $('privacy-proof-run'), privacyProofResult: $('privacy-proof-result'),
   bottomUtility: $('bottom-utility'), footerDisclosure: $('footer-disclosure-btn'), footerReset: $('footer-reset-btn'),
   recipientList: $('recipient-list'), recipientLabel: $('recipient-label'),
   recipientBack: $('recipient-back'), start: $('start-btn'), handoffMessage: $('handoff-message'), handoffTyped: $('handoff-typed'), handoffNext: $('handoff-next'), recipientContext: $('recipient-context'), questionCode: $('question-code'), answerPrompt: $('answer-prompt'), answerHint: $('answer-hint'),
@@ -407,12 +409,66 @@ function toggleAccessibilityOption(key) {
   scheduleSave();
 }
 
+function privacyProofSnapshot() {
+  const metaPolicy = document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content || '';
+  const connectionBlocked = /(?:^|;)\s*connect-src\s+'none'\s*(?:;|$)/i.test(metaPolicy);
+  const formsBlocked = /(?:^|;)\s*form-action\s+'none'\s*(?:;|$)/i.test(metaPolicy);
+
+  const resources = performance.getEntriesByType('resource')
+    .map(entry => {
+      try { return new URL(entry.name, location.href); } catch { return null; }
+    })
+    .filter(Boolean);
+
+  const externalHosts = [...new Set(resources
+    .filter(url => url.origin !== location.origin)
+    .map(url => url.host))];
+
+  const histiKeys = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('histi.')) histiKeys.push(key);
+    }
+  } catch {}
+
+  return {
+    pass: connectionBlocked && formsBlocked && externalHosts.length === 0,
+    connectionBlocked,
+    formsBlocked,
+    externalHosts,
+    histiKeys: histiKeys.sort(),
+    resourceCount: resources.length
+  };
+}
+
+function runPrivacyProof() {
+  const proof = privacyProofSnapshot();
+  if (!els.privacyProofResult) return proof;
+
+  if (proof.pass) {
+    const keys = proof.histiKeys.length ? proof.histiKeys.join(', ') : 'no HISTI data saved yet';
+    els.privacyProofResult.textContent =
+      `PASS — connection APIs are blocked by CSP, form submission is blocked, and this page loaded no third-party runtime resources. Local HISTI keys: ${keys}.`;
+    els.privacyProofResult.dataset.state = 'pass';
+  } else {
+    const problems = [];
+    if (!proof.connectionBlocked) problems.push("connect-src 'none' is not visible in the page policy");
+    if (!proof.formsBlocked) problems.push("form-action 'none' is not visible in the page policy");
+    if (proof.externalHosts.length) problems.push(`external resource hosts detected: ${proof.externalHosts.join(', ')}`);
+    els.privacyProofResult.textContent = `CHECK FAILED — ${problems.join('; ') || 'privacy conditions could not be verified'}.`;
+    els.privacyProofResult.dataset.state = 'fail';
+  }
+  return proof;
+}
+
 function openDisclosure() {
   els.accessibilityPanel.hidden = true;
   els.debugPanel.hidden = true;
   els.disclosurePanel.hidden = true;
   els.accessibility.setAttribute('aria-expanded', 'false');
   els.disclosurePanel.hidden = false;
+  runPrivacyProof();
 }
 
 function closeDisclosure() {
@@ -1448,6 +1504,8 @@ els.app.addEventListener('click', event => {
   else if (id === 'share-btn') shareResult();
 });
 
+els.privacyProofRun?.addEventListener('click', runPrivacyProof);
+
 els.recipientLabel.addEventListener('input', event => {
   state.recipientLabel = event.target.value;
   scheduleSave();
@@ -1461,9 +1519,7 @@ window.addEventListener('pagehide', () => { if (saveDirty) saveNow(); });
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && saveDirty) saveNow(); });
 
 async function boot() {
-  const response = await fetch('/questions.json', { cache: 'force-cache' });
-  if (!response.ok) throw new Error('Could not load question catalogue');
-  const data = await response.json();
+  const data = questionData;
   questions = Array.isArray(data.questions) ? data.questions : [];
   if (!questions.length) throw new Error('Question catalogue is empty');
   state.index = Math.min(Math.max(0, Number(state.index) || 0), questions.length - 1);
@@ -1474,7 +1530,8 @@ async function boot() {
   showScreen('intro');
   updateStartScreen();
 
-  window.__HISTI_DIAG__ = () => ({
+  window.__HISTI_PRIVACY_PROOF__ = runPrivacyProof;
+    window.__HISTI_DIAG__ = () => ({
     screen: state.screen,
     question: state.index,
     answers: Object.keys(state.answers).length,

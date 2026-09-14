@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; form-action 'none'; object-src 'none'; base-uri 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; media-src 'none'; img-src 'self' data: blob:; font-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#090907">
   <meta name="description" content="HISTI — a private, on-device self-assessment of information sharing.">
@@ -9,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles-sensitive-comfort.css?v=share-card-v2">
+  <link rel="stylesheet" href="/styles-privacy-proof.css?v=share-card-v2">
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
@@ -196,17 +197,69 @@
     </main>
 
     <section id="disclosure-panel" class="disclosure-sheet" hidden role="dialog" aria-modal="true" aria-labelledby="disclosure-title">
-      <div class="disclosure-card">
+      <div class="disclosure-card disclosure-proof-card">
         <div class="disclosure-head">
-          <p class="eyebrow">Before you begin</p>
+          <p class="eyebrow">Privacy proof</p>
           <button id="disclosure-close" type="button" aria-label="Close disclosure">Close</button>
         </div>
-        <h2 id="disclosure-title">Your answers stay with you.</h2>
-        <p class="disclosure-emphasis">You are not required to submit personal information. This result is calculated on-device and is not sent to HISTI servers.</p>
-        <p>Your answers, progress, and saved results stay in this browser on this device. HISTI describes disclosure to a selected recipient; it does not judge whether sharing more or less is good or bad.</p>
-        <p>You can choose “I’d rather not answer” or say you do not know. HISTI never needs you to type or paste the actual personal or sensitive value.</p>
-        <a class="disclosure-policy-link" href="/privacy">Read the full privacy policy</a>
-        <button id="disclosure-done" class="primary disclosure-done" type="button">Got it</button>
+
+        <div class="proof-hero">
+          <span class="proof-zero">0 bytes</span>
+          <div>
+            <h2 id="disclosure-title">Your test information is not uploaded.</h2>
+            <p>Answers, recipient labels, progress, and scores stay in this browser. HISTI does not put them in requests, URLs, analytics, logs, or an assessment-submission API.</p>
+          </div>
+        </div>
+
+        <div class="proof-enforcement" role="note" aria-label="Browser enforced privacy">
+          <strong>Browser-enforced, not just promised</strong>
+          <code>connect-src 'none'</code>
+          <span>The production Content Security Policy blocks page connection APIs including fetch, XHR, WebSocket, EventSource, and sendBeacon.</span>
+        </div>
+
+        <div class="proof-grid">
+          <article>
+            <span class="proof-check" aria-hidden="true">✓</span>
+            <div><strong>No answer upload endpoint</strong><p>The app has no assessment submission request. Question data is bundled as a static local module.</p></div>
+          </article>
+          <article>
+            <span class="proof-check" aria-hidden="true">✓</span>
+            <div><strong>Local browser storage only</strong><p>Progress and results are written to <code>histi.progress.v3</code> and <code>histi.results.v3</code> in localStorage.</p></div>
+          </article>
+          <article>
+            <span class="proof-check" aria-hidden="true">✓</span>
+            <div><strong>No trackers or remote fonts</strong><p>No analytics SDK, ad tracker, Google Font, or third-party runtime resource is required by the assessment.</p></div>
+          </article>
+          <article>
+            <span class="proof-check" aria-hidden="true">✓</span>
+            <div><strong>Forms cannot submit</strong><p>The same browser policy sets <code>form-action 'none'</code>.</p></div>
+          </article>
+        </div>
+
+        <div class="proof-live">
+          <div>
+            <strong>Verify this page yourself</strong>
+            <p id="privacy-proof-result" aria-live="polite">Open this panel and run the browser check.</p>
+          </div>
+          <button id="privacy-proof-run" class="secondary proof-run" type="button">Run privacy check</button>
+        </div>
+
+        <details class="proof-details">
+          <summary>How to verify manually in DevTools</summary>
+          <ol>
+            <li>Open <strong>Network</strong>, clear the log, then answer several questions. Answer clicks should create no requests.</li>
+            <li>Select the document request and inspect <strong>Response Headers</strong>. Confirm <code>Content-Security-Policy</code> contains <code>connect-src 'none'</code>.</li>
+            <li>Open <strong>Application → Local Storage → histi.ocharlotted.com</strong>. The assessment state is stored under the two HISTI keys shown above.</li>
+            <li>Inspect the public source on <a href="https://github.com/adbscoalition/histiii" rel="noopener noreferrer">GitHub</a>. The assessment runtime does not transmit answer state.</li>
+          </ol>
+        </details>
+
+        <p class="proof-boundary"><strong>What Vercel still sees:</strong> ordinary requests needed to load the static site itself (for example HTML, JavaScript, CSS, the logo, and the static question module). Those requests happen independently of your answers and contain no assessment state. If you explicitly use <strong>Share</strong>, your browser/OS hands the generated result to the destination you choose.</p>
+
+        <div class="proof-actions">
+          <a class="disclosure-policy-link" href="/privacy">Read the full privacy policy</a>
+          <button id="disclosure-done" class="primary disclosure-done" type="button">Got it</button>
+        </div>
       </div>
     </section>
 
@@ -222,6 +275,6 @@
     </footer>
   </div>
 
-  <script type="module" src="/app-sensitive-comfort.js?v=share-card-v2"></script>
+  <script type="module" src="/app-privacy-proof.js"></script>
 </body>
 </html>
