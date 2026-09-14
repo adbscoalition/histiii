@@ -38,9 +38,9 @@ const els = {
   disclosurePanel: $('disclosure-panel'), disclosureClose: $('disclosure-close'), disclosureDone: $('disclosure-done'),
   bottomUtility: $('bottom-utility'), footerDisclosure: $('footer-disclosure-btn'), footerReset: $('footer-reset-btn'),
   recipientList: $('recipient-list'), recipientLabel: $('recipient-label'),
-  recipientBack: $('recipient-back'), start: $('start-btn'), handoffMessage: $('handoff-message'), handoffTyped: $('handoff-typed'), handoffNext: $('handoff-next'), recipientContext: $('recipient-context'), questionCode: $('question-code'),
+  recipientBack: $('recipient-back'), start: $('start-btn'), handoffMessage: $('handoff-message'), handoffTyped: $('handoff-typed'), handoffNext: $('handoff-next'), recipientContext: $('recipient-context'), questionCode: $('question-code'), answerPrompt: $('answer-prompt'),
   questionTitle: $('question-title'), questionHelp: $('question-help'), risk: $('risk-note'), rubricList: $('rubric-list'), statusList: $('status-list'),
-  back: $('back-btn'), next: $('next-btn'), resultScore: $('result-score'), resultNote: $('result-note'), categoryResults: $('category-results'),
+  back: $('back-btn'), next: $('next-btn'), resultTitle: $('result-title'), resultScore: $('result-score'), resultMarker: $('result-marker'), resultNote: $('result-note'), categoryResults: $('category-results'),
   warningCard: $('result-warning-card'), warningLevel: $('result-warning-level'), warningScore: $('result-warning-score'),
   warningTitle: $('result-warning-title'), warningText: $('result-warning-text'),
   share: $('share-btn'), review: $('review-btn'), restart: $('restart-btn'), shareStatus: $('share-status')
@@ -414,6 +414,20 @@ function handoffRecipientPhrase() {
   }[state.recipientType] || 'this person';
 }
 
+function answerRecipientPhrase() {
+  const privateLabel = state.recipientLabel.trim();
+  if (privateLabel) return privateLabel;
+
+  return {
+    'close-family': 'your close family member',
+    partner: 'your spouse or partner',
+    friend: 'your friend',
+    acquaintance: 'your acquaintance',
+    other: 'this person',
+    public: 'the general public'
+  }[state.recipientType] || 'this person';
+}
+
 function handoffMotionEnabled() {
   return state.accessibility.motion !== false &&
     !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -565,6 +579,7 @@ function renderQuestion() {
   els.progress.textContent = `Question ${state.index + 1} of ${questions.length}`;
   els.progressFill.style.width = `${((state.index + 1) / questions.length) * 100}%`;
   els.recipientContext.textContent = `With ${recipientName()}`;
+  els.answerPrompt.textContent = `What did, or what would, you share to ${answerRecipientPhrase()}?`;
   els.questionCode.textContent = `${q.code} · ${state.index + 1}/${questions.length}`;
   els.questionTitle.textContent = `Did you / would you share anything about ${topicTitle(q)}?`;
   els.questionHelp.textContent = state.accessibility.reading === 'simple'
@@ -769,6 +784,30 @@ function fmt(n) {
   return Number(n).toFixed(2).replace(/\.00$/, '');
 }
 
+function directionalValue(score) {
+  return Math.max(-100, Math.min(100, (Number(score) - 50) * 2));
+}
+
+function directionalScore(score) {
+  if (score === null || !Number.isFinite(Number(score))) return 'N/C';
+  const value = directionalValue(score);
+  if (Math.abs(value) < 0.005) return '0';
+  return `${value < 0 ? 'P' : 'O'}${fmt(Math.abs(value))}`;
+}
+
+function resultPreference(score) {
+  if (score === null || !Number.isFinite(Number(score))) return 'Your preference could not be calculated.';
+  const value = directionalValue(score);
+  const magnitude = Math.abs(value);
+  const direction = value < 0 ? 'private' : 'open';
+  let degree = 'slightly';
+  if (magnitude >= 75) degree = 'strongly';
+  else if (magnitude >= 40) degree = 'moderately';
+  else if (magnitude >= 12) degree = 'somewhat';
+  if (magnitude < 12) return `You balance privacy and openness towards ${answerRecipientPhrase()}.`;
+  return `You prefer to be ${degree} ${direction} towards ${answerRecipientPhrase()}.`;
+}
+
 function saveResultSnapshot(result) {
   if (!state.completedAt || result.overall === null) return;
   try {
@@ -847,8 +886,10 @@ function updateResultWarning(result) {
 }
 
 function populateResults(result) {
-  const prefix = result.lowerBound ? '≥' : '';
-  els.resultScore.textContent = result.overall === null ? 'Not calculated' : `${prefix}${fmt(result.overall)}/100`;
+  els.resultTitle.textContent = resultPreference(result.overall);
+  els.resultScore.textContent = result.overall === null ? 'Not calculated' : directionalScore(result.overall);
+  els.resultMarker.hidden = result.overall === null;
+  els.resultMarker.style.setProperty('--score-position', `${result.overall === null ? 50 : Math.max(0, Math.min(100, Number(result.overall)))}%`);
   els.resultNote.textContent = result.overall === null
     ? 'No scored items were included.'
     : result.lowerBound
@@ -860,11 +901,25 @@ function populateResults(result) {
     const catResult = result.cats[cat];
     const card = document.createElement('div');
     card.className = 'category-card';
+    if (catResult.ratio === null) card.classList.add('is-not-calculated');
+    if (catResult.ratio !== null) card.style.setProperty('--score-position', `${Math.max(0, Math.min(100, catResult.ratio * 100))}%`);
+    const top = document.createElement('div');
+    top.className = 'category-card-top';
+    const badge = document.createElement('span');
+    badge.className = 'category-letter';
+    badge.textContent = cat;
     const label = document.createElement('span');
-    label.textContent = `${cat} · ${CATEGORY_NAMES[cat]}`;
+    label.className = 'category-name';
+    label.textContent = CATEGORY_NAMES[cat];
     const value = document.createElement('strong');
-    value.textContent = catResult.points === null ? 'N/C' : `${catResult.pnaCount ? '≥' : ''}${fmt(catResult.points)}/${catResult.cap}`;
-    card.append(label, value);
+    value.textContent = catResult.ratio === null ? 'N/C' : directionalScore(catResult.ratio * 100);
+    top.append(badge, label, value);
+    const miniTrack = document.createElement('div');
+    miniTrack.className = 'category-track';
+    miniTrack.setAttribute('aria-hidden', 'true');
+    const miniMarker = document.createElement('span');
+    miniTrack.append(miniMarker);
+    card.append(top, miniTrack);
     frag.append(card);
   }
   els.categoryResults.replaceChildren(frag);
@@ -955,10 +1010,11 @@ async function finishAssessment() {
   // Only now reveal the result itself.
   if (result.overall !== null) {
     const exactScore = Math.max(0, Math.min(100, Number(result.overall) || 0));
-    const wholeScore = Math.floor(exactScore);
-    const prefix = result.lowerBound ? '≥' : '';
+    const signedTarget = directionalValue(exactScore);
+    const wholeScore = Math.floor(Math.abs(signedTarget));
+    const direction = signedTarget < 0 ? 'P' : 'O';
 
-    els.resultScore.textContent = `${prefix}0/100`;
+    els.resultScore.textContent = '0';
     await els.resultScore.animate(
       [
         { opacity: 0, transform: 'translateY(4px)' },
@@ -971,7 +1027,7 @@ async function finishAssessment() {
     await wait(300);
 
     for (let value = 1; value <= wholeScore; value += 1) {
-      els.resultScore.textContent = `${prefix}${value}/100`;
+      els.resultScore.textContent = `${direction}${value}`;
       await wait(10);
     }
     els.resultScore.textContent = finalScoreText;
@@ -990,7 +1046,10 @@ async function finishAssessment() {
 
 async function shareResult() {
   const result = compute();
-  const text = `HISTI — ${recipientName()}\nOverall: ${result.overall === null ? 'Not calculated' : `${result.lowerBound ? '≥' : ''}${fmt(result.overall)}/100`}\nCalculated on-device.`;
+  const categoryText = Object.keys(CATEGORY_CAPS)
+    .map(cat => `${cat}: ${result.cats[cat].ratio === null ? 'N/C' : directionalScore(result.cats[cat].ratio * 100)}`)
+    .join(' · ');
+  const text = `HISTI — ${recipientName()}\nOverall: ${result.overall === null ? 'Not calculated' : directionalScore(result.overall)}\n${categoryText}\nCalculated on-device.`;
   try {
     if (navigator.share) await navigator.share({ title: 'My HISTI result', text });
     else if (navigator.clipboard) await navigator.clipboard.writeText(text);
