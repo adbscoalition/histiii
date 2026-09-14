@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; form-action 'none'; object-src 'none'; base-uri 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; media-src 'none'; img-src 'self' data: blob:; font-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#090907">
+  <meta name="description" content="HISTI Check-in — a private, on-device reflection on information sharing.">
+  <title>HISTI Check-in</title>
+<link rel="stylesheet" href="/styles-rights-motion.css">
+</head>
+<body>
+  <div class="ambient ambient-a" aria-hidden="true"></div>
+  <div class="ambient ambient-b" aria-hidden="true"></div>
+
+  <div id="app" class="app-shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+      <button id="accessibility-btn" class="accessibility-button" type="button" aria-expanded="false" aria-controls="accessibility-panel">Accessibility</button>
+      <img class="brand-logo" src="/histi-logo.webp?v=facelift-1" alt="HISTI">
+      <button id="debug-hotspot" class="debug-hotspot" type="button" tabindex="-1" aria-hidden="true"></button>
+    
+      </div>
+    </header>
+
+    <div id="progress-label" class="sr-only" hidden></div>
+    <div id="progress-track" class="progress-track" hidden aria-hidden="true">
+      <span id="progress-fill"></span>
+    </div>
+
+    <section id="accessibility-panel" class="utility-panel accessibility-panel" hidden aria-label="Accessibility options">
+      <div class="utility-panel-head">
+        <strong>Accessibility</strong>
+        <button type="button" data-panel-close="accessibility">Close</button>
+      </div>
+      <button type="button" data-a11y="textSize"><span>Text size</span><strong id="a11y-text-value">Standard</strong></button>
+      <button type="button" data-a11y="reading"><span>Reading level</span><strong id="a11y-reading-value">Standard</strong></button>
+      <button type="button" data-a11y="contrast"><span>High contrast</span><strong id="a11y-contrast-value">Off</strong></button>
+      <button type="button" data-a11y="spacing"><span>Extra spacing</span><strong id="a11y-spacing-value">Off</strong></button>
+      <button type="button" data-a11y="motion"><span>Question motion</span><strong id="a11y-motion-value">On</strong></button>
+      <button id="reset-btn" class="panel-danger" type="button">Reset check-in</button>
+    </section>
+
+    <section id="debug-panel" class="utility-panel debug-panel" hidden aria-label="Debug controls">
+      <div class="utility-panel-head">
+        <strong>Debug</strong>
+        <button type="button" data-panel-close="debug">Close</button>
+      </div>
+      <button id="debug-random-last" type="button">Random-fill previous questions → last question</button>
+      <div class="debug-jump">
+        <label for="debug-question">Jump to question</label>
+        <div class="debug-jump-row">
+          <input id="debug-question" type="number" min="1" max="263" step="1" inputmode="numeric" placeholder="1–263">
+          <button id="debug-jump" type="button">Jump</button>
+        </div>
+      </div>
+      <div class="debug-section-tools">
+        <span>Skip to section</span>
+        <div class="debug-section-grid">
+          <button type="button" data-debug-section="A">A</button>
+          <button type="button" data-debug-section="B">B</button>
+          <button type="button" data-debug-section="C">C</button>
+          <button type="button" data-debug-section="D">D</button>
+        </div>
+      </div>
+      <div class="debug-section-tools">
+        <span>Preview boundary</span>
+        <div class="debug-boundary-grid">
+          <button type="button" data-debug-boundary="A-B">A→B</button>
+          <button type="button" data-debug-boundary="B-C">B→C</button>
+          <button type="button" data-debug-boundary="C-D">C→D</button>
+        </div>
+      </div>
+      <p class="utility-note">Local-only test controls.</p>
+    </section>
+
+    <main id="intro-screen" class="screen landing-screen">
+      <section class="start-card" aria-labelledby="start-title">
+        <p class="eyebrow">Human Information-Sharing Transparency Index</p>
+        <h1 id="start-title">A quieter way to understand what you share.</h1>
+        <p class="start-lede">Think about one person or audience. HISTI will guide you through one question at a time and help you reflect on what you share or would share. You never need to enter the real private information.</p>
+
+        <div class="start-rights-card" role="note" aria-label="Know your rights">
+          <strong>Know your rights</strong>
+          <div class="start-rights-grid">
+            <span>Keep real private information to yourself.</span>
+            <span>Skip, refuse, go back, or stop at any time.</span>
+            <span>Review or change your answers whenever you want.</span>
+            <span>Share your result only if you choose.</span>
+          </div>
+        </div>
+        <p class="start-disclaimer"><strong>HISTI is a reflection tool.</strong> It is not a diagnosis, legal opinion, safety certificate, or measure of your character.</p>
+
+        <div id="start-status" class="start-status" hidden></div>
+        <button id="begin-btn" class="primary start-primary" type="button">Start check-in</button>
+        <button id="start-disclosure-btn" class="start-link" type="button">Read disclosure &amp; privacy</button>
+      </section>
+    </main>
+
+    <main id="recipient-screen" class="screen recipient-screen" hidden>
+      <div class="screen-heading">
+        <p class="eyebrow">Before we start</p>
+        <h1>Who are you thinking about?</h1>
+        <p>Pick one person or audience. You can use a private nickname; you never need to enter anyone’s real name.</p>
+      </div>
+      <div id="recipient-list" class="choice-grid"></div>
+      <label class="field">
+        <span>Optional private label</span>
+        <input id="recipient-label" maxlength="80" autocomplete="off" placeholder="e.g. Alex">
+      </label>
+      <div class="actions">
+        <button id="recipient-back" class="secondary" type="button">Back</button>
+        <button id="start-btn" class="primary" type="button" disabled>Start questions</button>
+      </div>
+    </main>
+
+    <main id="handoff-screen" class="screen handoff-screen" hidden>
+      <section class="handoff-stage" aria-labelledby="handoff-message">
+        <p class="eyebrow">A quick perspective shift</p>
+        <h1 id="handoff-message" class="handoff-message">
+          <span id="handoff-typed" class="handoff-copy" aria-hidden="true"></span>
+        </h1>
+        <button id="handoff-next" class="primary handoff-next" type="button" hidden>Next</button>
+      </section>
+    </main>
+
+    <main id="boundary-screen" class="screen boundary-screen" hidden>
+      <section id="boundary-card" class="boundary-card" data-level="caution" aria-labelledby="boundary-title">
+        <div class="boundary-heading-row">
+          <span id="boundary-level" class="boundary-level">Caution</span>
+          <span id="boundary-route" class="boundary-route">A → B</span>
+        </div>
+
+        <h1 id="boundary-title">The next section gets more personal.</h1>
+        <p id="boundary-copy" class="boundary-copy">Take a moment before continuing. HISTI only needs you to choose descriptions; it never needs the real private information.</p>
+
+        <div class="rights-card">
+          <span class="rights-heading">Know your rights</span>
+          <ul>
+            <li><strong>Keep private information private.</strong> Your actual private information should not be disclosed to HISTI. Keep the real details to yourself; the question answers do not provide a field for entering them.</li>
+            <li><strong>You can refuse.</strong> You have the absolute right to refuse to answer any question or all remaining questions.</li>
+            <li id="boundary-skip-right" hidden><strong>You can skip this section.</strong> If these questions make you uncomfortable, you may skip the entire section and continue without answering it.</li>
+          </ul>
+        </div>
+
+        <div class="boundary-actions">
+          <button id="boundary-skip" class="secondary boundary-skip" type="button" hidden>Skip questions</button>
+          <button id="boundary-continue" class="primary boundary-continue" type="button">Continue</button>
+        </div>
+      </section>
+    </main>
+
+    <main id="assessment-screen" class="screen assessment" hidden>
+      <section class="assessment-card" aria-live="polite">
+        <div class="question-top">
+          <div class="question-meta">
+            <span id="recipient-context"></span>
+            <span id="question-code"></span>
+          </div>
+          <h1 id="question-title"></h1>
+          <p id="question-help" class="muted"></p>
+          <div id="risk-note" class="risk privacy-warning" hidden role="note">
+            <strong id="risk-title">Keep the real details private</strong>
+            <span id="risk-text">Choose descriptions only. Never type or paste the actual personal information.</span>
+          </div>
+        </div>
+
+        <div class="answer-panel">
+          <div class="answer-panel-heading">
+            <strong id="answer-prompt">What did, or what would, you share to this person?</strong>
+            <span id="answer-hint">Select every answer that applies</span>
+          </div>
+          <div id="rubric-list" class="rubric-list" role="group" aria-label="Your answer"></div>
+        </div>
+      </section>
+
+      <nav class="quiz-nav" aria-label="Question navigation">
+        <div class="quiz-nav-inner">
+        <button id="back-btn" class="nav-primary previous" type="button">Previous</button>
+
+        <div id="status-list" class="status-list" role="group" aria-label="Other answers">
+          <button type="button" data-status="PNA" aria-pressed="false">I’d rather not answer</button>
+          <button type="button" data-status="U" aria-pressed="false">I don’t know</button>
+        </div>
+
+        <button id="next-btn" class="nav-primary next" type="button">Next</button>
+      
+        </div>
+      </nav>
+    </main>
+
+    <section id="section-skip-dialog" class="section-skip-dialog" hidden role="dialog" aria-modal="true" aria-labelledby="section-skip-title">
+      <div class="section-skip-card">
+        <p class="eyebrow">Skip Category <span id="section-skip-category">C</span></p>
+        <h2 id="section-skip-title">Are you sure you want to skip this section?</h2>
+        <p class="section-skip-copy">You do not need to enter any true personal information for these questions.</p>
+
+        <div id="section-skip-reasons" class="section-skip-reasons" role="radiogroup" aria-label="Reason for skipping">
+          <label class="skip-reason">
+            <input type="radio" name="section-skip-reason" value="exclude">
+            <span>
+              <strong>I’m uncomfortable answering these questions</strong>
+              <small>Skip this category and exclude it from the calculation (N/C).</small>
+            </span>
+          </label>
+          <label class="skip-reason">
+            <input type="radio" name="section-skip-reason" value="private">
+            <span>
+              <strong>I refuse to answer these questions</strong>
+              <small>Skip this category and count it as P100 / fully private.</small>
+            </span>
+          </label>
+        </div>
+
+        <div class="section-skip-actions">
+          <button id="section-skip-back" class="secondary" type="button">Back</button>
+          <button id="section-skip-confirm" class="primary" type="button" disabled>Skip anyways</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="finish-sequence" class="finish-sequence" hidden aria-live="polite" aria-label="Calculating result">
+      <div id="finish-calculating" class="finish-calculating">
+        <span>Calculating</span><span class="calculating-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      </div>
+      <div id="finish-score" class="finish-score" hidden>0</div>
+    </section>
+    <div id="finish-blackout" class="finish-blackout" hidden aria-hidden="true"></div>
+
+    <main id="results-screen" class="screen results-screen" hidden>
+      <section class="result-card" aria-labelledby="result-title">
+        <div class="result-hero">
+          <p class="eyebrow">Your disclosure preference</p>
+          <h1 id="result-title" class="result-title"></h1>
+
+          <div class="result-spectrum" aria-label="Disclosure preference scale from P100 private through zero to O100 open">
+            <div class="spectrum-labels" aria-hidden="true"><span>Private</span><span>Open</span></div>
+            <div class="spectrum-track">
+              <span class="spectrum-center" aria-hidden="true"></span>
+              <span id="result-marker" class="spectrum-marker" aria-hidden="true"></span>
+            </div>
+            <div class="spectrum-values" aria-hidden="true"><span>P100</span><span>0</span><span>O100</span></div>
+          </div>
+
+          <div class="result-score-line"><span>HISTI</span><strong id="result-score" class="score"></strong></div>
+          <p id="result-note" class="muted"></p>
+        </div>
+
+        <div class="subscore-section">
+          <div class="subscore-heading">
+            <h2>Category subscores</h2>
+            <span>P = private · O = open</span>
+          </div>
+          <div id="category-results" class="category-grid"></div>
+        </div>
+        <div class="result-disclaimer">
+          <img src="/histi-logo.webp?v=facelift-1" alt="HISTI">
+          <div>
+            <strong>WHAT THIS RESULT MEANS</strong>
+            <p>HISTI is a reflection tool. This number is not a diagnosis, legal judgment, safety verdict, or measure of your character. It only summarizes your answers using HISTI’s scoring rules.</p>
+          </div>
+        </div>
+        <div class="result-rights" role="note">
+          <strong>Know your rights</strong>
+          <p>You can review or change answers, keep this result private, reset the local data, or stop here. Share only if you choose.</p>
+        </div>
+        <div class="actions result-actions">
+          <button id="share-btn" class="primary" type="button">Share result image</button>
+          <button id="review-btn" class="secondary" type="button">Review</button>
+          <button id="restart-btn" class="secondary" type="button">Start over</button>
+        </div>
+        <p id="share-status" class="muted small" aria-live="polite"></p>
+      </section>
+
+      <section id="result-warning-card" class="warning-card warning-safe" aria-live="polite">
+        <div class="warning-card-head">
+          <span id="result-warning-level" class="warning-level">Privacy reminder</span>
+          <span id="result-warning-score" class="warning-score"></span>
+        </div>
+        <h2 id="result-warning-title">A note about very sensitive information</h2>
+        <p id="result-warning-text">This is a rule-of-thumb reminder based on your answers, not a judgment about what is safe or unsafe.</p>
+      </section>
+    </main>
+
+    <section id="disclosure-panel" class="disclosure-sheet" hidden role="dialog" aria-modal="true" aria-labelledby="disclosure-title">
+      <div class="disclosure-card disclosure-proof-card">
+        <div class="disclosure-head">
+          <p class="eyebrow">Privacy proof</p>
+          <button id="disclosure-close" type="button" aria-label="Close disclosure">Close</button>
+        </div>
+
+        <div class="proof-hero">
+          <span class="proof-zero">0 bytes</span>
+          <div>
+            <h2 id="disclosure-title">Your test information is not uploaded.</h2>
+            <p>Answers, recipient labels, progress, and scores stay in this browser. HISTI does not put them in requests, URLs, analytics, logs, or an assessment-submission API.</p>
+          </div>
+        </div>
+
+        <div class="proof-enforcement" role="note" aria-label="Browser enforced privacy">
+          <strong>Browser-enforced, not just promised</strong>
+          <code>connect-src 'none'</code>
+          <span>The production Content Security Policy blocks page connection APIs including fetch, XHR, WebSocket, EventSource, and sendBeacon.</span>
+        </div>
+
+        <div class="proof-grid">
+          <article>
+            <span class="proof-check" aria-hidden="true">✓</span>
+            <div><strong>No answer upload endpoint</strong><p>The app has no assessment submission request. Question data is bundled as a static local module.</p></div>
+          </article>
+          <article>
+            <span class="proof-check" aria-hidden="true">✓</span>
+            <div><strong>Local browser storage only</strong><p>Progress and results are written to <code>histi.progress.v3</code> and <code>histi.results.v3</code> in localStorage.</p></div>
+          </article>
+          <article>
+            <span class="proof-check" aria-hidden="true">✓</span>
+            <div><strong>No trackers or remote fonts</strong><p>No analytics SDK, ad tracker, Google Font, or third-party runtime resource is required by the assessment.</p></div>
+          </article>
+          <article>
+            <span class="proof-check" aria-hidden="true">✓</span>
+            <div><strong>Forms cannot submit</strong><p>The same browser policy sets <code>form-action 'none'</code>.</p></div>
+          </article>
+        </div>
+
+        <div class="proof-live">
+          <div>
+            <strong>Verify this page yourself</strong>
+            <p id="privacy-proof-result" aria-live="polite">Open this panel and run the browser check.</p>
+          </div>
+          <button id="privacy-proof-run" class="secondary proof-run" type="button">Run privacy check</button>
+        </div>
+
+        <details class="proof-details">
+          <summary>How to verify manually in DevTools</summary>
+          <ol>
+            <li>Open <strong>Network</strong>, clear the log, then answer several questions. Answer clicks should create no requests.</li>
+            <li>Select the document request and inspect <strong>Response Headers</strong>. Confirm <code>Content-Security-Policy</code> contains <code>connect-src 'none'</code>.</li>
+            <li>Open <strong>Application → Local Storage → histi.ocharlotted.com</strong>. The assessment state is stored under the two HISTI keys shown above.</li>
+            <li>Inspect the public source on <a href="https://github.com/adbscoalition/histiii" rel="noopener noreferrer">GitHub</a>. The assessment runtime does not transmit answer state.</li>
+          </ol>
+        </details>
+
+        <div class="proof-rights" role="note">
+          <strong>Know your rights while using HISTI</strong>
+          <ul>
+            <li>You may refuse any question or all questions.</li>
+            <li>You may skip sensitive sections, go back, stop, or reset.</li>
+            <li>You never need to enter the real private or sensitive value.</li>
+            <li>Your result stays private unless you choose to share it.</li>
+          </ul>
+        </div>
+
+        <p class="proof-boundary"><strong>What Vercel still sees:</strong> ordinary requests needed to load the static site itself (for example HTML, JavaScript, CSS, the logo, and the static question module). Those requests happen independently of your answers and contain no check-in state. If you explicitly use <strong>Share</strong>, your browser/OS hands the generated result to the destination you choose.</p>
+
+        <div class="proof-actions">
+          <a class="disclosure-policy-link" href="/privacy">Read the full privacy policy</a>
+          <button id="disclosure-done" class="primary disclosure-done" type="button">Got it</button>
+        </div>
+      </div>
+    </section>
+
+    <footer id="bottom-utility" class="bottom-utility">
+      <div class="bottom-utility-inner">
+        <div class="footer-links">
+          <button id="footer-disclosure-btn" type="button">Disclosure</button>
+          <a href="/privacy">Privacy policy</a>
+        </div>
+        <span class="device-note"><span class="device-dot" aria-hidden="true"></span>Saved only on this device</span>
+        <button id="footer-reset-btn" type="button">Reset</button>
+      </div>
+    </footer>
+  </div>
+
+  <script type="module" src="/app-rights-motion.js"></script>
+</body>
+</html>
