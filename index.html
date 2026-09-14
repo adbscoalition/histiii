@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles-did-would.css?v=share-card-v2">
+  <link rel="stylesheet" href="/styles-sensitive-comfort.css?v=share-card-v2">
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
@@ -106,13 +106,16 @@
           </div>
           <h1 id="question-title"></h1>
           <p id="question-help" class="muted"></p>
-          <p id="risk-note" class="risk" hidden>Do not enter the actual identifier, password, code, key, or document content.</p>
+          <div id="risk-note" class="risk privacy-warning" hidden role="note">
+            <strong id="risk-title">Keep the real details private</strong>
+            <span id="risk-text">Choose descriptions only. Never type or paste the actual personal information.</span>
+          </div>
         </div>
 
         <div class="answer-panel">
           <div class="answer-panel-heading">
             <strong id="answer-prompt">What did, or what would, you share to this person?</strong>
-            <span>Select every answer that applies</span>
+            <span id="answer-hint">Select every answer that applies</span>
           </div>
           <div id="rubric-list" class="rubric-list" role="group" aria-label="Your answer"></div>
         </div>
@@ -123,7 +126,7 @@
         <button id="back-btn" class="nav-primary previous" type="button">Previous</button>
 
         <div id="status-list" class="status-list" role="group" aria-label="Other answers">
-          <button type="button" data-status="PNA" aria-pressed="false">I refuse to answer</button>
+          <button type="button" data-status="PNA" aria-pressed="false">I’d rather not answer</button>
           <button type="button" data-status="U" aria-pressed="false">I don’t know</button>
         </div>
 
@@ -201,7 +204,7 @@
         <h2 id="disclosure-title">Your answers stay with you.</h2>
         <p class="disclosure-emphasis">You are not required to submit personal information. This result is calculated on-device and is not sent to HISTI servers.</p>
         <p>Your answers, progress, and saved results stay in this browser on this device. HISTI describes disclosure to a selected recipient; it does not judge whether sharing more or less is good or bad.</p>
-        <p>You can refuse any question or say you do not know.</p>
+        <p>You can choose “I’d rather not answer” or say you do not know. HISTI never needs you to type or paste the actual personal or sensitive value.</p>
         <a class="disclosure-policy-link" href="/privacy">Read the full privacy policy</a>
         <button id="disclosure-done" class="primary disclosure-done" type="button">Got it</button>
       </div>
@@ -219,6 +222,6 @@
     </footer>
   </div>
 
-  <script type="module" src="/app-did-would.js?v=share-card-v2"></script>
+  <script type="module" src="/app-sensitive-comfort.js?v=share-card-v2"></script>
 </body>
 </html>
