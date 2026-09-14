@@ -915,14 +915,17 @@ async function shareResult() {
 }
 
 function resetAll(confirmFirst = true) {
-  if (confirmFirst && !window.confirm('Reset this assessment? All answers and current progress will be cleared.')) return;
+  if (confirmFirst && !window.confirm('Reset HISTI? All answers, progress, and saved results on this device will be cleared.')) return;
   if (saveTimer !== null) clearTimeout(saveTimer);
   saveTimer = null;
   saveDirty = false;
   finishSequenceRunning = false;
   els.finishSequence.hidden = true;
   els.finishBlackout.hidden = true;
-  try { localStorage.removeItem(STORAGE_PROGRESS); } catch {}
+  try {
+    localStorage.removeItem(STORAGE_PROGRESS);
+    localStorage.removeItem(STORAGE_RESULTS);
+  } catch {}
   state = freshState();
   els.accessibilityPanel.hidden = true;
   els.debugPanel.hidden = true;
