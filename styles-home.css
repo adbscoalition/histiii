@@ -82,3 +82,10 @@ footer>p{font-size:11.5px!important;line-height:1.4!important}
   .preview-note{font-size:12.5px!important}
   .cards p,.category-grid p,.before-list p{font-size:13px!important}
 }
+
+
+/* ===== 13+ privacy-policy note ===== */
+.before-list article:nth-child(6){
+  border-color:rgba(233,145,0,.20);
+  background:rgba(233,145,0,.045)
+}

@@ -69,7 +69,8 @@ const els = {
   a11yContrastValue: $('a11y-contrast-value'), a11ySpacingValue: $('a11y-spacing-value'), a11yMotionValue: $('a11y-motion-value'),
   begin: $('begin-btn'), startStatus: $('start-status'), startDisclosure: $('start-disclosure-btn'),
   disclosurePanel: $('disclosure-panel'), disclosureClose: $('disclosure-close'), disclosureDone: $('disclosure-done'), privacyProofRun: $('privacy-proof-run'), privacyProofResult: $('privacy-proof-result'),
-  bottomUtility: $('bottom-utility'), footerDisclosure: $('footer-disclosure-btn'), footerReset: $('footer-reset-btn'),
+  dataExportDialog: $('data-export-dialog'), dataExportClose: $('data-export-close'), dataExportDownload: $('data-export-download'), dataExportCopy: $('data-export-copy'), dataExportView: $('data-export-view'), dataExportRawWrap: $('data-export-raw-wrap'), dataExportRaw: $('data-export-raw'), dataExportStatus: $('data-export-status'),
+  bottomUtility: $('bottom-utility'), footerDisclosure: $('footer-disclosure-btn'), footerExport: $('footer-export-btn'), footerReset: $('footer-reset-btn'),
   recipientList: $('recipient-list'), recipientLabel: $('recipient-label'),
   recipientBack: $('recipient-back'), start: $('start-btn'), handoffMessage: $('handoff-message'), handoffTyped: $('handoff-typed'), handoffNext: $('handoff-next'),
   boundaryCard: $('boundary-card'), boundaryLevel: $('boundary-level'), boundaryRoute: $('boundary-route'), boundaryTitle: $('boundary-title'), boundaryCopy: $('boundary-copy'), boundarySkipRight: $('boundary-skip-right'), boundarySkip: $('boundary-skip'), boundaryContinue: $('boundary-continue'),
@@ -497,13 +498,16 @@ function privacyProofSnapshot() {
     }
   } catch {}
 
+  const appCookieCount = document.cookie ? document.cookie.split(';').filter(Boolean).length : 0;
+
   return {
-    pass: connectionBlocked && formsBlocked && externalHosts.length === 0,
+    pass: connectionBlocked && formsBlocked && externalHosts.length === 0 && appCookieCount === 0,
     connectionBlocked,
     formsBlocked,
     externalHosts,
     histiKeys: histiKeys.sort(),
-    resourceCount: resources.length
+    resourceCount: resources.length,
+    appCookieCount
   };
 }
 
@@ -514,13 +518,14 @@ function runPrivacyProof() {
   if (proof.pass) {
     const keys = proof.histiKeys.length ? proof.histiKeys.join(', ') : 'no HISTI data saved yet';
     els.privacyProofResult.textContent =
-      `PASS — connection APIs are blocked by CSP, form submission is blocked, and this page loaded no third-party runtime resources. Local HISTI keys: ${keys}.`;
+      `PASS — connection APIs are blocked by CSP, form submission is blocked, this page loaded no third-party runtime resources, and no cookies are visible to the HISTI page. Local HISTI keys: ${keys}.`;
     els.privacyProofResult.dataset.state = 'pass';
   } else {
     const problems = [];
     if (!proof.connectionBlocked) problems.push("connect-src 'none' is not visible in the page policy");
     if (!proof.formsBlocked) problems.push("form-action 'none' is not visible in the page policy");
     if (proof.externalHosts.length) problems.push(`external resource hosts detected: ${proof.externalHosts.join(', ')}`);
+    if (proof.appCookieCount) problems.push(`${proof.appCookieCount} cookie(s) visible to the page`);
     els.privacyProofResult.textContent = `CHECK FAILED — ${problems.join('; ') || 'privacy conditions could not be verified'}.`;
     els.privacyProofResult.dataset.state = 'fail';
   }
@@ -532,6 +537,7 @@ function openDisclosure() {
   els.debugPanel.hidden = true;
   els.disclosurePanel.hidden = true;
   els.sectionSkipDialog.hidden = true;
+  els.dataExportDialog.hidden = true;
   els.accessibility.setAttribute('aria-expanded', 'false');
   els.disclosurePanel.hidden = false;
   runPrivacyProof();
@@ -1641,6 +1647,80 @@ async function shareResult() {
   }
 }
 
+function localDataExportObject() {
+  let progress = null;
+  let results = null;
+  try { progress = JSON.parse(localStorage.getItem(STORAGE_PROGRESS) || 'null'); } catch {}
+  try { results = JSON.parse(localStorage.getItem(STORAGE_RESULTS) || 'null'); } catch {}
+
+  return {
+    format: 'HISTI-local-export-v1',
+    exportedAt: new Date().toISOString(),
+    origin: location.origin,
+    storage: {
+      [STORAGE_PROGRESS]: progress,
+      [STORAGE_RESULTS]: results
+    },
+    notes: [
+      'Created locally in this browser.',
+      'HISTI does not upload this export to create it.',
+      'The optional recipient label, if present, is included because it is part of your local HISTI progress.'
+    ]
+  };
+}
+
+function localDataExportText() {
+  return JSON.stringify(localDataExportObject(), null, 2);
+}
+
+function openDataExport() {
+  els.accessibilityPanel.hidden = true;
+  els.debugPanel.hidden = true;
+  els.disclosurePanel.hidden = true;
+  els.sectionSkipDialog.hidden = true;
+  els.dataExportRawWrap.hidden = true;
+  els.dataExportStatus.textContent = '';
+  els.dataExportDialog.hidden = false;
+}
+
+function closeDataExport() {
+  els.dataExportDialog.hidden = true;
+}
+
+function downloadDataExport() {
+  const blob = new Blob([localDataExportText()], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `histi-local-data-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1500);
+  els.dataExportStatus.textContent = 'Local JSON export downloaded.';
+}
+
+async function copyDataExport() {
+  const text = localDataExportText();
+  try {
+    if (!navigator.clipboard?.writeText) throw new Error('Clipboard API unavailable');
+    await navigator.clipboard.writeText(text);
+    els.dataExportStatus.textContent = 'Local JSON export copied to clipboard.';
+  } catch {
+    els.dataExportRaw.value = text;
+    els.dataExportRawWrap.hidden = false;
+    els.dataExportRaw.focus();
+    els.dataExportRaw.select();
+    els.dataExportStatus.textContent = 'Clipboard access is unavailable. The raw export is selected below so you can copy it manually.';
+  }
+}
+
+function viewDataExport() {
+  els.dataExportRaw.value = localDataExportText();
+  els.dataExportRawWrap.hidden = false;
+  els.dataExportStatus.textContent = 'Raw local export shown below.';
+}
+
 function resetAll(confirmFirst = true) {
   if (confirmFirst && !window.confirm('Reset HISTI? All answers, progress, and saved results on this device will be cleared.')) return;
   if (saveTimer !== null) clearTimeout(saveTimer);
@@ -1725,6 +1805,11 @@ els.app.addEventListener('click', event => {
   else if (id === 'section-skip-confirm') confirmSectionSkip();
   else if (id === 'start-disclosure-btn' || id === 'footer-disclosure-btn') openDisclosure();
   else if (id === 'disclosure-close' || id === 'disclosure-done') closeDisclosure();
+  else if (id === 'footer-export-btn') openDataExport();
+  else if (id === 'data-export-close') closeDataExport();
+  else if (id === 'data-export-download') downloadDataExport();
+  else if (id === 'data-export-copy') copyDataExport();
+  else if (id === 'data-export-view') viewDataExport();
   else if (id === 'footer-reset-btn') resetAll(true);
   else if (id === 'begin-btn') enterFromStart();
   else if (id === 'recipient-back') showScreen('intro');
@@ -1791,6 +1876,10 @@ boot().catch(err => {
 
 document.addEventListener('keydown', event => {
   if (event.key !== 'Escape') return;
+  if (!els.dataExportDialog.hidden) {
+    closeDataExport();
+    return;
+  }
   if (!els.sectionSkipDialog.hidden) {
     closeSectionSkipDialog();
     return;

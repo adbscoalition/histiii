@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#090907">
   <meta name="description" content="HISTI Check-in — a private, on-device reflection on information sharing.">
   <title>HISTI Check-in</title>
-<link rel="stylesheet" href="/styles-rights-motion.css">
+<link rel="stylesheet" href="/styles-privacy-controls.css">
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
@@ -90,6 +90,7 @@
           </div>
         </div>
         <p class="start-disclaimer"><strong>HISTI is a reflection tool.</strong> It is not a diagnosis, legal opinion, safety certificate, or measure of your character.</p>
+        <p class="age-note"><strong>Age 13+.</strong> By starting the check-in, you confirm that you are at least 13. HISTI does not ask for your birth date.</p>
 
         <div id="start-status" class="start-status" hidden></div>
         <button id="begin-btn" class="primary start-primary" type="button">Start check-in</button>
@@ -105,7 +106,7 @@
       </div>
       <div id="recipient-list" class="choice-grid"></div>
       <label class="field">
-        <span>Optional private label</span>
+        <span>Optional private label <small>— stored only in this browser</small></span>
         <input id="recipient-label" maxlength="80" autocomplete="off" placeholder="e.g. Alex">
       </label>
       <div class="actions">
@@ -359,10 +360,49 @@
       </div>
     </section>
 
+    <section id="data-export-dialog" class="data-export-dialog" hidden role="dialog" aria-modal="true" aria-labelledby="data-export-title">
+      <div class="data-export-card">
+        <div class="utility-panel-head">
+          <div>
+            <p class="eyebrow">Your local data</p>
+            <h2 id="data-export-title">Export my HISTI data</h2>
+          </div>
+          <button id="data-export-close" type="button">Close</button>
+        </div>
+
+        <p class="data-export-copy">This export is created entirely in your browser. HISTI does not upload it to create the file.</p>
+
+        <div class="data-export-summary">
+          <strong>Included</strong>
+          <span>Current progress, recipient type/private label, answer state, local preferences, and saved result snapshots stored by HISTI in this browser.</span>
+        </div>
+
+        <div class="data-export-actions">
+          <button id="data-export-download" class="primary" type="button">Download JSON</button>
+          <button id="data-export-copy" class="secondary" type="button">Copy JSON</button>
+          <button id="data-export-view" class="secondary" type="button">View raw data</button>
+        </div>
+
+        <div id="data-export-raw-wrap" class="data-export-raw" hidden>
+          <label for="data-export-raw"><strong>Raw local export</strong></label>
+          <textarea id="data-export-raw" readonly spellcheck="false"></textarea>
+          <p>If downloading or clipboard access is unavailable, select the text above and copy it manually.</p>
+        </div>
+
+        <p id="data-export-status" class="data-export-status" aria-live="polite"></p>
+
+        <div class="data-export-alternatives">
+          <strong>Alternative methods</strong>
+          <p>You can also inspect HISTI’s local data in your browser’s site-storage tools. To delete it without using HISTI, clear site data for <code>histi.ocharlotted.com</code>. The Reset control inside HISTI removes the same HISTI progress/result keys.</p>
+        </div>
+      </div>
+    </section>
+
     <footer id="bottom-utility" class="bottom-utility">
       <div class="bottom-utility-inner">
         <div class="footer-links">
           <button id="footer-disclosure-btn" type="button">Disclosure</button>
+          <button id="footer-export-btn" type="button">Export my data</button>
           <a href="/privacy">Privacy policy</a>
           <a href="/terms">Terms</a>
         </div>
@@ -372,6 +412,6 @@
     </footer>
   </div>
 
-  <script type="module" src="/app-rights-motion.js"></script>
+  <script type="module" src="/app-privacy-controls.js"></script>
 </body>
 </html>
