@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles-did-would.css?v=privacy-v1">
+  <link rel="stylesheet" href="/styles-did-would.css?v=handoff-v1">
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
@@ -85,6 +85,16 @@
         <button id="recipient-back" class="secondary" type="button">Back</button>
         <button id="start-btn" class="primary" type="button" disabled>Start questions</button>
       </div>
+    </main>
+
+    <main id="handoff-screen" class="screen handoff-screen" hidden>
+      <section class="handoff-stage" aria-labelledby="handoff-message">
+        <p class="eyebrow">A quick perspective shift</p>
+        <h1 id="handoff-message" class="handoff-message">
+          <span id="handoff-typed" class="handoff-copy" aria-hidden="true"></span>
+        </h1>
+        <button id="handoff-next" class="primary handoff-next" type="button" hidden>Next</button>
+      </section>
     </main>
 
     <main id="assessment-screen" class="screen assessment" hidden>
@@ -182,6 +192,6 @@
     </footer>
   </div>
 
-  <script type="module" src="/app-did-would.js?v=privacy-v1"></script>
+  <script type="module" src="/app-did-would.js?v=handoff-v1"></script>
 </body>
 </html>

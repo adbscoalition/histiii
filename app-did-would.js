@@ -26,7 +26,7 @@ const D_RISK_THRESHOLDS = {
 
 const $ = id => document.getElementById(id);
 const els = {
-  app: $('app'), intro: $('intro-screen'), recipient: $('recipient-screen'), assessment: $('assessment-screen'), results: $('results-screen'),
+  app: $('app'), intro: $('intro-screen'), recipient: $('recipient-screen'), handoff: $('handoff-screen'), assessment: $('assessment-screen'), results: $('results-screen'),
   progress: $('progress-label'), progressTrack: $('progress-track'), progressFill: $('progress-fill'), reset: $('reset-btn'),
   accessibility: $('accessibility-btn'), accessibilityPanel: $('accessibility-panel'),
   debugHotspot: $('debug-hotspot'), debugPanel: $('debug-panel'), debugRandomLast: $('debug-random-last'),
@@ -38,7 +38,7 @@ const els = {
   disclosurePanel: $('disclosure-panel'), disclosureClose: $('disclosure-close'), disclosureDone: $('disclosure-done'),
   bottomUtility: $('bottom-utility'), footerDisclosure: $('footer-disclosure-btn'), footerReset: $('footer-reset-btn'),
   recipientList: $('recipient-list'), recipientLabel: $('recipient-label'),
-  recipientBack: $('recipient-back'), start: $('start-btn'), recipientContext: $('recipient-context'), questionCode: $('question-code'),
+  recipientBack: $('recipient-back'), start: $('start-btn'), handoffMessage: $('handoff-message'), handoffTyped: $('handoff-typed'), handoffNext: $('handoff-next'), recipientContext: $('recipient-context'), questionCode: $('question-code'),
   questionTitle: $('question-title'), questionHelp: $('question-help'), risk: $('risk-note'), rubricList: $('rubric-list'), statusList: $('status-list'),
   back: $('back-btn'), next: $('next-btn'), resultScore: $('result-score'), resultNote: $('result-note'), categoryResults: $('category-results'),
   warningCard: $('result-warning-card'), warningLevel: $('result-warning-level'), warningScore: $('result-warning-score'),
@@ -51,6 +51,9 @@ let state = loadState() || freshState();
 let saveTimer = null;
 let saveDirty = false;
 let finishSequenceRunning = false;
+let handoffAnimationFrame = null;
+let handoffRevealTimer = null;
+let handoffRunId = 0;
 
 function freshState() {
   return {
@@ -298,13 +301,14 @@ function updateStartScreen() {
 }
 
 function showScreen(name) {
-  for (const [screen, el] of [['intro', els.intro], ['start', els.recipient], ['assessment', els.assessment], ['results', els.results]]) {
+  for (const [screen, el] of [['intro', els.intro], ['start', els.recipient], ['handoff', els.handoff], ['assessment', els.assessment], ['results', els.results]]) {
     el.hidden = screen !== name;
   }
   const inAssessment = name === 'assessment';
+  const immersive = inAssessment || name === 'handoff';
   els.progress.hidden = !inAssessment;
   els.progressTrack.hidden = !inAssessment;
-  els.bottomUtility.hidden = inAssessment;
+  els.bottomUtility.hidden = immersive;
   state.screen = name;
   if (name === 'intro') updateStartScreen();
 }
@@ -394,6 +398,89 @@ function enterFromStart() {
 
   showScreen('start');
   renderRecipientChoices();
+}
+
+function handoffRecipientPhrase() {
+  const privateLabel = state.recipientLabel.trim();
+  if (privateLabel) return privateLabel;
+
+  return {
+    'close-family': 'your close family member',
+    partner: 'your spouse or partner',
+    friend: 'your friend',
+    acquaintance: 'an acquaintance',
+    other: 'this person',
+    public: 'the general public'
+  }[state.recipientType] || 'this person';
+}
+
+function handoffMotionEnabled() {
+  return state.accessibility.motion !== false &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function cancelHandoffAnimation() {
+  handoffRunId += 1;
+  if (handoffAnimationFrame !== null) cancelAnimationFrame(handoffAnimationFrame);
+  if (handoffRevealTimer !== null) clearTimeout(handoffRevealTimer);
+  handoffAnimationFrame = null;
+  handoffRevealTimer = null;
+}
+
+function startHandoff() {
+  cancelHandoffAnimation();
+  const runId = handoffRunId;
+  const sentence = `Imagine ${handoffRecipientPhrase()} is asking you these questions…`;
+
+  showScreen('handoff');
+  els.handoffMessage.setAttribute('aria-label', sentence);
+  els.handoffMessage.classList.remove('is-raised', 'is-typing');
+  els.handoffTyped.textContent = '';
+  els.handoffNext.hidden = true;
+
+  if (!handoffMotionEnabled()) {
+    els.handoffTyped.textContent = sentence;
+    els.handoffMessage.classList.add('is-raised');
+    els.handoffNext.hidden = false;
+    return;
+  }
+
+  els.handoffMessage.classList.add('is-typing');
+  const typeDuration = 1000;
+
+  handoffAnimationFrame = requestAnimationFrame(startTime => {
+    const typeFrame = now => {
+      if (runId !== handoffRunId || state.screen !== 'handoff') return;
+      const progress = Math.min(1, (now - startTime) / typeDuration);
+      const characterCount = Math.min(sentence.length, Math.ceil(sentence.length * progress));
+      els.handoffTyped.textContent = sentence.slice(0, characterCount);
+
+      if (progress < 1) {
+        handoffAnimationFrame = requestAnimationFrame(typeFrame);
+        return;
+      }
+
+      handoffAnimationFrame = null;
+      els.handoffTyped.textContent = sentence;
+      els.handoffMessage.classList.remove('is-typing');
+      handoffRevealTimer = window.setTimeout(() => {
+        if (runId !== handoffRunId || state.screen !== 'handoff') return;
+        handoffRevealTimer = null;
+        els.handoffMessage.classList.add('is-raised');
+        els.handoffNext.hidden = false;
+      }, 400);
+    };
+
+    typeFrame(startTime);
+  });
+}
+
+function finishHandoff() {
+  cancelHandoffAnimation();
+  state.index = 0;
+  showScreen('assessment');
+  renderQuestion();
+  saveNow();
 }
 
 let debugTapCount = 0;
@@ -920,6 +1007,7 @@ function resetAll(confirmFirst = true) {
   saveTimer = null;
   saveDirty = false;
   finishSequenceRunning = false;
+  cancelHandoffAnimation();
   els.finishSequence.hidden = true;
   els.finishBlackout.hidden = true;
   try {
@@ -983,7 +1071,8 @@ els.app.addEventListener('click', event => {
   else if (id === 'footer-reset-btn') resetAll(true);
   else if (id === 'begin-btn') enterFromStart();
   else if (id === 'recipient-back') showScreen('intro');
-  else if (id === 'start-btn' && state.recipientType) { state.index = Math.min(Math.max(0, state.index), questions.length - 1); showScreen('assessment'); renderQuestion(); saveNow(); }
+  else if (id === 'start-btn' && state.recipientType) { state.index = 0; startHandoff(); saveNow(); }
+  else if (id === 'handoff-next') finishHandoff();
   else if (id === 'back-btn') go(-1);
   else if (id === 'next-btn') { if (state.index >= questions.length - 1) finishAssessment(); else go(1); }
   else if (id === 'review-btn') { showScreen('assessment'); renderQuestion(); }

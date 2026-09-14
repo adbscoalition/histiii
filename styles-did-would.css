@@ -2629,3 +2629,79 @@ body.a11y-contrast{
   .policy-section p,.policy-section li{font-size:14px;line-height:1.68}
   .policy-footer{align-items:flex-start;flex-direction:column}
 }
+
+/* ===== Recipient handoff ===== */
+.handoff-screen{
+  display:grid;
+  place-items:center;
+  padding-bottom:18px;
+  text-align:center;
+  background:
+    radial-gradient(circle at 50% 48%,rgba(233,145,0,.095),transparent 35%),
+    #070707
+}
+.handoff-stage{
+  width:min(100%,820px);
+  min-height:270px;
+  display:grid;
+  grid-template-rows:auto minmax(104px,auto) 54px;
+  justify-items:center;
+  align-items:center;
+  gap:16px
+}
+.handoff-stage .eyebrow{
+  align-self:end;
+  color:#bda56e!important
+}
+.handoff-message{
+  max-width:20ch;
+  margin:0;
+  align-self:end;
+  color:#fff8e4;
+  font-size:clamp(34px,5.3vw,64px);
+  font-weight:800;
+  line-height:1.02;
+  letter-spacing:-.052em;
+  text-wrap:balance;
+  transform:translateY(38px);
+  transition:transform 400ms cubic-bezier(.22,.72,.24,1)
+}
+.handoff-message.is-raised{transform:translateY(0)}
+.handoff-message.is-typing .handoff-copy::after{
+  content:"";
+  display:inline-block;
+  width:3px;
+  height:.84em;
+  margin-left:6px;
+  border-radius:2px;
+  vertical-align:-.04em;
+  background:#e99100;
+  animation:handoffCaret .58s steps(1,end) infinite
+}
+.handoff-next{
+  min-width:170px;
+  min-height:52px;
+  align-self:start;
+  color:#090909!important;
+  font-size:14px;
+  animation:handoffNextIn 400ms cubic-bezier(.22,.72,.24,1) both
+}
+@keyframes handoffCaret{50%{opacity:0}}
+@keyframes handoffNextIn{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+@media(max-width:620px){
+  .handoff-screen{padding:12px 20px 20px}
+  .handoff-stage{min-height:245px;grid-template-rows:auto minmax(96px,auto) 52px;gap:13px}
+  .handoff-message{font-size:clamp(30px,9.2vw,42px);transform:translateY(32px)}
+  .handoff-next{width:min(100%,260px)}
+}
+
+body.reduce-motion .handoff-message{transform:none!important}
+body.reduce-motion .handoff-next{animation:none!important}
+@media(prefers-reduced-motion:reduce){
+  .handoff-message{transform:none!important}
+  .handoff-next{animation:none!important}
+}
