@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#090907">
   <meta name="description" content="HISTI — a private, on-device self-assessment of information sharing.">
   <title>HISTI</title>
-<link rel="stylesheet" href="/styles-privacy-proof.css?v=share-card-v2">
+<link rel="stylesheet" href="/styles-boundary-warnings.css">
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
@@ -54,6 +54,23 @@
           <button id="debug-jump" type="button">Jump</button>
         </div>
       </div>
+      <div class="debug-section-tools">
+        <span>Skip to section</span>
+        <div class="debug-section-grid">
+          <button type="button" data-debug-section="A">A</button>
+          <button type="button" data-debug-section="B">B</button>
+          <button type="button" data-debug-section="C">C</button>
+          <button type="button" data-debug-section="D">D</button>
+        </div>
+      </div>
+      <div class="debug-section-tools">
+        <span>Preview boundary</span>
+        <div class="debug-boundary-grid">
+          <button type="button" data-debug-boundary="A-B">A→B</button>
+          <button type="button" data-debug-boundary="B-C">B→C</button>
+          <button type="button" data-debug-boundary="C-D">C→D</button>
+        </div>
+      </div>
       <p class="utility-note">Local-only test controls.</p>
     </section>
 
@@ -95,6 +112,32 @@
       </section>
     </main>
 
+    <main id="boundary-screen" class="screen boundary-screen" hidden>
+      <section id="boundary-card" class="boundary-card" data-level="caution" aria-labelledby="boundary-title">
+        <div class="boundary-heading-row">
+          <span id="boundary-level" class="boundary-level">Caution</span>
+          <span id="boundary-route" class="boundary-route">A → B</span>
+        </div>
+
+        <h1 id="boundary-title">The next section gets more personal.</h1>
+        <p id="boundary-copy" class="boundary-copy">Take a moment before continuing. HISTI only needs you to choose descriptions; it never needs the real private information.</p>
+
+        <div class="rights-card">
+          <span class="rights-heading">Your rights</span>
+          <ul>
+            <li><strong>Keep private information private.</strong> Your actual private information should not be disclosed to HISTI. Keep the real details to yourself; the question answers do not provide a field for entering them.</li>
+            <li><strong>You can refuse.</strong> You have the absolute right to refuse to answer any question or all remaining questions.</li>
+            <li id="boundary-skip-right" hidden><strong>You can skip this section.</strong> If these questions make you uncomfortable, you may skip the entire section and continue without answering it.</li>
+          </ul>
+        </div>
+
+        <div class="boundary-actions">
+          <button id="boundary-skip" class="secondary boundary-skip" type="button" hidden>Skip questions</button>
+          <button id="boundary-continue" class="primary boundary-continue" type="button">Continue</button>
+        </div>
+      </section>
+    </main>
+
     <main id="assessment-screen" class="screen assessment" hidden>
       <section class="assessment-card" aria-live="polite">
         <div class="question-top">
@@ -133,6 +176,36 @@
         </div>
       </nav>
     </main>
+
+    <section id="section-skip-dialog" class="section-skip-dialog" hidden role="dialog" aria-modal="true" aria-labelledby="section-skip-title">
+      <div class="section-skip-card">
+        <p class="eyebrow">Skip Category <span id="section-skip-category">C</span></p>
+        <h2 id="section-skip-title">Are you sure you want to skip this section?</h2>
+        <p class="section-skip-copy">You do not need to enter any true personal information for these questions.</p>
+
+        <div id="section-skip-reasons" class="section-skip-reasons" role="radiogroup" aria-label="Reason for skipping">
+          <label class="skip-reason">
+            <input type="radio" name="section-skip-reason" value="exclude">
+            <span>
+              <strong>I’m uncomfortable answering these questions</strong>
+              <small>Skip this category and exclude it from the calculation (N/C).</small>
+            </span>
+          </label>
+          <label class="skip-reason">
+            <input type="radio" name="section-skip-reason" value="private">
+            <span>
+              <strong>I refuse to answer these questions</strong>
+              <small>Skip this category and count it as P100 / fully private.</small>
+            </span>
+          </label>
+        </div>
+
+        <div class="section-skip-actions">
+          <button id="section-skip-back" class="secondary" type="button">Back</button>
+          <button id="section-skip-confirm" class="primary" type="button" disabled>Skip anyways</button>
+        </div>
+      </div>
+    </section>
 
     <section id="finish-sequence" class="finish-sequence" hidden aria-live="polite" aria-label="Calculating result">
       <div id="finish-calculating" class="finish-calculating">
@@ -272,6 +345,6 @@
     </footer>
   </div>
 
-  <script type="module" src="/app-privacy-proof.js"></script>
+  <script type="module" src="/app-boundary-warnings.js"></script>
 </body>
 </html>

@@ -27,9 +27,39 @@ const D_RISK_THRESHOLDS = {
   'close-family': { label: 'Family', caution: 6, warning: 8 }
 };
 
+const CATEGORY_BOUNDARIES = {
+  'A>B': {
+    from: 'A',
+    to: 'B',
+    level: 'caution',
+    label: 'Caution',
+    title: 'The next section gets more personal.',
+    copy: 'Category B covers basic identifying and contact information. Continue at your own pace; choose descriptions only and keep the real details to yourself.',
+    skippable: false
+  },
+  'B>C': {
+    from: 'B',
+    to: 'C',
+    level: 'warning',
+    label: 'Warning',
+    title: 'You’re about to be asked about sensitive information.',
+    copy: 'The next section asks whether you did or would disclose sensitive information. HISTI only asks which description fits — never enter, paste, or repeat the real information.',
+    skippable: true
+  },
+  'C>D': {
+    from: 'C',
+    to: 'D',
+    level: 'warning-strong',
+    label: 'Warning',
+    title: 'You’re about to be asked about very sensitive information.',
+    copy: 'The next section includes high-risk topics such as credentials, identifiers, financial details, security information, and other very sensitive data. Keep every real value private; choose descriptions only.',
+    skippable: true
+  }
+};
+
 const $ = id => document.getElementById(id);
 const els = {
-  app: $('app'), intro: $('intro-screen'), recipient: $('recipient-screen'), handoff: $('handoff-screen'), assessment: $('assessment-screen'), results: $('results-screen'),
+  app: $('app'), intro: $('intro-screen'), recipient: $('recipient-screen'), handoff: $('handoff-screen'), boundary: $('boundary-screen'), assessment: $('assessment-screen'), results: $('results-screen'),
   progress: $('progress-label'), progressTrack: $('progress-track'), progressFill: $('progress-fill'), reset: $('reset-btn'),
   accessibility: $('accessibility-btn'), accessibilityPanel: $('accessibility-panel'),
   debugHotspot: $('debug-hotspot'), debugPanel: $('debug-panel'), debugRandomLast: $('debug-random-last'),
@@ -41,7 +71,10 @@ const els = {
   disclosurePanel: $('disclosure-panel'), disclosureClose: $('disclosure-close'), disclosureDone: $('disclosure-done'), privacyProofRun: $('privacy-proof-run'), privacyProofResult: $('privacy-proof-result'),
   bottomUtility: $('bottom-utility'), footerDisclosure: $('footer-disclosure-btn'), footerReset: $('footer-reset-btn'),
   recipientList: $('recipient-list'), recipientLabel: $('recipient-label'),
-  recipientBack: $('recipient-back'), start: $('start-btn'), handoffMessage: $('handoff-message'), handoffTyped: $('handoff-typed'), handoffNext: $('handoff-next'), recipientContext: $('recipient-context'), questionCode: $('question-code'), answerPrompt: $('answer-prompt'), answerHint: $('answer-hint'),
+  recipientBack: $('recipient-back'), start: $('start-btn'), handoffMessage: $('handoff-message'), handoffTyped: $('handoff-typed'), handoffNext: $('handoff-next'),
+  boundaryCard: $('boundary-card'), boundaryLevel: $('boundary-level'), boundaryRoute: $('boundary-route'), boundaryTitle: $('boundary-title'), boundaryCopy: $('boundary-copy'), boundarySkipRight: $('boundary-skip-right'), boundarySkip: $('boundary-skip'), boundaryContinue: $('boundary-continue'),
+  sectionSkipDialog: $('section-skip-dialog'), sectionSkipCategory: $('section-skip-category'), sectionSkipReasons: $('section-skip-reasons'), sectionSkipBack: $('section-skip-back'), sectionSkipConfirm: $('section-skip-confirm'),
+  recipientContext: $('recipient-context'), questionCode: $('question-code'), answerPrompt: $('answer-prompt'), answerHint: $('answer-hint'),
   questionTitle: $('question-title'), questionHelp: $('question-help'), risk: $('risk-note'), riskTitle: $('risk-title'), riskText: $('risk-text'), rubricList: $('rubric-list'), statusList: $('status-list'),
   back: $('back-btn'), next: $('next-btn'), resultTitle: $('result-title'), resultScore: $('result-score'), resultMarker: $('result-marker'), resultNote: $('result-note'), categoryResults: $('category-results'),
   warningCard: $('result-warning-card'), warningLevel: $('result-warning-level'), warningScore: $('result-warning-score'),
@@ -65,6 +98,9 @@ function freshState() {
     recipientLabel: '',
     index: 0,
     answers: {},
+    categorySkips: {},
+    boundarySeen: {},
+    pendingBoundary: null,
     accessibility: { reading: 'standard', textSize: 'standard', contrast: false, spacing: false, motion: true },
     animationsEnabled: false,
     resultReveal: false,
@@ -78,6 +114,9 @@ function loadState() {
     if (!parsed || parsed.version !== 3 || !parsed.state) return null;
     const next = { ...freshState(), ...parsed.state };
     next.answers = parsed.state.answers || {};
+    next.categorySkips = parsed.state.categorySkips || {};
+    next.boundarySeen = parsed.state.boundarySeen || {};
+    next.pendingBoundary = parsed.state.pendingBoundary || null;
     next.accessibility = { ...freshState().accessibility, ...(parsed.state.accessibility || {}) };
     if (next.screen === 'calculating') next.screen = 'results';
     return next;
@@ -93,6 +132,9 @@ function snapshot() {
     recipientLabel: state.recipientLabel,
     index: state.index,
     answers: state.answers,
+    categorySkips: state.categorySkips,
+    boundarySeen: state.boundarySeen,
+    pendingBoundary: state.pendingBoundary,
     accessibility: state.accessibility,
     animationsEnabled: false,
     resultReveal: false,
@@ -166,6 +208,28 @@ function disclosurePct(q, a) {
 function compute() {
   const cats = {};
   for (const cat of Object.keys(CATEGORY_CAPS)) {
+    const skipMode = state.categorySkips?.[cat] || null;
+    if (skipMode === 'exclude') {
+      cats[cat] = {
+        ratio: null,
+        points: null,
+        cap: CATEGORY_CAPS[cat],
+        pnaCount: 0,
+        skipMode
+      };
+      continue;
+    }
+    if (skipMode === 'private') {
+      cats[cat] = {
+        ratio: 0,
+        points: 0,
+        cap: CATEGORY_CAPS[cat],
+        pnaCount: 0,
+        skipMode
+      };
+      continue;
+    }
+
     const qs = questions.filter(q => q.category === cat);
     let includedWeight = 0;
     let achievedWeight = 0;
@@ -185,7 +249,8 @@ function compute() {
       ratio,
       points: ratio === null ? null : ratio * CATEGORY_CAPS[cat],
       cap: CATEGORY_CAPS[cat],
-      pnaCount
+      pnaCount,
+      skipMode: null
     };
   }
   const active = Object.values(cats).filter(c => c.ratio !== null);
@@ -341,11 +406,11 @@ function updateStartScreen() {
 }
 
 function showScreen(name) {
-  for (const [screen, el] of [['intro', els.intro], ['start', els.recipient], ['handoff', els.handoff], ['assessment', els.assessment], ['results', els.results]]) {
+  for (const [screen, el] of [['intro', els.intro], ['start', els.recipient], ['handoff', els.handoff], ['boundary', els.boundary], ['assessment', els.assessment], ['results', els.results]]) {
     el.hidden = screen !== name;
   }
   const inAssessment = name === 'assessment';
-  const immersive = inAssessment || name === 'handoff';
+  const immersive = inAssessment || name === 'handoff' || name === 'boundary';
   els.progress.hidden = !inAssessment;
   els.progressTrack.hidden = !inAssessment;
   els.bottomUtility.hidden = immersive;
@@ -466,6 +531,7 @@ function openDisclosure() {
   els.accessibilityPanel.hidden = true;
   els.debugPanel.hidden = true;
   els.disclosurePanel.hidden = true;
+  els.sectionSkipDialog.hidden = true;
   els.accessibility.setAttribute('aria-expanded', 'false');
   els.disclosurePanel.hidden = false;
   runPrivacyProof();
@@ -478,6 +544,12 @@ function closeDisclosure() {
 function enterFromStart() {
   if (state.completedAt) {
     renderResults();
+    return;
+  }
+
+  if (state.pendingBoundary?.from && state.pendingBoundary?.to) {
+    renderCategoryBoundary();
+    showScreen('boundary');
     return;
   }
 
@@ -656,11 +728,45 @@ function debugJumpToQuestion() {
 
   if (!state.recipientType) state.recipientType = 'friend';
   state.completedAt = null;
+  state.pendingBoundary = null;
   state.index = requested - 1;
   showScreen('assessment');
   renderQuestion();
   saveNow();
   els.debugPanel.hidden = true;
+}
+
+function firstIndexForCategory(category) {
+  return questions.findIndex(q => q.category === category);
+}
+
+function lastIndexForCategory(category) {
+  for (let i = questions.length - 1; i >= 0; i -= 1) {
+    if (questions[i]?.category === category) return i;
+  }
+  return -1;
+}
+
+function debugJumpToSection(category) {
+  const target = firstIndexForCategory(category);
+  if (target < 0) return;
+  if (!state.recipientType) state.recipientType = 'friend';
+  state.completedAt = null;
+  state.pendingBoundary = null;
+  state.index = target;
+  showScreen('assessment');
+  renderQuestion();
+  saveNow();
+  els.debugPanel.hidden = true;
+}
+
+function debugPreviewBoundary(value) {
+  const [from, to] = String(value || '').split('-');
+  if (!CATEGORY_BOUNDARIES[`${from}>${to}`]) return;
+  if (!state.recipientType) state.recipientType = 'friend';
+  state.completedAt = null;
+  els.debugPanel.hidden = true;
+  openCategoryBoundary(from, to, { force: true });
 }
 
 
@@ -780,6 +886,7 @@ function pairedFullIndex(q, partialIndex) {
 
 function toggleRubric(index, button) {
   const q = questions[state.index];
+  if (q && state.categorySkips?.[q.category]) delete state.categorySkips[q.category];
   const a = getAnswer(q);
   const selected = new Set(a.selected || []);
   const raw = String(q.rubric[index]?.trigger || '');
@@ -830,6 +937,7 @@ function toggleRubric(index, button) {
 
 function setNone() {
   const q = questions[state.index];
+  if (q && state.categorySkips?.[q.category]) delete state.categorySkips[q.category];
   const a = getAnswer(q);
   const turningOff = a.status === 'SCORE' && a.explicitNone === true;
 
@@ -848,6 +956,7 @@ function setNone() {
 
 function setStatus(status) {
   const q = questions[state.index];
+  if (q && state.categorySkips?.[q.category]) delete state.categorySkips[q.category];
   const a = getAnswer(q);
   const turningOff = a.answered && a.status === status;
 
@@ -870,12 +979,112 @@ function setStatus(status) {
   scheduleSave();
 }
 
+function boundaryKey(from, to) {
+  return `${from}>${to}`;
+}
+
+function renderCategoryBoundary() {
+  const pending = state.pendingBoundary;
+  if (!pending) return;
+  const config = CATEGORY_BOUNDARIES[pending.key];
+  if (!config) return;
+
+  els.boundaryCard.dataset.level = config.level;
+  els.boundaryLevel.textContent = config.label;
+  els.boundaryRoute.textContent = `${config.from} → ${config.to}`;
+  els.boundaryTitle.textContent = config.title;
+  els.boundaryCopy.textContent = config.copy;
+  els.boundarySkip.hidden = !config.skippable;
+  els.boundarySkipRight.hidden = !config.skippable;
+}
+
+function openCategoryBoundary(from, to, { force = false } = {}) {
+  const key = boundaryKey(from, to);
+  const config = CATEGORY_BOUNDARIES[key];
+  if (!config) return false;
+  if (!force && state.boundarySeen?.[key]) return false;
+
+  const targetIndex = firstIndexForCategory(to);
+  if (targetIndex < 0) return false;
+
+  state.pendingBoundary = { key, from, to, targetIndex };
+  renderCategoryBoundary();
+  showScreen('boundary');
+  saveNow();
+  return true;
+}
+
+function continueCategoryBoundary() {
+  const pending = state.pendingBoundary;
+  if (!pending) return;
+
+  state.boundarySeen[pending.key] = true;
+  if (pending.to === 'C' || pending.to === 'D') delete state.categorySkips[pending.to];
+  const target = Number(pending.targetIndex);
+  state.pendingBoundary = null;
+  state.index = Number.isFinite(target) ? target : firstIndexForCategory(pending.to);
+  showScreen('assessment');
+  renderQuestion();
+  saveNow();
+}
+
+function openSectionSkipDialog() {
+  const pending = state.pendingBoundary;
+  const config = pending ? CATEGORY_BOUNDARIES[pending.key] : null;
+  if (!pending || !config?.skippable || !['C', 'D'].includes(pending.to)) return;
+
+  els.sectionSkipCategory.textContent = pending.to;
+  for (const input of els.sectionSkipReasons.querySelectorAll('input[name="section-skip-reason"]')) input.checked = false;
+  els.sectionSkipConfirm.disabled = true;
+  els.sectionSkipDialog.hidden = false;
+}
+
+function closeSectionSkipDialog() {
+  els.sectionSkipDialog.hidden = true;
+}
+
+function clearCategoryAnswers(category) {
+  for (const q of questions) {
+    if (q.category === category) delete state.answers[q.code];
+  }
+}
+
+function confirmSectionSkip() {
+  const pending = state.pendingBoundary;
+  if (!pending || !['C', 'D'].includes(pending.to)) return;
+  const reason = els.sectionSkipReasons.querySelector('input[name="section-skip-reason"]:checked')?.value;
+  if (!['exclude', 'private'].includes(reason)) return;
+
+  const category = pending.to;
+  state.categorySkips[category] = reason;
+  state.boundarySeen[pending.key] = true;
+  clearCategoryAnswers(category);
+  state.pendingBoundary = null;
+  closeSectionSkipDialog();
+
+  if (category === 'C') {
+    openCategoryBoundary('C', 'D', { force: true });
+    return;
+  }
+
+  const lastD = lastIndexForCategory('D');
+  if (lastD >= 0) state.index = lastD;
+  saveNow();
+  finishAssessment();
+}
+
 let questionTransitioning = false;
 
 function go(delta) {
   saveNow();
   const next = state.index + delta;
   if (next < 0 || next >= questions.length || questionTransitioning) return;
+
+  const currentQuestion = questions[state.index];
+  const nextQuestion = questions[next];
+  if (delta > 0 && currentQuestion && nextQuestion && currentQuestion.category !== nextQuestion.category) {
+    if (openCategoryBoundary(currentQuestion.category, nextQuestion.category)) return;
+  }
 
   const card = els.assessment.querySelector('.assessment-card');
   const reduceMotion = state.accessibility.motion === false || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -945,7 +1154,7 @@ function saveResultSnapshot(result) {
       recipientLabel: state.recipientLabel,
       overall: result.overall,
       lowerBound: result.lowerBound,
-      categories: Object.fromEntries(Object.entries(result.cats).map(([k, c]) => [k, { points: c.points, cap: c.cap, pnaCount: c.pnaCount }]))
+      categories: Object.fromEntries(Object.entries(result.cats).map(([k, c]) => [k, { points: c.points, cap: c.cap, pnaCount: c.pnaCount, skipMode: c.skipMode || null }]))
     });
     localStorage.setItem(STORAGE_RESULTS, JSON.stringify(list.slice(0, 12)));
   } catch {}
@@ -1018,7 +1227,7 @@ function populateResults(result) {
   els.resultNote.textContent = result.overall === null
     ? 'No scored items were included.'
     : result.lowerBound
-      ? 'This is a lower bound because one or more items were marked “I refuse to answer.”'
+      ? 'This is a lower bound because one or more items were marked “I’d rather not answer.”'
       : 'Your score is calculated locally in this browser.';
 
   const frag = document.createDocumentFragment();
@@ -1035,7 +1244,7 @@ function populateResults(result) {
     badge.textContent = cat;
     const label = document.createElement('span');
     label.className = 'category-name';
-    label.textContent = CATEGORY_NAMES[cat];
+    label.textContent = CATEGORY_NAMES[cat] + (catResult.skipMode ? ' · skipped' : '');
     const value = document.createElement('strong');
     value.textContent = catResult.ratio === null ? 'N/C' : directionalScore(catResult.ratio * 100);
     top.append(badge, label, value);
@@ -1088,6 +1297,9 @@ async function finishAssessment() {
   // Finish overlay owns the viewport until the report is ready.
   els.intro.hidden = true;
   els.recipient.hidden = true;
+  els.handoff.hidden = true;
+  els.boundary.hidden = true;
+  els.sectionSkipDialog.hidden = true;
   els.assessment.hidden = true;
   els.results.hidden = true;
   els.progress.hidden = true;
@@ -1466,6 +1678,18 @@ els.app.addEventListener('click', event => {
     return;
   }
 
+  const debugSection = event.target.closest('[data-debug-section]');
+  if (debugSection) {
+    debugJumpToSection(debugSection.dataset.debugSection);
+    return;
+  }
+
+  const debugBoundary = event.target.closest('[data-debug-boundary]');
+  if (debugBoundary) {
+    debugPreviewBoundary(debugBoundary.dataset.debugBoundary);
+    return;
+  }
+
   const recipient = event.target.closest('[data-recipient]');
   if (recipient) { setRecipient(recipient.dataset.recipient); return; }
 
@@ -1489,6 +1713,10 @@ els.app.addEventListener('click', event => {
   else if (id === 'debug-hotspot') tapDebugHotspot();
   else if (id === 'debug-random-last') debugRandomToLast();
   else if (id === 'debug-jump') debugJumpToQuestion();
+  else if (id === 'boundary-continue') continueCategoryBoundary();
+  else if (id === 'boundary-skip') openSectionSkipDialog();
+  else if (id === 'section-skip-back') closeSectionSkipDialog();
+  else if (id === 'section-skip-confirm') confirmSectionSkip();
   else if (id === 'start-disclosure-btn' || id === 'footer-disclosure-btn') openDisclosure();
   else if (id === 'disclosure-close' || id === 'disclosure-done') closeDisclosure();
   else if (id === 'footer-reset-btn') resetAll(true);
@@ -1505,6 +1733,11 @@ els.app.addEventListener('click', event => {
 });
 
 els.privacyProofRun?.addEventListener('click', runPrivacyProof);
+
+els.sectionSkipReasons?.addEventListener('change', () => {
+  const selected = els.sectionSkipReasons.querySelector('input[name="section-skip-reason"]:checked');
+  els.sectionSkipConfirm.disabled = !selected;
+});
 
 els.recipientLabel.addEventListener('input', event => {
   state.recipientLabel = event.target.value;
@@ -1552,6 +1785,10 @@ boot().catch(err => {
 
 document.addEventListener('keydown', event => {
   if (event.key !== 'Escape') return;
+  if (!els.sectionSkipDialog.hidden) {
+    closeSectionSkipDialog();
+    return;
+  }
   els.accessibilityPanel.hidden = true;
   els.debugPanel.hidden = true;
   els.disclosurePanel.hidden = true;
