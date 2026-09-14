@@ -2926,3 +2926,45 @@ body.reduce-motion .handoff-next{animation:none!important}
   .result-card .result-actions{padding:0 14px 20px;grid-template-columns:1fr}
   .result-card .result-actions button{min-height:44px!important}
 }
+
+/* ===== Unified selected state + result-image disclaimer ===== */
+.choice-button[aria-pressed="true"],
+.rubric-button[aria-pressed="true"],
+.none-button[aria-pressed="true"],
+.status-list button[aria-pressed="true"]{
+  color:#090806!important;
+  border-color:#ffd257!important;
+  background:linear-gradient(135deg,#ffd75a,#e8ad23 68%,#cf8a12)!important;
+  box-shadow:0 10px 25px rgba(219,157,26,.18),inset 0 1px 0 rgba(255,245,190,.55)!important
+}
+.choice-button[aria-pressed="true"] strong,
+.choice-button[aria-pressed="true"] span{color:#090806!important}
+.rubric-button[aria-pressed="true"]::before,
+.none-button[aria-pressed="true"]::before{
+  border-color:rgba(9,8,6,.45)!important;
+  background-color:#fff7d8!important;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.4 6.4 12 13 4.8' fill='none' stroke='%23090806' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+  background-size:13px 13px!important;
+  box-shadow:none!important
+}
+.result-disclaimer{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  padding:18px clamp(20px,5vw,54px);
+  border-top:1px solid rgba(255,255,255,.08);
+  color:#bdb5a3;
+  background:#11110f
+}
+.result-disclaimer img{width:74px;height:auto;flex:none;filter:drop-shadow(0 4px 12px rgba(238,183,42,.11))}
+.result-disclaimer strong{display:block;margin-bottom:4px;color:#f1bb2b;font-size:12px;letter-spacing:.11em}
+.result-disclaimer p{margin:0;font-size:11px;line-height:1.4}
+.result-card #share-status{display:block!important;min-height:17px!important}
+
+@media(max-width:620px){
+  .result-disclaimer{align-items:flex-start;padding:16px 14px;gap:12px}
+  .result-disclaimer img{width:62px}
+  .result-disclaimer p{font-size:10.5px}
+}

@@ -7,6 +7,7 @@ const CATEGORY_NAMES = {
   C: 'Sensitive Information',
   D: 'Very Sensitive Information'
 };
+const RESULT_DISCLAIMER = 'The score is not fully accurate to true privacy and openness values.';
 const RECIPIENTS = [
   ['close-family', 'Close family member', 'A parent, sibling, child, or another close relative'],
   ['partner', 'Spouse or partner', 'A spouse, romantic partner, or long-term partner'],
@@ -1044,19 +1045,258 @@ async function finishAssessment() {
   finishSequenceRunning = false;
 }
 
+function roundedRect(ctx, x, y, width, height, radius) {
+  const r = Math.min(radius, width / 2, height / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + width, y, x + width, y + height, r);
+  ctx.arcTo(x + width, y + height, x, y + height, r);
+  ctx.arcTo(x, y + height, x, y, r);
+  ctx.arcTo(x, y, x + width, y, r);
+  ctx.closePath();
+}
+
+function canvasLines(ctx, text, maxWidth) {
+  const words = String(text || '').split(/\s+/).filter(Boolean);
+  const lines = [];
+  let line = '';
+  for (const word of words) {
+    const candidate = line ? `${line} ${word}` : word;
+    if (line && ctx.measureText(candidate).width > maxWidth) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = candidate;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+function loadCanvasImage(src) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = src;
+  });
+}
+
+function canvasToBlob(canvas) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Could not create the result image.')), 'image/png');
+  });
+}
+
+async function createResultImage(result) {
+  await document.fonts?.ready;
+  const canvas = document.createElement('canvas');
+  canvas.width = 1200;
+  canvas.height = 1500;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Canvas is unavailable.');
+
+  ctx.fillStyle = '#070706';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const glow = ctx.createRadialGradient(1050, 100, 20, 1050, 100, 650);
+  glow.addColorStop(0, 'rgba(239,185,43,.22)');
+  glow.addColorStop(1, 'rgba(239,185,43,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, canvas.width, 760);
+
+  roundedRect(ctx, 48, 48, 1104, 1080, 34);
+  ctx.fillStyle = '#0d0d0b';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(239,185,43,.35)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  ctx.fillStyle = '#e9b62e';
+  ctx.font = '800 21px "Public Sans", sans-serif';
+  ctx.fillText('YOUR DISCLOSURE PREFERENCE', 92, 116);
+
+  ctx.fillStyle = '#f8f4e9';
+  ctx.font = '800 58px "Public Sans", sans-serif';
+  const titleLines = canvasLines(ctx, resultPreference(result.overall), 1010).slice(0, 3);
+  titleLines.forEach((line, index) => ctx.fillText(line, 92, 190 + index * 68));
+
+  const spectrumY = 230 + titleLines.length * 68;
+  ctx.fillStyle = '#d9d2c2';
+  ctx.font = '700 23px "Public Sans", sans-serif';
+  ctx.fillText('Private', 92, spectrumY);
+  ctx.textAlign = 'right';
+  ctx.fillText('Open', 1108, spectrumY);
+  ctx.textAlign = 'left';
+
+  const trackX = 92;
+  const trackY = spectrumY + 28;
+  const trackWidth = 1016;
+  const trackHeight = 42;
+  roundedRect(ctx, trackX, trackY, trackWidth, trackHeight, 21);
+  const trackGradient = ctx.createLinearGradient(trackX, 0, trackX + trackWidth, 0);
+  trackGradient.addColorStop(0, '#5d5e5e');
+  trackGradient.addColorStop(.5, '#9c8b55');
+  trackGradient.addColorStop(1, '#f2b91f');
+  ctx.fillStyle = trackGradient;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.25)';
+  ctx.stroke();
+
+  ctx.fillStyle = 'rgba(255,255,255,.38)';
+  ctx.fillRect(trackX + trackWidth / 2, trackY - 7, 2, trackHeight + 14);
+  if (result.overall !== null) {
+    const position = Math.max(0, Math.min(100, Number(result.overall))) / 100;
+    const markerX = trackX + position * trackWidth;
+    roundedRect(ctx, markerX - 14, trackY - 8, 28, trackHeight + 16, 14);
+    ctx.fillStyle = '#fffdf8';
+    ctx.fill();
+  }
+
+  ctx.fillStyle = '#8f897d';
+  ctx.font = '700 17px "Public Sans", sans-serif';
+  ctx.fillText('P100', trackX, trackY + 72);
+  ctx.textAlign = 'center';
+  ctx.fillText('0', trackX + trackWidth / 2, trackY + 72);
+  ctx.textAlign = 'right';
+  ctx.fillText('O100', trackX + trackWidth, trackY + 72);
+  ctx.textAlign = 'left';
+
+  const scoreY = trackY + 174;
+  ctx.fillStyle = '#8f897d';
+  ctx.font = '800 21px "Public Sans", sans-serif';
+  ctx.fillText('HISTI', 92, scoreY);
+  ctx.fillStyle = '#f2bc2e';
+  ctx.font = '800 92px "Public Sans", sans-serif';
+  ctx.fillText(result.overall === null ? 'Not calculated' : directionalScore(result.overall), 190, scoreY + 10);
+
+  const subscoreY = scoreY + 104;
+  ctx.fillStyle = '#f6f1e5';
+  ctx.font = '750 25px "Public Sans", sans-serif';
+  ctx.fillText('Category subscores', 92, subscoreY);
+  ctx.textAlign = 'right';
+  ctx.fillStyle = '#827c71';
+  ctx.font = '600 16px "Public Sans", sans-serif';
+  ctx.fillText('P = private · O = open', 1108, subscoreY);
+  ctx.textAlign = 'left';
+
+  Object.keys(CATEGORY_CAPS).forEach((cat, index) => {
+    const resultCat = result.cats[cat];
+    const col = index % 2;
+    const row = Math.floor(index / 2);
+    const x = 92 + col * 516;
+    const y = subscoreY + 30 + row * 142;
+    roundedRect(ctx, x, y, 500, 124, 19);
+    ctx.fillStyle = '#181816';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.11)';
+    ctx.stroke();
+
+    roundedRect(ctx, x + 18, y + 18, 48, 48, 12);
+    ctx.fillStyle = '#eeb72a';
+    ctx.fill();
+    ctx.fillStyle = '#16130b';
+    ctx.font = '850 24px "Public Sans", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(cat, x + 42, y + 51);
+    ctx.textAlign = 'left';
+
+    ctx.fillStyle = '#8f8a80';
+    ctx.font = '600 15px "Public Sans", sans-serif';
+    ctx.fillText(CATEGORY_NAMES[cat], x + 82, y + 34);
+    ctx.fillStyle = '#f5f1e8';
+    ctx.font = '800 31px "Public Sans", sans-serif';
+    ctx.fillText(resultCat.ratio === null ? 'N/C' : directionalScore(resultCat.ratio * 100), x + 82, y + 67);
+
+    const miniX = x + 18;
+    const miniY = y + 94;
+    const miniWidth = 464;
+    const miniGradient = ctx.createLinearGradient(miniX, 0, miniX + miniWidth, 0);
+    miniGradient.addColorStop(0, '#5d5e5e');
+    miniGradient.addColorStop(.5, '#9c8b55');
+    miniGradient.addColorStop(1, '#eeb72a');
+    ctx.fillStyle = miniGradient;
+    roundedRect(ctx, miniX, miniY, miniWidth, 6, 3);
+    ctx.fill();
+    if (resultCat.ratio !== null) {
+      ctx.beginPath();
+      ctx.arc(miniX + Math.max(0, Math.min(1, resultCat.ratio)) * miniWidth, miniY + 3, 7, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff';
+      ctx.fill();
+    }
+  });
+
+  ctx.strokeStyle = 'rgba(239,185,43,.28)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(48, 1196);
+  ctx.lineTo(1152, 1196);
+  ctx.stroke();
+
+  let logo = null;
+  try { logo = await loadCanvasImage('/histi-logo.webp?v=facelift-1'); } catch {}
+  if (logo) {
+    const logoWidth = 190;
+    const logoHeight = logoWidth * (logo.naturalHeight / logo.naturalWidth);
+    ctx.drawImage(logo, 92, 1244, logoWidth, logoHeight);
+  }
+  ctx.fillStyle = '#f7f2e5';
+  ctx.font = '800 30px "Public Sans", sans-serif';
+  ctx.fillText('HISTI', 92, 1366);
+  ctx.fillStyle = '#d3cab5';
+  ctx.font = '650 24px "Public Sans", sans-serif';
+  const disclaimerLines = canvasLines(ctx, RESULT_DISCLAIMER, 720);
+  disclaimerLines.forEach((line, index) => ctx.fillText(line, 360, 1278 + index * 34));
+  ctx.fillStyle = '#7e786d';
+  ctx.font = '600 18px "Public Sans", sans-serif';
+  ctx.fillText('histi.ocharlotted.com', 360, 1377);
+
+  return canvasToBlob(canvas);
+}
+
+function downloadResultImage(blob) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'histi-result.png';
+  document.body.append(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
 async function shareResult() {
   const result = compute();
   const categoryText = Object.keys(CATEGORY_CAPS)
     .map(cat => `${cat}: ${result.cats[cat].ratio === null ? 'N/C' : directionalScore(result.cats[cat].ratio * 100)}`)
     .join(' · ');
-  const text = `HISTI — ${recipientName()}\nOverall: ${result.overall === null ? 'Not calculated' : directionalScore(result.overall)}\n${categoryText}\nCalculated on-device.`;
+  const text = `HISTI — ${recipientName()}\nOverall: ${result.overall === null ? 'Not calculated' : directionalScore(result.overall)}\n${categoryText}\n${RESULT_DISCLAIMER}\nCalculated on-device.`;
+  const originalLabel = els.share.textContent;
+  els.share.disabled = true;
+  els.share.textContent = 'Preparing image…';
+  els.shareStatus.textContent = 'Creating your result image…';
   try {
-    if (navigator.share) await navigator.share({ title: 'My HISTI result', text });
-    else if (navigator.clipboard) await navigator.clipboard.writeText(text);
-    else throw new Error('Sharing is unavailable');
-    els.shareStatus.textContent = navigator.share ? 'Share sheet opened.' : 'Summary copied.';
+    const blob = await createResultImage(result);
+    const file = new File([blob], 'histi-result.png', { type: 'image/png' });
+    if (navigator.share && navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({ title: 'My HISTI result', text, files: [file] });
+        els.shareStatus.textContent = 'Result image shared.';
+        return;
+      } catch (err) {
+        if (err?.name === 'AbortError') {
+          els.shareStatus.textContent = 'Sharing canceled.';
+          return;
+        }
+      }
+    }
+    downloadResultImage(blob);
+    els.shareStatus.textContent = 'Result image downloaded.';
   } catch (err) {
-    if (err?.name !== 'AbortError') els.shareStatus.textContent = 'Could not share this result.';
+    els.shareStatus.textContent = 'Could not create the result image.';
+  } finally {
+    els.share.disabled = false;
+    els.share.textContent = originalLabel;
   }
 }
 
