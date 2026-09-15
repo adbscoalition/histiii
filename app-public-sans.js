@@ -870,6 +870,11 @@ function renderQuestion() {
   const enabled = assignedWeight(a) !== null;
   const frag = document.createDocumentFragment();
 
+  const showNotApplicable = allowsEventNotApplicable(q);
+  const zeroChoiceRow = document.createElement('div');
+  zeroChoiceRow.className = 'zero-choice-row';
+  zeroChoiceRow.classList.toggle('has-not-applicable', showNotApplicable);
+
   const none = document.createElement('button');
   none.type = 'button';
   none.className = 'none-button';
@@ -878,9 +883,8 @@ function renderQuestion() {
   const noneText = document.createElement('span');
   noneText.textContent = isSensitive ? 'None of these feel like a match.' : 'I didn’t share any of these.';
   none.append(noneText);
-  frag.append(none);
+  zeroChoiceRow.append(none);
 
-  const showNotApplicable = allowsEventNotApplicable(q);
   if (showNotApplicable) {
     const notApplicable = document.createElement('button');
     notApplicable.type = 'button';
@@ -890,8 +894,10 @@ function renderQuestion() {
     const notApplicableText = document.createElement('span');
     notApplicableText.textContent = 'This didn’t happen / doesn’t apply to me.';
     notApplicable.append(notApplicableText);
-    frag.append(notApplicable);
+    zeroChoiceRow.append(notApplicable);
   }
+
+  frag.append(zeroChoiceRow);
 
   q.rubric.forEach((item, idx) => {
     const btn = document.createElement('button');
@@ -905,7 +911,7 @@ function renderQuestion() {
     btn.append(span);
     frag.append(btn);
   });
-  const answerCount = q.rubric.length + 1 + (showNotApplicable ? 1 : 0);
+  const answerCount = q.rubric.length + 1;
   els.rubricList.style.setProperty('--answer-count', String(answerCount));
   els.rubricList.replaceChildren(frag);
 
