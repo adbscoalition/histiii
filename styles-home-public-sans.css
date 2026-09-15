@@ -1,7 +1,19 @@
-@font-face{font-family:"Public Sans";src:url("/fonts/public-sans-ascii-low.woff2") format("woff2");font-style:normal;font-weight:100 900;font-display:swap;unicode-range:U+0020-0040}
-@font-face{font-family:"Public Sans";src:url("/fonts/public-sans-ascii-high.woff2") format("woff2");font-style:normal;font-weight:100 900;font-display:swap;unicode-range:U+0041-007E}
-@font-face{font-family:"Public Sans";src:url("/fonts/public-sans-latin1.woff2") format("woff2");font-style:normal;font-weight:100 900;font-display:swap;unicode-range:U+00A0-00FF}
-@font-face{font-family:"Public Sans";src:url("/fonts/public-sans-symbols.woff2") format("woff2");font-style:normal;font-weight:100 900;font-display:swap;unicode-range:U+2000-206F,U+20A0-20CF,U+2190-21FF,U+25A0-25FF,U+2713-2714}
+@font-face{
+  font-family:"Public Sans";
+  src:url("/fonts/public-sans-ascii.woff2") format("woff2");
+  font-style:normal;
+  font-weight:100 900;
+  font-display:swap;
+  unicode-range:U+0000-007F;
+}
+@font-face{
+  font-family:"Public Sans";
+  src:url("/fonts/public-sans-symbols.woff2") format("woff2");
+  font-style:normal;
+  font-weight:100 900;
+  font-display:swap;
+  unicode-range:U+2000-206F,U+20A0-20CF,U+2190-21FF,U+25A0-25FF,U+2600-26FF,U+2700-27BF;
+}
 
 :root{color-scheme:dark;--bg:#080806;--surface:#11100d;--surface2:#18150f;--ink:#f7f3e9;--muted:#aaa294;--soft:#837d72;--orange:#e99100;--bright:#ffae19;--line:rgba(255,255,255,.1);--max:1180px}
 *{box-sizing:border-box}html{scroll-behavior:smooth;background:var(--bg)}body{margin:0;overflow-x:hidden;color:var(--ink);background:radial-gradient(circle at 10% 5%,rgba(233,145,0,.11),transparent 25%),var(--bg);font-family:"Public Sans",ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
