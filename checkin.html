@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; form-action 'none'; object-src 'none'; base-uri 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; media-src 'none'; img-src 'self' data: blob:; font-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; form-action 'none'; object-src 'none'; base-uri 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; media-src 'none'; img-src 'self' data: blob:; font-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="application-name" content="HISTI">
   <meta name="robots" content="index,follow">
@@ -22,7 +22,7 @@
   <meta name="description" content="HISTI Check-in — a private, on-device reflection on information sharing.">
   <title>HISTI | Check In</title>
 <link rel="manifest" href="/site.webmanifest">
-  <link rel="stylesheet" href="/styles-frontpage-v2.css">
+  <link rel="stylesheet" href="/styles-public-sans.css">
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
@@ -372,7 +372,7 @@
           </article>
           <article>
             <span class="proof-check" aria-hidden="true">✓</span>
-            <div><strong>No trackers or remote fonts</strong><p>No analytics SDK, ad tracker, Google Font, or third-party runtime resource is required by the assessment.</p></div>
+            <div><strong>No trackers or third-party font services</strong><p>Public Sans is self-hosted from the HISTI origin. No Google Fonts, font CDN, analytics SDK, ad tracker, or other third-party runtime resource is required by the check-in.</p></div>
           </article>
           <article>
             <span class="proof-check" aria-hidden="true">✓</span>
@@ -469,6 +469,6 @@
     </footer>
   </div>
 
-  <script type="module" src="/app-frontpage-v2.js"></script>
+  <script type="module" src="/app-public-sans.js"></script>
 </body>
 </html>
