@@ -22,7 +22,7 @@
   <meta name="description" content="HISTI Check-in — a private, on-device reflection on information sharing.">
   <title>HISTI | Check In</title>
 <link rel="manifest" href="/site.webmanifest">
-  <link rel="stylesheet" href="/styles-ui-polish.css">
+  <link rel="stylesheet" href="/styles-live-proof.css">
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
@@ -31,10 +31,22 @@
   <div id="app" class="app-shell">
     <header class="topbar">
       <div class="topbar-inner">
-      <button id="accessibility-btn" class="accessibility-button" type="button" aria-expanded="false" aria-controls="accessibility-panel">Accessibility</button>
-      <img class="brand-logo" src="/histi-logo.webp?v=facelift-1" alt="HISTI">
-      <button id="debug-hotspot" class="debug-hotspot" type="button" tabindex="-1" aria-hidden="true"></button>
-    
+        <div class="topbar-left">
+          <a class="home-button" href="/" aria-label="Back to HISTI home">Home</a>
+          <button id="accessibility-btn" class="accessibility-button" type="button" aria-expanded="false" aria-controls="accessibility-panel">Accessibility</button>
+        </div>
+
+        <a class="brand-home-link" href="/" aria-label="Back to HISTI home">
+          <img class="brand-logo" src="/histi-logo.webp?v=facelift-1" alt="HISTI">
+        </a>
+
+        <div class="topbar-right">
+          <button id="privacy-live-btn" class="privacy-live-badge" type="button" aria-label="Open live privacy proof">
+            <span class="privacy-live-dot" aria-hidden="true"></span>
+            <span id="privacy-live-label">Checking privacy…</span>
+          </button>
+          <button id="debug-hotspot" class="debug-hotspot" type="button" tabindex="-1" aria-hidden="true"></button>
+        </div>
       </div>
     </header>
 
@@ -109,7 +121,7 @@
 
         <div id="start-status" class="start-status" hidden></div>
         <button id="begin-btn" class="primary start-primary" type="button">Start check-in</button>
-        <button id="start-disclosure-btn" class="start-link" type="button">Read disclosure &amp; privacy</button>
+        <button id="start-disclosure-btn" class="start-link" type="button">Open live privacy proof</button>
       </section>
     </main>
 
@@ -282,6 +294,7 @@
         </div>
         <div class="actions result-actions">
           <button id="share-btn" class="primary" type="button">Share result image</button>
+          <button id="copy-result-btn" class="secondary" type="button">Copy result summary</button>
           <button id="review-btn" class="secondary" type="button">Review</button>
           <button id="restart-btn" class="secondary" type="button">Start over</button>
         </div>
@@ -318,6 +331,30 @@
           <code>connect-src 'none'</code>
           <span>The production Content Security Policy blocks page connection APIs including fetch, XHR, WebSocket, EventSource, and sendBeacon.</span>
         </div>
+
+        <div class="proof-telemetry" aria-label="Live privacy proof">
+          <article>
+            <span id="proof-network-value" class="proof-telemetry-value">Checking…</span>
+            <strong>Connection APIs</strong>
+            <small>Must be browser-blocked</small>
+          </article>
+          <article>
+            <span id="proof-cookie-value" class="proof-telemetry-value">Checking…</span>
+            <strong>Page-visible cookies</strong>
+            <small>HISTI sets none</small>
+          </article>
+          <article>
+            <span id="proof-external-value" class="proof-telemetry-value">Checking…</span>
+            <strong>Third-party runtime hosts</strong>
+            <small>Expected: 0</small>
+          </article>
+          <article>
+            <span id="proof-storage-value" class="proof-telemetry-value">Checking…</span>
+            <strong>Local HISTI records</strong>
+            <small>Stored in this browser</small>
+          </article>
+        </div>
+        <p id="privacy-proof-updated" class="proof-updated" aria-live="polite">Waiting for live verification…</p>
 
         <div class="proof-grid">
           <article>
@@ -416,7 +453,7 @@
     <footer id="bottom-utility" class="bottom-utility">
       <div class="bottom-utility-inner">
         <div class="footer-links">
-          <button id="footer-disclosure-btn" type="button">Disclosure</button>
+          <button id="footer-disclosure-btn" type="button">Live privacy proof</button>
           <button id="footer-export-btn" type="button">Export my data</button>
           <a href="/privacy">Privacy policy</a>
           <a href="/terms">Terms</a>
@@ -427,6 +464,6 @@
     </footer>
   </div>
 
-  <script type="module" src="/app-privacy-controls.js"></script>
+  <script type="module" src="/app-live-proof.js"></script>
 </body>
 </html>

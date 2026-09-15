@@ -69,6 +69,7 @@ const els = {
   a11yContrastValue: $('a11y-contrast-value'), a11ySpacingValue: $('a11y-spacing-value'), a11yMotionValue: $('a11y-motion-value'),
   begin: $('begin-btn'), startStatus: $('start-status'), startDisclosure: $('start-disclosure-btn'),
   disclosurePanel: $('disclosure-panel'), disclosureClose: $('disclosure-close'), disclosureDone: $('disclosure-done'), privacyProofRun: $('privacy-proof-run'), privacyProofResult: $('privacy-proof-result'),
+  privacyLive: $('privacy-live-btn'), privacyLiveLabel: $('privacy-live-label'), proofNetworkValue: $('proof-network-value'), proofCookieValue: $('proof-cookie-value'), proofExternalValue: $('proof-external-value'), proofStorageValue: $('proof-storage-value'), privacyProofUpdated: $('privacy-proof-updated'),
   dataExportDialog: $('data-export-dialog'), dataExportClose: $('data-export-close'), dataExportDownload: $('data-export-download'), dataExportCopy: $('data-export-copy'), dataExportView: $('data-export-view'), dataExportRawWrap: $('data-export-raw-wrap'), dataExportRaw: $('data-export-raw'), dataExportStatus: $('data-export-status'),
   bottomUtility: $('bottom-utility'), footerDisclosure: $('footer-disclosure-btn'), footerExport: $('footer-export-btn'), footerReset: $('footer-reset-btn'),
   recipientList: $('recipient-list'), recipientLabel: $('recipient-label'),
@@ -80,7 +81,7 @@ const els = {
   back: $('back-btn'), next: $('next-btn'), resultTitle: $('result-title'), resultScore: $('result-score'), resultMarker: $('result-marker'), resultNote: $('result-note'), categoryResults: $('category-results'),
   warningCard: $('result-warning-card'), warningLevel: $('result-warning-level'), warningScore: $('result-warning-score'),
   warningTitle: $('result-warning-title'), warningText: $('result-warning-text'),
-  share: $('share-btn'), review: $('review-btn'), restart: $('restart-btn'), shareStatus: $('share-status')
+  share: $('share-btn'), copyResult: $('copy-result-btn'), review: $('review-btn'), restart: $('restart-btn'), shareStatus: $('share-status')
 };
 
 let questions = [];
@@ -152,6 +153,7 @@ function saveNow() {
   try {
     localStorage.setItem(STORAGE_PROGRESS, JSON.stringify({ version: 3, savedAt: Date.now(), state: snapshot() }));
   } catch {}
+  refreshPrivacyProof();
 }
 
 function scheduleSave() {
@@ -510,14 +512,41 @@ function privacyProofSnapshot() {
     externalHosts,
     histiKeys: histiKeys.sort(),
     resourceCount: resources.length,
-    appCookieCount
+    appCookieCount,
+    checkedAt: new Date()
   };
 }
 
-function runPrivacyProof() {
-  const proof = privacyProofSnapshot();
-  if (!els.privacyProofResult) return proof;
+function renderPrivacyProof(proof) {
+  if (!proof) return;
 
+  if (els.privacyLive) {
+    els.privacyLive.dataset.state = proof.pass ? 'pass' : 'fail';
+    els.privacyLiveLabel.textContent = proof.pass ? 'LIVE · local-only verified' : 'Privacy check needs attention';
+  }
+
+  if (els.proofNetworkValue) {
+    els.proofNetworkValue.textContent = proof.connectionBlocked ? 'Blocked' : 'Not blocked';
+    els.proofNetworkValue.dataset.state = proof.connectionBlocked ? 'pass' : 'fail';
+  }
+  if (els.proofCookieValue) {
+    els.proofCookieValue.textContent = String(proof.appCookieCount);
+    els.proofCookieValue.dataset.state = proof.appCookieCount === 0 ? 'pass' : 'fail';
+  }
+  if (els.proofExternalValue) {
+    els.proofExternalValue.textContent = String(proof.externalHosts.length);
+    els.proofExternalValue.dataset.state = proof.externalHosts.length === 0 ? 'pass' : 'fail';
+  }
+  if (els.proofStorageValue) {
+    els.proofStorageValue.textContent = `${proof.histiKeys.length} local key${proof.histiKeys.length === 1 ? '' : 's'}`;
+    els.proofStorageValue.dataset.state = 'local';
+  }
+  if (els.privacyProofUpdated) {
+    els.privacyProofUpdated.textContent =
+      `Live verification · ${proof.checkedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })} · ${proof.resourceCount} same-page resource entr${proof.resourceCount === 1 ? 'y' : 'ies'} observed.`;
+  }
+
+  if (!els.privacyProofResult) return;
   if (proof.pass) {
     const keys = proof.histiKeys.length ? proof.histiKeys.join(', ') : 'no HISTI data saved yet';
     els.privacyProofResult.textContent =
@@ -532,7 +561,16 @@ function runPrivacyProof() {
     els.privacyProofResult.textContent = `CHECK FAILED — ${problems.join('; ') || 'privacy conditions could not be verified'}.`;
     els.privacyProofResult.dataset.state = 'fail';
   }
+}
+
+function refreshPrivacyProof() {
+  const proof = privacyProofSnapshot();
+  renderPrivacyProof(proof);
   return proof;
+}
+
+function runPrivacyProof() {
+  return refreshPrivacyProof();
 }
 
 function openDisclosure() {
@@ -1464,17 +1502,17 @@ async function createResultImage(result) {
   ctx.stroke();
 
   ctx.fillStyle = '#e9b62e';
-  ctx.font = '800 21px "Public Sans", sans-serif';
+  ctx.font = '800 21px system-ui, sans-serif';
   ctx.fillText('YOUR DISCLOSURE PREFERENCE', 92, 116);
 
   ctx.fillStyle = '#f8f4e9';
-  ctx.font = '800 58px "Public Sans", sans-serif';
+  ctx.font = '800 58px system-ui, sans-serif';
   const titleLines = canvasLines(ctx, resultPreference(result.overall), 1010).slice(0, 3);
   titleLines.forEach((line, index) => ctx.fillText(line, 92, 190 + index * 68));
 
   const spectrumY = 230 + titleLines.length * 68;
   ctx.fillStyle = '#d9d2c2';
-  ctx.font = '700 23px "Public Sans", sans-serif';
+  ctx.font = '700 23px system-ui, sans-serif';
   ctx.fillText('Private', 92, spectrumY);
   ctx.textAlign = 'right';
   ctx.fillText('Open', 1108, spectrumY);
@@ -1505,7 +1543,7 @@ async function createResultImage(result) {
   }
 
   ctx.fillStyle = '#8f897d';
-  ctx.font = '700 17px "Public Sans", sans-serif';
+  ctx.font = '700 17px system-ui, sans-serif';
   ctx.fillText('P100', trackX, trackY + 72);
   ctx.textAlign = 'center';
   ctx.fillText('0', trackX + trackWidth / 2, trackY + 72);
@@ -1515,19 +1553,19 @@ async function createResultImage(result) {
 
   const scoreY = trackY + 174;
   ctx.fillStyle = '#8f897d';
-  ctx.font = '800 21px "Public Sans", sans-serif';
+  ctx.font = '800 21px system-ui, sans-serif';
   ctx.fillText('HISTI', 92, scoreY);
   ctx.fillStyle = '#f2bc2e';
-  ctx.font = '800 92px "Public Sans", sans-serif';
+  ctx.font = '800 92px system-ui, sans-serif';
   ctx.fillText(result.overall === null ? 'Not calculated' : directionalScore(result.overall), 190, scoreY + 10);
 
   const subscoreY = scoreY + 104;
   ctx.fillStyle = '#f6f1e5';
-  ctx.font = '750 25px "Public Sans", sans-serif';
+  ctx.font = '750 25px system-ui, sans-serif';
   ctx.fillText('Category subscores', 92, subscoreY);
   ctx.textAlign = 'right';
   ctx.fillStyle = '#827c71';
-  ctx.font = '600 16px "Public Sans", sans-serif';
+  ctx.font = '600 16px system-ui, sans-serif';
   ctx.fillText('P = private · O = open', 1108, subscoreY);
   ctx.textAlign = 'left';
 
@@ -1547,16 +1585,16 @@ async function createResultImage(result) {
     ctx.fillStyle = '#eeb72a';
     ctx.fill();
     ctx.fillStyle = '#16130b';
-    ctx.font = '850 24px "Public Sans", sans-serif';
+    ctx.font = '850 24px system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(cat, x + 42, y + 51);
     ctx.textAlign = 'left';
 
     ctx.fillStyle = '#8f8a80';
-    ctx.font = '600 15px "Public Sans", sans-serif';
+    ctx.font = '600 15px system-ui, sans-serif';
     ctx.fillText(CATEGORY_NAMES[cat], x + 82, y + 34);
     ctx.fillStyle = '#f5f1e8';
-    ctx.font = '800 31px "Public Sans", sans-serif';
+    ctx.font = '800 31px system-ui, sans-serif';
     ctx.fillText(resultCat.ratio === null ? 'N/C' : directionalScore(resultCat.ratio * 100), x + 82, y + 67);
 
     const miniX = x + 18;
@@ -1592,15 +1630,15 @@ async function createResultImage(result) {
     ctx.drawImage(logo, 92, 1244, logoWidth, logoHeight);
   }
   ctx.fillStyle = '#f7f2e5';
-  ctx.font = '800 30px "Public Sans", sans-serif';
+  ctx.font = '800 30px system-ui, sans-serif';
   ctx.fillText('HISTI', 92, 1366);
   ctx.fillStyle = '#d3cab5';
-  ctx.font = '650 24px "Public Sans", sans-serif';
+  ctx.font = '650 24px system-ui, sans-serif';
   const disclaimerLines = canvasLines(ctx, RESULT_DISCLAIMER, 720);
   disclaimerLines.forEach((line, index) => ctx.fillText(line, 360, 1278 + index * 34));
   ctx.fillStyle = '#7e786d';
-  ctx.font = '600 18px "Public Sans", sans-serif';
-  ctx.fillText('histi.ocharlotted.com', 360, 1377);
+  ctx.font = '600 18px system-ui, sans-serif';
+  ctx.fillText('www.histi.org', 360, 1377);
 
   return canvasToBlob(canvas);
 }
@@ -1616,12 +1654,40 @@ function downloadResultImage(blob) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1500);
 }
 
-async function shareResult() {
-  const result = compute();
+function resultSummaryText(result = compute()) {
   const categoryText = Object.keys(CATEGORY_CAPS)
     .map(cat => `${cat}: ${result.cats[cat].ratio === null ? 'N/C' : directionalScore(result.cats[cat].ratio * 100)}`)
     .join(' · ');
-  const text = `HISTI — ${recipientName()}\nOverall: ${result.overall === null ? 'Not calculated' : directionalScore(result.overall)}\n${categoryText}\n${RESULT_DISCLAIMER}\nCalculated on-device.`;
+  return `HISTI — ${recipientName()}\nOverall: ${result.overall === null ? 'Not calculated' : directionalScore(result.overall)}\n${categoryText}\n${RESULT_DISCLAIMER}\nCalculated on-device at www.histi.org.`;
+}
+
+async function copyResultSummary() {
+  const text = resultSummaryText();
+  try {
+    if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
+    await navigator.clipboard.writeText(text);
+    els.shareStatus.textContent = 'Result summary copied.';
+  } catch {
+    const field = document.createElement('textarea');
+    field.value = text;
+    field.setAttribute('readonly', '');
+    field.style.position = 'fixed';
+    field.style.opacity = '0';
+    document.body.append(field);
+    field.select();
+    try {
+      document.execCommand('copy');
+      els.shareStatus.textContent = 'Result summary copied.';
+    } catch {
+      els.shareStatus.textContent = 'Copy is unavailable in this browser.';
+    }
+    field.remove();
+  }
+}
+
+async function shareResult() {
+  const result = compute();
+  const text = resultSummaryText(result);
   const originalLabel = els.share.textContent;
   els.share.disabled = true;
   els.share.textContent = 'Preparing image…';
@@ -1807,7 +1873,7 @@ els.app.addEventListener('click', event => {
   else if (id === 'boundary-skip') openSectionSkipDialog();
   else if (id === 'section-skip-back') closeSectionSkipDialog();
   else if (id === 'section-skip-confirm') confirmSectionSkip();
-  else if (id === 'start-disclosure-btn' || id === 'footer-disclosure-btn') openDisclosure();
+  else if (id === 'start-disclosure-btn' || id === 'footer-disclosure-btn' || id === 'privacy-live-btn') openDisclosure();
   else if (id === 'disclosure-close' || id === 'disclosure-done') closeDisclosure();
   else if (id === 'footer-export-btn') openDataExport();
   else if (id === 'data-export-close') closeDataExport();
@@ -1825,6 +1891,7 @@ els.app.addEventListener('click', event => {
   else if (id === 'restart-btn') resetAll(true);
   else if (id === 'reset-btn') resetAll(true);
   else if (id === 'share-btn') shareResult();
+  else if (id === 'copy-result-btn') copyResultSummary();
 });
 
 els.privacyProofRun?.addEventListener('click', runPrivacyProof);
@@ -1844,7 +1911,11 @@ els.debugQuestion?.addEventListener('keydown', event => {
 });
 
 window.addEventListener('pagehide', () => { if (saveDirty) saveNow(); });
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && saveDirty) saveNow(); });
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && saveDirty) saveNow();
+  if (document.visibilityState === 'visible') refreshPrivacyProof();
+});
+window.addEventListener('focus', refreshPrivacyProof);
 
 async function boot() {
   const data = questionData;
@@ -1857,6 +1928,8 @@ async function boot() {
   // Always return to the calm start screen on load. Saved progress remains available to resume.
   showScreen('intro');
   updateStartScreen();
+  refreshPrivacyProof();
+  if (location.hash === '#privacy-proof') openDisclosure();
 
   window.__HISTI_PRIVACY_PROOF__ = runPrivacyProof;
     window.__HISTI_DIAG__ = () => ({
