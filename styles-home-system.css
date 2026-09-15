@@ -1,5 +1,5 @@
 :root{color-scheme:dark;--bg:#080806;--surface:#11100d;--surface2:#18150f;--ink:#f7f3e9;--muted:#aaa294;--soft:#837d72;--orange:#e99100;--bright:#ffae19;--line:rgba(255,255,255,.1);--max:1180px}
-*{box-sizing:border-box}html{scroll-behavior:smooth;background:var(--bg)}body{margin:0;overflow-x:hidden;color:var(--ink);background:radial-gradient(circle at 10% 5%,rgba(233,145,0,.11),transparent 25%),var(--bg);font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}html{scroll-behavior:smooth;background:var(--bg)}body{margin:0;overflow-x:hidden;color:var(--ink);background:radial-gradient(circle at 10% 5%,rgba(233,145,0,.11),transparent 25%),var(--bg);font-family:system-ui,"Segoe UI Variable Text","Segoe UI",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
 a{color:inherit}.wrap{width:min(calc(100% - 40px),var(--max));margin-inline:auto}.site-header{position:sticky;z-index:20;top:0;min-height:70px;padding:0 max(20px,calc((100vw - var(--max))/2));display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(8,8,6,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
 .brand{width:max-content}.brand img,footer img{display:block;width:92px;height:auto;border-radius:7px}.site-header nav{display:flex;gap:22px}.site-header nav a,footer a{color:#aaa294;font-size:12px;font-weight:700;text-decoration:none}.site-header nav a:hover,footer a:hover{color:#fff}
 .button{display:inline-flex;min-height:50px;width:max-content;align-items:center;justify-content:center;gap:10px;padding:0 18px;border:1px solid var(--orange);border-radius:12px;color:#080806;background:linear-gradient(135deg,var(--bright),var(--orange));box-shadow:0 12px 34px rgba(233,145,0,.16);font-size:13px;font-weight:900;text-decoration:none;transition:transform .18s ease,box-shadow .18s ease}.button:hover{transform:translateY(-2px);box-shadow:0 17px 42px rgba(233,145,0,.24)}.button.small{justify-self:end;min-height:40px;padding-inline:14px;font-size:11px}.button.ghost{border-color:rgba(255,255,255,.14);color:#e3ddcf;background:rgba(255,255,255,.035);box-shadow:none}.button.ghost:hover{border-color:rgba(233,145,0,.38);background:rgba(233,145,0,.06)}
@@ -269,7 +269,7 @@ footer>div span{
 
 /* ===== Unified native font stack ===== */
 :root{
-  --font-sans:"Helvetica Neue",Helvetica,Arial,sans-serif
+  --font-sans:system-ui,"Segoe UI Variable Text","Segoe UI",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif
 }
 html,body,button,input,textarea,select{
   font-family:var(--font-sans)!important
@@ -281,7 +281,7 @@ code,pre{
 
 /* ===== Front page V2 ===== */
 :root{
-  --font-sans:"Helvetica Neue",Helvetica,Arial,sans-serif!important;
+  --font-sans:system-ui,"Segoe UI Variable Text","Segoe UI",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif!important;
   --page:#070706;
   --panel:#0e0d0a;
   --panel-2:#13110c;
