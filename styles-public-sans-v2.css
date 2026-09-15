@@ -4575,132 +4575,103 @@ body{
 html,body,button,input,textarea,select,a{font-family:var(--font-sans)!important}
 
 
-/* ===== Zero-disclosure / not-applicable pair ===== */
-.zero-choice-row{
-  min-width:0;
-  min-height:0;
-  display:grid;
-  grid-template-columns:minmax(0,1fr);
-  gap:5px;
-}
-.zero-choice-row.has-not-applicable{
-  grid-template-columns:repeat(2,minmax(0,1fr));
-}
-.zero-choice-row .none-button{
-  height:100%;
-  min-width:0!important;
-}
-.zero-choice-row.has-not-applicable .none-button{
-  padding-inline:10px!important;
-}
-@media(max-width:430px){
-  .zero-choice-row.has-not-applicable{
-    grid-template-columns:1fr;
-  }
-}
-
-
-/* ===== Life-event zero choices: left / right, independent of normal answer rows ===== */
-.rubric-list.has-zero-pair{
-  grid-template-rows:auto repeat(var(--rubric-count),minmax(0,1fr))!important;
-}
-.zero-choice-row.has-not-applicable{
-  width:100%;
-  min-height:40px;
+/* ===== Answer layout: natural-height rows, one full-width zero-choice row ===== */
+.assessment-card .rubric-list,
+.assessment-card .rubric-list.has-zero-pair{
   display:flex!important;
+  flex-direction:column!important;
+  align-content:start!important;
+  align-items:stretch!important;
+  gap:10px!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+}
+.answer-choice-row{
+  display:flex;
   align-items:stretch;
-  justify-content:space-between;
-  gap:clamp(16px,4vw,44px);
+  gap:10px;
+  min-width:0;
+  width:100%;
+  flex:0 0 auto;
 }
-.zero-choice-row.has-not-applicable > .none-button{
-  width:auto!important;
-  min-width:0!important;
-  min-height:40px!important;
+.answer-choice-row > .rubric-button{flex:1 1 0}
+.zero-choice-row{
+  flex:0 0 auto;
+  grid-column:1 / -1!important;
+  min-width:0;
   height:auto!important;
-  flex:0 1 auto;
-}
-.zero-choice-row.has-not-applicable > .none-button:first-child{
-  margin-right:auto;
-}
-.zero-choice-row.has-not-applicable > .not-applicable-button{
-  margin-left:auto;
-  text-align:right!important;
-  grid-template-columns:minmax(0,1fr) 17px!important;
-}
-.zero-choice-row.has-not-applicable > .not-applicable-button::before{
-  grid-column:2;
-  grid-row:1;
-}
-.zero-choice-row.has-not-applicable > .not-applicable-button > span{
-  grid-column:1;
-  grid-row:1;
-}
-@media(max-width:430px){
-  .rubric-list.has-zero-pair{
-    grid-template-rows:auto repeat(var(--rubric-count),minmax(0,1fr))!important;
-  }
-  .zero-choice-row.has-not-applicable{
-    display:grid!important;
-    grid-template-columns:1fr!important;
-    gap:5px;
-  }
-  .zero-choice-row.has-not-applicable > .none-button{
-    width:100%!important;
-    margin:0!important;
-    text-align:left!important;
-    grid-template-columns:17px minmax(0,1fr)!important;
-  }
-  .zero-choice-row.has-not-applicable > .not-applicable-button::before{
-    grid-column:1;
-  }
-  .zero-choice-row.has-not-applicable > .not-applicable-button > span{
-    grid-column:2;
-  }
-}
-
-
-/* ===== Full-row life-event pair ===== */
-.rubric-list.has-zero-pair{
-  grid-template-rows:minmax(48px,1fr) repeat(var(--rubric-count),minmax(0,1fr))!important;
-}
-.rubric-list.has-zero-pair .zero-choice-row.has-not-applicable{
-  width:100%!important;
-  height:100%!important;
-  min-height:0!important;
+  min-height:64px!important;
   display:grid!important;
-  grid-template-columns:repeat(2,minmax(0,1fr))!important;
-  gap:6px!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  gap:10px!important;
   align-items:stretch!important;
 }
-.rubric-list.has-zero-pair .zero-choice-row.has-not-applicable > .none-button{
-  width:100%!important;
-  height:100%!important;
-  min-height:0!important;
-  margin:0!important;
-  padding:4px 11px!important;
-  text-align:left!important;
-  grid-template-columns:17px minmax(0,1fr)!important;
+.zero-choice-row.has-not-applicable{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
 }
-.rubric-list.has-zero-pair .zero-choice-row.has-not-applicable > .not-applicable-button::before{
+.assessment-card .rubric-list .rubric-button,
+.assessment-card .rubric-list .zero-choice-row > .none-button{
+  grid-column:auto!important;
+  grid-row:auto!important;
+  width:100%!important;
+  height:auto!important;
+  min-height:64px!important;
+  margin:0!important;
+  padding:12px 14px!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  font-size:14.5px!important;
+  line-height:1.35!important;
+  text-align:left!important;
+}
+.assessment-card .rubric-list button > span{
+  flex:1 1 0;
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+.assessment-card .rubric-list button::before{
+  flex:0 0 20px;
+}
+.zero-choice-row .not-applicable-button::before{
   grid-column:1!important;
   grid-row:1!important;
 }
-.rubric-list.has-zero-pair .zero-choice-row.has-not-applicable > .not-applicable-button > span{
+.zero-choice-row .not-applicable-button > span{
   grid-column:2!important;
   grid-row:1!important;
 }
+/* Selected styles must also outrank the legacy compact-card button rules. */
+.assessment-card .rubric-list button[aria-pressed="true"]{
+  color:#090806!important;
+  border-color:#ffd257!important;
+  background:linear-gradient(135deg,#ffd75a,#e8ad23 68%,#cf8a12)!important;
+  box-shadow:inset 0 1px 0 rgba(255,245,190,.55)!important;
+}
+.assessment-card .rubric-list button[aria-pressed="true"] > span{
+  color:#090806!important;
+}
+body.a11y-large .assessment-card .rubric-list button{
+  font-size:17px!important;
+  line-height:1.45!important;
+}
+body.a11y-spacing .assessment-card .rubric-list,
+body.a11y-spacing .zero-choice-row{
+  gap:14px!important;
+}
+@media(max-width:620px){
+  .answer-choice-row{flex-direction:column}
+  .answer-choice-row > .rubric-button{flex:none}
+  .assessment-card .rubric-list .rubric-button,
+  .assessment-card .rubric-list .zero-choice-row > .none-button{
+    font-size:13.5px!important;
+    padding:11px!important;
+    gap:8px!important;
+  }
+}
 @media(max-width:430px){
-  .rubric-list.has-zero-pair{
-    grid-template-rows:minmax(54px,1fr) repeat(var(--rubric-count),minmax(0,1fr))!important;
-  }
-  .rubric-list.has-zero-pair .zero-choice-row.has-not-applicable{
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:4px!important;
-  }
-  .rubric-list.has-zero-pair .zero-choice-row.has-not-applicable > .none-button{
-    font-size:clamp(9.5px,2.7vw,11.5px)!important;
-    padding-inline:7px!important;
-    gap:6px!important;
+  .zero-choice-row.has-not-applicable{
+    grid-template-columns:minmax(0,1fr)!important;
   }
 }
 

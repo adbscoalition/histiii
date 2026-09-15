@@ -295,7 +295,7 @@ function humanRubricPhrase(value) {
 
   s = s
     .replace(/^Confirms\s+/i, 'that ')
-    .replace(/^Identifies\s+/i, '')
+    .replace(/^Identifies(?: or clearly describes)?\s+/i, '')
     .replace(/^Gives\s+/i, '')
     .replace(/^Reveals\s+/i, '')
     .replace(/^Discloses\s+/i, '')
@@ -351,12 +351,12 @@ function rubricLabel(q, item, index) {
   if (/Full-detail increment/i.test(raw)) {
     const prior = index > 0 ? humanRubricPhrase(q.rubric[index - 1]?.trigger || '') : '';
     return prior
-      ? `I shared the full details for ${prior}.`
+      ? `I shared the full details about ${prior.replace(/^that\s+/i, 'whether ')}.`
       : 'I shared the full details.';
   }
 
   if (/Partial\/limited evidence toward:/i.test(raw)) {
-    return `I shared some details about ${phrase}.`;
+    return `I shared some details about ${phrase.replace(/^that\s+/i, 'whether ')}.`;
   }
 
   if (/\ball\b/i.test(raw)) {
@@ -364,7 +364,7 @@ function rubricLabel(q, item, index) {
   }
 
   if (/^Confirms\b/i.test(cleanRubricBase(raw))) {
-    return `I mentioned ${phrase}.`;
+    return `I mentioned ${phrase === 'that the event' ? 'that the event happened' : phrase}.`;
   }
 
   if (/^Explains\b/i.test(cleanRubricBase(raw))) {
@@ -926,7 +926,13 @@ function renderQuestion() {
 
   frag.append(zeroChoiceRow);
 
+  let answerRow;
   q.rubric.forEach((item, idx) => {
+    if (idx % 2 === 0) {
+      answerRow = document.createElement('div');
+      answerRow.className = 'answer-choice-row';
+      frag.append(answerRow);
+    }
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'rubric-button';
@@ -936,16 +942,13 @@ function renderQuestion() {
     const span = document.createElement('span');
     span.textContent = rubricLabel(q, item, idx);
     btn.append(span);
-    frag.append(btn);
+    answerRow.append(btn);
   });
-  const answerCount = q.rubric.length + 1;
-  els.rubricList.style.setProperty('--answer-count', String(answerCount));
-  els.rubricList.style.setProperty('--rubric-count', String(q.rubric.length));
   els.rubricList.classList.toggle('has-zero-pair', showNotApplicable);
   els.rubricList.replaceChildren(frag);
 
-  card.classList.toggle('compact', answerCount >= 8);
-  card.classList.toggle('ultra-compact', answerCount >= 11);
+  // Dense questions scroll; never shrink their text or tracks to fit the viewport.
+  card.classList.remove('compact', 'ultra-compact');
   syncStatusButtons(a);
 }
 
