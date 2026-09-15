@@ -76,7 +76,7 @@ const els = {
   recipientBack: $('recipient-back'), start: $('start-btn'), handoffMessage: $('handoff-message'), handoffTyped: $('handoff-typed'), handoffNext: $('handoff-next'),
   boundaryCard: $('boundary-card'), boundaryLevel: $('boundary-level'), boundaryRoute: $('boundary-route'), boundaryTitle: $('boundary-title'), boundaryCopy: $('boundary-copy'), boundarySkipRight: $('boundary-skip-right'), boundarySkip: $('boundary-skip'), boundaryContinue: $('boundary-continue'),
   sectionSkipDialog: $('section-skip-dialog'), sectionSkipCategory: $('section-skip-category'), sectionSkipReasons: $('section-skip-reasons'), sectionSkipBack: $('section-skip-back'), sectionSkipConfirm: $('section-skip-confirm'),
-  recipientContext: $('recipient-context'), questionCode: $('question-code'), answerPrompt: $('answer-prompt'), answerHint: $('answer-hint'),
+  questionCode: $('question-code'), answerPrompt: $('answer-prompt'), answerHint: $('answer-hint'),
   questionTitle: $('question-title'), questionHelp: $('question-help'), risk: $('risk-note'), riskTitle: $('risk-title'), riskText: $('risk-text'), rubricList: $('rubric-list'), statusList: $('status-list'),
   back: $('back-btn'), next: $('next-btn'), resultTitle: $('result-title'), resultScore: $('result-score'), resultMarker: $('result-marker'), resultNote: $('result-note'), categoryResults: $('category-results'),
   warningCard: $('result-warning-card'), warningLevel: $('result-warning-level'), warningScore: $('result-warning-score'),
@@ -823,11 +823,10 @@ function renderQuestion() {
 
   els.progress.textContent = `Question ${state.index + 1} of ${questions.length}`;
   els.progressFill.style.width = `${((state.index + 1) / questions.length) * 100}%`;
-  els.recipientContext.textContent = `With ${recipientName()}`;
   els.questionCode.textContent = `${q.code} · ${state.index + 1}/${questions.length}`;
 
   if (isVerySensitive) {
-    els.questionTitle.textContent = `Keeping the actual details private, did you / would you share anything about ${topicTitle(q)}?`;
+    els.questionTitle.textContent = `Keeping the actual details private, did you / would you share anything about ${topicTitle(q)} with ${answerRecipientPhrase()}?`;
     els.questionHelp.textContent = state.accessibility.reading === 'simple'
       ? 'Choose the closest level. You can leave this unanswered or say you’d rather not answer.'
       : 'This can be sensitive. Choose the closest description only; you never need to enter or repeat the real value.';
@@ -836,7 +835,7 @@ function renderQuestion() {
     els.riskTitle.textContent = 'Never enter the actual sensitive value';
     els.riskText.textContent = 'Do not type or paste passwords, one-time or recovery codes, ID numbers, bank or card details, security answers, exact locations, keys, or document contents. Choose the closest description only.';
   } else if (isSensitive) {
-    els.questionTitle.textContent = `Thinking generally, did you / would you share anything about ${topicTitle(q)}?`;
+    els.questionTitle.textContent = `Thinking generally, did you / would you share anything about ${topicTitle(q)} with ${answerRecipientPhrase()}?`;
     els.questionHelp.textContent = state.accessibility.reading === 'simple'
       ? 'Pick the closest description. Approximate is enough.'
       : 'You can answer approximately. Choose the closest description; no exact personal details are needed.';
@@ -845,11 +844,11 @@ function renderQuestion() {
     els.riskTitle.textContent = 'Keep the real personal details private';
     els.riskText.textContent = 'Do not type or paste names, phone or email details, addresses, dates, locations, identifiers, or other real personal values. Choose a description only.';
   } else {
-    els.questionTitle.textContent = `Did you / would you share anything about ${topicTitle(q)}?`;
+    els.questionTitle.textContent = `Did you / would you share anything about ${topicTitle(q)} with ${answerRecipientPhrase()}?`;
     els.questionHelp.textContent = state.accessibility.reading === 'simple'
       ? 'Pick what feels true for what you did or would do. You can leave this unanswered.'
       : 'Choose what feels closest to what you shared or would share. The wording does not have to match perfectly.';
-    els.answerPrompt.textContent = `What did, or what would, you share to ${answerRecipientPhrase()}?`;
+    els.answerPrompt.textContent = `What did you share, or what would you share, with ${answerRecipientPhrase()}?`;
     els.answerHint.textContent = 'Select every answer that applies';
   }
 
