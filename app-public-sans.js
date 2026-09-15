@@ -913,6 +913,8 @@ function renderQuestion() {
   });
   const answerCount = q.rubric.length + 1;
   els.rubricList.style.setProperty('--answer-count', String(answerCount));
+  els.rubricList.style.setProperty('--rubric-count', String(q.rubric.length));
+  els.rubricList.classList.toggle('has-zero-pair', showNotApplicable);
   els.rubricList.replaceChildren(frag);
 
   card.classList.toggle('compact', answerCount >= 8);
