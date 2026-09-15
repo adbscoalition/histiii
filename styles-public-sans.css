@@ -8,6 +8,14 @@
 }
 @font-face{
   font-family:"Public Sans";
+  src:url("/fonts/public-sans-latin1.woff2") format("woff2");
+  font-style:normal;
+  font-weight:100 900;
+  font-display:swap;
+  unicode-range:U+0080-00FF;
+}
+@font-face{
+  font-family:"Public Sans";
   src:url("/fonts/public-sans-symbols.woff2") format("woff2");
   font-style:normal;
   font-weight:100 900;
