@@ -4,10 +4,25 @@
   <meta charset="utf-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; form-action 'none'; object-src 'none'; base-uri 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; media-src 'none'; img-src 'self' data: blob:; font-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="application-name" content="HISTI">
+  <meta name="robots" content="index,follow">
+  <meta name="title" content="HISTI | Check In">
+  <meta property="og:site_name" content="HISTI">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="HISTI | Check In">
+  <meta property="og:description" content="Take the private HISTI information-sharing check-in. Answers and scoring stay in your browser.">
+  <meta property="og:url" content="https://www.histi.org/checkin">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="HISTI | Check In">
+  <meta name="twitter:description" content="Take the private HISTI information-sharing check-in. Answers and scoring stay in your browser.">
+  <link rel="canonical" href="https://www.histi.org/checkin">
+  <link rel="icon" type="image/png" sizes="48x48" href="/histi-icon-48.png">
+  <link rel="shortcut icon" href="/histi-icon-48.png">
   <meta name="theme-color" content="#090907">
   <meta name="description" content="HISTI Check-in — a private, on-device reflection on information sharing.">
-  <title>HISTI Check-in</title>
-<link rel="stylesheet" href="/styles-ui-polish.css">
+  <title>HISTI | Check In</title>
+<link rel="manifest" href="/site.webmanifest">
+  <link rel="stylesheet" href="/styles-ui-polish.css">
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
@@ -336,7 +351,7 @@
           <ol>
             <li>Open <strong>Network</strong>, clear the log, then answer several questions. Answer clicks should create no requests.</li>
             <li>Select the document request and inspect <strong>Response Headers</strong>. Confirm <code>Content-Security-Policy</code> contains <code>connect-src 'none'</code>.</li>
-            <li>Open <strong>Application → Local Storage → histi.ocharlotted.com</strong>. The assessment state is stored under the two HISTI keys shown above.</li>
+            <li>Open <strong>Application → Local Storage → www.histi.org</strong>. The assessment state is stored under the two HISTI keys shown above.</li>
             <li>Inspect the public source on <a href="https://github.com/adbscoalition/histiii" rel="noopener noreferrer">GitHub</a>. The assessment runtime does not transmit answer state.</li>
           </ol>
         </details>
@@ -393,7 +408,7 @@
 
         <div class="data-export-alternatives">
           <strong>Alternative methods</strong>
-          <p>You can also inspect HISTI’s local data in your browser’s site-storage tools. To delete it without using HISTI, clear site data for <code>histi.ocharlotted.com</code>. The Reset control inside HISTI removes the same HISTI progress/result keys.</p>
+          <p>You can also inspect HISTI’s local data in your browser’s site-storage tools. To delete it without using HISTI, clear site data for <code>www.histi.org</code>. The Reset control inside HISTI removes the same HISTI progress/result keys.</p>
         </div>
       </div>
     </section>

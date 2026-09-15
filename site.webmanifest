@@ -1,0 +1,17 @@
+{
+  "name": "HISTI",
+  "short_name": "HISTI",
+  "description": "Private information-sharing reflection tool.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080806",
+  "theme_color": "#080806",
+  "icons": [
+    {
+      "src": "/histi-icon-48.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

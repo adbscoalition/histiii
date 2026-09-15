@@ -407,6 +407,9 @@ function updateStartScreen() {
 }
 
 function showScreen(name) {
+  document.title = name === 'assessment' && questions.length
+    ? `${state.index + 1} / ${questions.length} | HISTI`
+    : 'HISTI | Check In';
   for (const [screen, el] of [['intro', els.intro], ['start', els.recipient], ['handoff', els.handoff], ['boundary', els.boundary], ['assessment', els.assessment], ['results', els.results]]) {
     el.hidden = screen !== name;
   }
@@ -780,6 +783,7 @@ function debugPreviewBoundary(value) {
 function renderQuestion() {
   const q = questions[state.index];
   if (!q) return;
+  document.title = `${state.index + 1} / ${questions.length} | HISTI`;
   const a = getAnswer(q);
   a.visited = true;
 
