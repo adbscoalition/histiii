@@ -241,6 +241,7 @@ function compute() {
       const a = getAnswer(q);
       const w = assignedWeight(a);
       if (w === null || !a.answered) continue;
+      if (a.status === 'NAPP') continue;
       if (a.status === 'SCORE' || a.status === 'PNA') {
         includedWeight += w;
         if (a.status === 'PNA') pnaCount++;
@@ -374,6 +375,11 @@ function rubricLabel(q, item, index) {
 
 function topicTitle(q) {
   return String(q.title || 'this topic').replace(/\//g, ' or ').replace(/-/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+}
+
+function allowsEventNotApplicable(q) {
+  if (!q || q.category !== 'A') return false;
+  return /event applies within the observation period/i.test(String(q.applicability || '')) || q.code === 'A13';
 }
 
 function recipientName() {
@@ -875,6 +881,19 @@ function renderQuestion() {
   none.append(noneText);
   frag.append(none);
 
+  const showNotApplicable = allowsEventNotApplicable(q);
+  if (showNotApplicable) {
+    const notApplicable = document.createElement('button');
+    notApplicable.type = 'button';
+    notApplicable.className = 'none-button not-applicable-button';
+    notApplicable.dataset.notApplicable = 'true';
+    notApplicable.setAttribute('aria-pressed', String(a.status === 'NAPP' && a.answered));
+    const notApplicableText = document.createElement('span');
+    notApplicableText.textContent = 'This didn’t happen / doesn’t apply to me.';
+    notApplicable.append(notApplicableText);
+    frag.append(notApplicable);
+  }
+
   q.rubric.forEach((item, idx) => {
     const btn = document.createElement('button');
     btn.type = 'button';
@@ -887,11 +906,12 @@ function renderQuestion() {
     btn.append(span);
     frag.append(btn);
   });
-  els.rubricList.style.setProperty('--answer-count', String(q.rubric.length + 1));
+  const answerCount = q.rubric.length + 1 + (showNotApplicable ? 1 : 0);
+  els.rubricList.style.setProperty('--answer-count', String(answerCount));
   els.rubricList.replaceChildren(frag);
 
-  card.classList.toggle('compact', q.rubric.length >= 7);
-  card.classList.toggle('ultra-compact', q.rubric.length >= 10);
+  card.classList.toggle('compact', answerCount >= 8);
+  card.classList.toggle('ultra-compact', answerCount >= 11);
   syncStatusButtons(a);
 }
 
@@ -962,6 +982,8 @@ function toggleRubric(index, button) {
   }
   const none = els.rubricList.querySelector('[data-none]');
   if (none) none.setAttribute('aria-pressed', 'false');
+  const notApplicable = els.rubricList.querySelector('[data-not-applicable]');
+  if (notApplicable) notApplicable.setAttribute('aria-pressed', 'false');
   syncStatusButtons(a);
   scheduleSave();
 }
@@ -981,6 +1003,39 @@ function setNone() {
   for (const btn of els.rubricList.querySelectorAll('[data-rubric]')) btn.setAttribute('aria-pressed', 'false');
   const none = els.rubricList.querySelector('[data-none]');
   if (none) none.setAttribute('aria-pressed', String(a.explicitNone));
+  const notApplicable = els.rubricList.querySelector('[data-not-applicable]');
+  if (notApplicable) notApplicable.setAttribute('aria-pressed', 'false');
+  syncStatusButtons(a);
+  scheduleSave();
+}
+
+function setEventNotApplicable() {
+  const q = questions[state.index];
+  if (!allowsEventNotApplicable(q)) return;
+  if (state.categorySkips?.[q.category]) delete state.categorySkips[q.category];
+
+  const a = getAnswer(q);
+  const turningOff = a.status === 'NAPP' && a.answered;
+
+  a.selected = [];
+  a.explicitNone = false;
+  a.fullByAll = false;
+
+  if (turningOff) {
+    a.status = 'SCORE';
+    a.answered = false;
+  } else {
+    a.status = 'NAPP';
+    a.answered = true;
+  }
+
+  for (const btn of els.rubricList.querySelectorAll('[data-rubric]')) {
+    btn.setAttribute('aria-pressed', 'false');
+  }
+  const none = els.rubricList.querySelector('[data-none]');
+  if (none) none.setAttribute('aria-pressed', 'false');
+  const notApplicable = els.rubricList.querySelector('[data-not-applicable]');
+  if (notApplicable) notApplicable.setAttribute('aria-pressed', String(a.status === 'NAPP' && a.answered));
   syncStatusButtons(a);
   scheduleSave();
 }
@@ -1006,6 +1061,8 @@ function setStatus(status) {
   for (const btn of els.rubricList.querySelectorAll('[data-rubric]')) btn.setAttribute('aria-pressed', 'false');
   const none = els.rubricList.querySelector('[data-none]');
   if (none) none.setAttribute('aria-pressed', 'false');
+  const notApplicable = els.rubricList.querySelector('[data-not-applicable]');
+  if (notApplicable) notApplicable.setAttribute('aria-pressed', 'false');
   syncStatusButtons(a);
   scheduleSave();
 }
@@ -1841,6 +1898,9 @@ els.app.addEventListener('click', event => {
 
   const none = event.target.closest('[data-none]');
   if (none) { setNone(); return; }
+
+  const notApplicable = event.target.closest('[data-not-applicable]');
+  if (notApplicable) { setEventNotApplicable(); return; }
 
   const rubric = event.target.closest('[data-rubric]');
   if (rubric && !rubric.disabled) { toggleRubric(Number(rubric.dataset.rubric), rubric); return; }
