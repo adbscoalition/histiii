@@ -62,7 +62,7 @@ const els = {
   app: $('app'), intro: $('intro-screen'), recipient: $('recipient-screen'), handoff: $('handoff-screen'), boundary: $('boundary-screen'), assessment: $('assessment-screen'), results: $('results-screen'),
   progress: $('progress-label'), progressTrack: $('progress-track'), progressFill: $('progress-fill'), reset: $('reset-btn'),
   accessibility: $('accessibility-btn'), accessibilityPanel: $('accessibility-panel'),
-  debugHotspot: $('debug-hotspot'), debugPanel: $('debug-panel'), debugRandomLast: $('debug-random-last'),
+  debugPanel: $('debug-panel'), debugRandomLast: $('debug-random-last'),
   debugQuestion: $('debug-question'), debugJump: $('debug-jump'),
   finishSequence: $('finish-sequence'), finishCalculating: $('finish-calculating'), finishScore: $('finish-score'), finishBlackout: $('finish-blackout'),
   a11yTextValue: $('a11y-text-value'), a11yReadingValue: $('a11y-reading-value'),
@@ -708,24 +708,6 @@ function finishHandoff() {
   showScreen('assessment');
   renderQuestion();
   saveNow();
-}
-
-let debugTapCount = 0;
-let debugTapTimer = null;
-
-function tapDebugHotspot() {
-  debugTapCount += 1;
-  if (debugTapTimer !== null) clearTimeout(debugTapTimer);
-  debugTapTimer = setTimeout(() => { debugTapCount = 0; }, 3500);
-
-  if (debugTapCount >= 7) {
-    debugTapCount = 0;
-    clearTimeout(debugTapTimer);
-    debugTapTimer = null;
-    els.accessibilityPanel.hidden = true;
-    els.accessibility.setAttribute('aria-expanded', 'false');
-    els.debugPanel.hidden = false;
-  }
 }
 
 function debugRandomToLast() {
@@ -1834,6 +1816,14 @@ els.app.addEventListener('click', event => {
     return;
   }
 
+  const debugOpen = event.target.closest('[data-debug-open]');
+  if (debugOpen) {
+    els.accessibilityPanel.hidden = true;
+    els.accessibility.setAttribute('aria-expanded', 'false');
+    els.debugPanel.hidden = false;
+    return;
+  }
+
   const debugSection = event.target.closest('[data-debug-section]');
   if (debugSection) {
     debugJumpToSection(debugSection.dataset.debugSection);
@@ -1866,7 +1856,6 @@ els.app.addEventListener('click', event => {
     els.accessibility.setAttribute('aria-expanded', String(willOpen));
     els.debugPanel.hidden = true;
   }
-  else if (id === 'debug-hotspot') tapDebugHotspot();
   else if (id === 'debug-random-last') debugRandomToLast();
   else if (id === 'debug-jump') debugJumpToQuestion();
   else if (id === 'boundary-continue') continueCategoryBoundary();
