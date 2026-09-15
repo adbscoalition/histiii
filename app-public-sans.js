@@ -63,6 +63,7 @@ const els = {
   progress: $('progress-label'), progressTrack: $('progress-track'), progressFill: $('progress-fill'), reset: $('reset-btn'),
   accessibility: $('accessibility-btn'), accessibilityPanel: $('accessibility-panel'),
   debugPanel: $('debug-panel'), debugRandomLast: $('debug-random-last'),
+  debugWatermark: $('debug-watermark'), debugWatermarkToggle: $('debug-watermark-toggle'), debugWatermarkValue: $('debug-watermark-value'),
   debugQuestion: $('debug-question'), debugJump: $('debug-jump'),
   finishSequence: $('finish-sequence'), finishCalculating: $('finish-calculating'), finishScore: $('finish-score'), finishBlackout: $('finish-blackout'),
   a11yTextValue: $('a11y-text-value'), a11yReadingValue: $('a11y-reading-value'),
@@ -104,6 +105,8 @@ function freshState() {
     boundarySeen: {},
     pendingBoundary: null,
     accessibility: { reading: 'standard', textSize: 'standard', contrast: false, spacing: false, motion: true },
+    debugGenerated: false,
+    debugWatermarkEnabled: true,
     animationsEnabled: false,
     resultReveal: false,
     completedAt: null
@@ -138,6 +141,8 @@ function snapshot() {
     boundarySeen: state.boundarySeen,
     pendingBoundary: state.pendingBoundary,
     accessibility: state.accessibility,
+    debugGenerated: !!state.debugGenerated,
+    debugWatermarkEnabled: state.debugWatermarkEnabled !== false,
     animationsEnabled: false,
     resultReveal: false,
     completedAt: state.completedAt || null
@@ -716,9 +721,28 @@ function finishHandoff() {
   saveNow();
 }
 
+function debugWatermarkActive() {
+  return !!state.debugGenerated && state.debugWatermarkEnabled !== false;
+}
+
+function syncDebugWatermark() {
+  const enabled = state.debugWatermarkEnabled !== false;
+  if (els.debugWatermark) els.debugWatermark.hidden = !debugWatermarkActive();
+  if (els.debugWatermarkValue) els.debugWatermarkValue.textContent = enabled ? 'On' : 'Off';
+  const label = els.debugWatermarkToggle?.querySelector('span');
+  if (label) label.textContent = enabled ? 'Disable debug watermark' : 'Enable debug watermark';
+}
+
+function toggleDebugWatermark() {
+  state.debugWatermarkEnabled = state.debugWatermarkEnabled === false;
+  syncDebugWatermark();
+  scheduleSave();
+}
+
 function debugRandomToLast() {
   if (!questions.length) return;
   if (!state.recipientType) state.recipientType = 'friend';
+  state.debugGenerated = true;
 
   for (let i = 0; i < questions.length - 1; i++) {
     const q = questions[i];
@@ -732,6 +756,7 @@ function debugRandomToLast() {
     a.answered = true;
     a.explicitNone = false;
     a.fullByAll = false;
+    a.debugFilled = true;
   }
 
   const last = questions[questions.length - 1];
@@ -743,11 +768,13 @@ function debugRandomToLast() {
   lastAnswer.answered = false;
   lastAnswer.explicitNone = false;
   lastAnswer.fullByAll = false;
+  lastAnswer.debugFilled = false;
 
   state.index = questions.length - 1;
   state.completedAt = null;
   showScreen('assessment');
   renderQuestion();
+  syncDebugWatermark();
   saveNow();
   els.debugPanel.hidden = true;
 }
@@ -946,6 +973,7 @@ function toggleRubric(index, button) {
   const q = questions[state.index];
   if (q && state.categorySkips?.[q.category]) delete state.categorySkips[q.category];
   const a = getAnswer(q);
+  a.debugFilled = false;
   const selected = new Set(a.selected || []);
   const raw = String(q.rubric[index]?.trigger || '');
   const wasSelected = selected.has(index);
@@ -999,6 +1027,7 @@ function setNone() {
   const q = questions[state.index];
   if (q && state.categorySkips?.[q.category]) delete state.categorySkips[q.category];
   const a = getAnswer(q);
+  a.debugFilled = false;
   const turningOff = a.status === 'SCORE' && a.explicitNone === true;
 
   a.status = 'SCORE';
@@ -1022,6 +1051,7 @@ function setEventNotApplicable() {
   if (state.categorySkips?.[q.category]) delete state.categorySkips[q.category];
 
   const a = getAnswer(q);
+  a.debugFilled = false;
   const turningOff = a.status === 'NAPP' && a.answered;
 
   a.selected = [];
@@ -1051,6 +1081,7 @@ function setStatus(status) {
   const q = questions[state.index];
   if (q && state.categorySkips?.[q.category]) delete state.categorySkips[q.category];
   const a = getAnswer(q);
+  a.debugFilled = false;
   const turningOff = a.answered && a.status === status;
 
   a.selected = [];
@@ -1249,6 +1280,8 @@ function saveResultSnapshot(result) {
       recipientLabel: state.recipientLabel,
       overall: result.overall,
       lowerBound: result.lowerBound,
+      debugGenerated: !!state.debugGenerated,
+      debugWatermarkApplied: debugWatermarkActive(),
       categories: Object.fromEntries(Object.entries(result.cats).map(([k, c]) => [k, { points: c.points, cap: c.cap, pnaCount: c.pnaCount, skipMode: c.skipMode || null }]))
     });
     localStorage.setItem(STORAGE_RESULTS, JSON.stringify(list.slice(0, 12)));
@@ -1686,6 +1719,27 @@ async function createResultImage(result) {
   ctx.font = '600 18px "Public Sans", sans-serif';
   ctx.fillText('www.histi.org', 360, 1377);
 
+  if (debugWatermarkActive()) {
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate(-Math.PI / 7);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'rgba(242,185,31,.13)';
+    ctx.font = '900 76px "Public Sans", sans-serif';
+    for (let y = -520; y <= 520; y += 210) {
+      ctx.fillText('DEBUG · GENERATED TEST DATA', 0, y);
+    }
+    ctx.restore();
+
+    ctx.fillStyle = '#eeb72a';
+    ctx.fillRect(0, 0, canvas.width, 58);
+    ctx.fillStyle = '#111009';
+    ctx.textAlign = 'center';
+    ctx.font = '900 22px "Public Sans", sans-serif';
+    ctx.fillText('DEBUG · GENERATED TEST DATA · NOT A REAL RESULT', canvas.width / 2, 38);
+    ctx.textAlign = 'left';
+  }
+
   return canvasToBlob(canvas);
 }
 
@@ -1693,7 +1747,7 @@ function downloadResultImage(blob) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = 'histi-result.png';
+  link.download = debugWatermarkActive() ? 'histi-debug-result.png' : 'histi-result.png';
   document.body.append(link);
   link.click();
   link.remove();
@@ -1704,7 +1758,8 @@ function resultSummaryText(result = compute()) {
   const categoryText = Object.keys(CATEGORY_CAPS)
     .map(cat => `${cat}: ${result.cats[cat].ratio === null ? 'N/C' : directionalScore(result.cats[cat].ratio * 100)}`)
     .join(' · ');
-  return `HISTI — ${recipientName()}\nOverall: ${result.overall === null ? 'Not calculated' : directionalScore(result.overall)}\n${categoryText}\n${RESULT_DISCLAIMER}\nCalculated on-device at www.histi.org.`;
+  const debugLine = debugWatermarkActive() ? 'DEBUG · GENERATED TEST DATA · NOT A REAL RESULT\n' : '';
+  return `${debugLine}HISTI — ${recipientName()}\nOverall: ${result.overall === null ? 'Not calculated' : directionalScore(result.overall)}\n${categoryText}\n${RESULT_DISCLAIMER}\nCalculated on-device at www.histi.org.`;
 }
 
 async function copyResultSummary() {
@@ -1740,7 +1795,7 @@ async function shareResult() {
   els.shareStatus.textContent = 'Creating your result image…';
   try {
     const blob = await createResultImage(result);
-    const file = new File([blob], 'histi-result.png', { type: 'image/png' });
+    const file = new File([blob], debugWatermarkActive() ? 'histi-debug-result.png' : 'histi-result.png', { type: 'image/png' });
     if (navigator.share && navigator.canShare?.({ files: [file] })) {
       try {
         await navigator.share({ title: 'My HISTI result', text, files: [file] });
@@ -1769,19 +1824,26 @@ function localDataExportObject() {
   try { progress = JSON.parse(localStorage.getItem(STORAGE_PROGRESS) || 'null'); } catch {}
   try { results = JSON.parse(localStorage.getItem(STORAGE_RESULTS) || 'null'); } catch {}
 
+  const notes = [
+    'Created locally in this browser.',
+    'HISTI does not upload this export to create it.',
+    'The optional recipient label, if present, is included because it is part of your local HISTI progress.'
+  ];
+  if (debugWatermarkActive()) notes.unshift('DEBUG · GENERATED TEST DATA · NOT A REAL RESPONSE SET.');
+
   return {
     format: 'HISTI-local-export-v1',
     exportedAt: new Date().toISOString(),
     origin: location.origin,
+    debug: {
+      generated: !!state.debugGenerated,
+      watermarkApplied: debugWatermarkActive()
+    },
     storage: {
       [STORAGE_PROGRESS]: progress,
       [STORAGE_RESULTS]: results
     },
-    notes: [
-      'Created locally in this browser.',
-      'HISTI does not upload this export to create it.',
-      'The optional recipient label, if present, is included because it is part of your local HISTI progress.'
-    ]
+    notes
   };
 }
 
@@ -1808,7 +1870,7 @@ function downloadDataExport() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `histi-local-data-${new Date().toISOString().slice(0, 10)}.json`;
+  link.download = `${debugWatermarkActive() ? 'histi-debug-local-data' : 'histi-local-data'}-${new Date().toISOString().slice(0, 10)}.json`;
   document.body.append(link);
   link.click();
   link.remove();
@@ -1851,6 +1913,7 @@ function resetAll(confirmFirst = true) {
     localStorage.removeItem(STORAGE_RESULTS);
   } catch {}
   state = freshState();
+  syncDebugWatermark();
   els.accessibilityPanel.hidden = true;
   els.debugPanel.hidden = true;
   els.disclosurePanel.hidden = true;
@@ -1924,6 +1987,7 @@ els.app.addEventListener('click', event => {
     els.debugPanel.hidden = true;
   }
   else if (id === 'debug-random-last') debugRandomToLast();
+  else if (id === 'debug-watermark-toggle') toggleDebugWatermark();
   else if (id === 'debug-jump') debugJumpToQuestion();
   else if (id === 'boundary-continue') continueCategoryBoundary();
   else if (id === 'boundary-skip') openSectionSkipDialog();
@@ -1980,6 +2044,7 @@ async function boot() {
   state.index = Math.min(Math.max(0, Number(state.index) || 0), questions.length - 1);
   renderRecipientChoices();
   applyAccessibility();
+  syncDebugWatermark();
 
   // Always return to the calm start screen on load. Saved progress remains available to resume.
   showScreen('intro');
