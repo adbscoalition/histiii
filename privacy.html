@@ -2,7 +2,7 @@
 <html lang="en" class="policy-document">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; form-action 'none'; object-src 'none'; base-uri 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; media-src 'none'; img-src 'self' data: blob:; font-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; form-action 'none'; object-src 'none'; base-uri 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; media-src 'none'; img-src 'self' data: blob:; font-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="application-name" content="HISTI">
   <meta name="robots" content="index,follow">
@@ -22,7 +22,7 @@
   <meta name="description" content="How HISTI handles local check-in data, cookies, hosting metadata, retention, export, and deletion.">
   <title>HISTI | Privacy Policy</title>
   <link rel="manifest" href="/site.webmanifest">
-  <link rel="stylesheet" href="/styles-frontpage-v2.css">
+  <link rel="stylesheet" href="/styles-public-sans.css">
 </head>
 <body class="policy-page">
   <div class="policy-shell">
@@ -87,7 +87,7 @@
 
       <section class="policy-section">
         <h2>6. No analytics, ads, or third-party runtime trackers</h2>
-        <p>The current check-in does not load an analytics SDK, advertising tracker, remote font service, or third-party tracking script. It uses system fonts and same-origin static assets.</p>
+        <p>The current check-in does not load an analytics SDK, advertising tracker, remote font service, or third-party tracking script. Public Sans and other runtime assets are served from the HISTI origin.</p>
         <p>The production browser policy sets <code>connect-src 'none'</code> and <code>form-action 'none'</code>, blocking the normal page APIs used for fetch/XHR/WebSocket/EventSource/sendBeacon connections and form submissions.</p>
       </section>
 
