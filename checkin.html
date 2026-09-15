@@ -22,7 +22,7 @@
   <meta name="description" content="HISTI Check-in — a private, on-device reflection on information sharing.">
   <title>HISTI | Check In</title>
 <link rel="manifest" href="/site.webmanifest">
-  <link rel="stylesheet" href="/styles-public-sans-v2.css?v=event-pair-2">
+  <link rel="stylesheet" href="/styles-public-sans-v2.css?v=debug-watermark-1">
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
@@ -49,6 +49,8 @@
       </div>
     </header>
 
+    <div id="debug-watermark" class="debug-generated-watermark" hidden aria-hidden="true">DEBUG · GENERATED TEST DATA</div>
+
     <div id="progress-label" class="sr-only" hidden></div>
     <div id="progress-track" class="progress-track" hidden aria-hidden="true">
       <span id="progress-fill"></span>
@@ -73,6 +75,10 @@
         <button type="button" data-panel-close="debug">Close</button>
       </div>
       <button id="debug-random-last" type="button">Random-fill previous questions → last question</button>
+      <button id="debug-watermark-toggle" type="button">
+        <span>Disable debug watermark</span>
+        <strong id="debug-watermark-value">On</strong>
+      </button>
       <div class="debug-jump">
         <label for="debug-question">Jump to question</label>
         <div class="debug-jump-row">
@@ -468,6 +474,6 @@
     </footer>
   </div>
 
-  <script type="module" src="/app-public-sans.js?v=event-pair-2"></script>
+  <script type="module" src="/app-public-sans.js?v=debug-watermark-1"></script>
 </body>
 </html>
