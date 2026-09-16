@@ -32,6 +32,7 @@ main{min-height:0;display:grid;align-items:center}
 .card-number{position:absolute;top:22px;right:22px;color:#4f4d47;font-size:13px;font-weight:900;letter-spacing:.1em}
 .card-name{position:relative;z-index:1;margin-top:auto;color:#f7f3e9;font-size:clamp(26px,2.4vw,36px);font-weight:900;line-height:1;letter-spacing:-.045em;overflow-wrap:anywhere}
 .card-description{position:relative;z-index:1;margin-top:9px;color:#9b958a;font-size:15px;line-height:1.4}
+.card-time{position:relative;z-index:1;margin-top:5px;color:#d1cabd;font-size:13px;font-weight:750;line-height:1.4}
 .card-action{position:relative;z-index:1;margin-top:24px;display:flex;align-items:center;justify-content:space-between;color:#f7f3e9;font-size:14px;font-weight:850}
 .full .card-action b{color:var(--yellow)}
 .condensed .card-action b{color:#72aaf6}

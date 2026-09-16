@@ -210,7 +210,14 @@ function disclosurePct(q, a) {
   if (a.fullByAll) return 100;
   const hasLiteralAll = [...selected].some(idx => /\ball\b/i.test(String(q.rubric[idx]?.trigger || '')));
   if (hasLiteralAll) return 100;
-  return Math.min(100, q.rubric.reduce((sum, item, idx) => sum + (selected.has(idx) ? Number(item.share) : 0), 0));
+  return Math.min(100, q.rubric.reduce((sum, item, idx) => {
+    if (!selected.has(idx)) return sum;
+    // A selected Full row replaces its paired Partial row for scoring. The
+    // Partial remains selected in the UI to show that Full includes it.
+    const fullIndex = pairedFullIndex(q, idx);
+    if (fullIndex >= 0 && selected.has(fullIndex)) return sum;
+    return sum + Number(item.share);
+  }, 0));
 }
 
 function compute() {

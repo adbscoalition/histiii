@@ -52,5 +52,28 @@ const birth = catalogue.questions.find(q=>q.code==='A05');
 context.birth=birth;
 assert.equal(vm.runInContext('pairedFullIndex(birth,0)',context),1);
 context.testAnswer={status:'SCORE',answered:true,selected:[0,1],fullByAll:false};
-assert.equal(vm.runInContext('disclosurePct(birth,testAnswer)',context),20);
-console.log('PASS: 120 prompts, 263 unique mappings, category counts, original weighted scoring, exclusions, cumulative rubrics, isolated storage, and no upload APIs.');
+assert.equal(vm.runInContext('disclosurePct(birth,testAnswer)',context),10, 'full replaces its paired partial instead of adding to it');
+context.testAnswer.selected=[0];
+assert.equal(vm.runInContext('disclosurePct(birth,testAnswer)',context),10, 'partial still scores when selected alone');
+context.examplePair={rubric:[
+  {trigger:'1A. Partial/limited evidence toward: example',share:0.75},
+  {trigger:'1B. Full-detail increment — completes 1A with exact detail',share:1.5}
+]};
+context.testAnswer.selected=[0,1];
+assert.equal(vm.runInContext('disclosurePct(examplePair,testAnswer)',context),1.5, '0.75 partial plus 1.50 full scores 1.50 total');
+
+// The regular HISTI runtime must use the same replacement rule.
+const regularSource = fs.readFileSync(new URL('../app-public-sans.js', import.meta.url), 'utf8');
+const regularContext = vm.createContext({});
+for (const name of ['disclosurePct','pairedFullIndex']) {
+  const start = regularSource.indexOf(`function ${name}(`);
+  const tail = regularSource.slice(start);
+  const next = tail.slice(1).search(/\n(?:async )?function /);
+  vm.runInContext(next < 0 ? tail : tail.slice(0,next+1), regularContext);
+}
+regularContext.birth=birth;
+regularContext.testAnswer={status:'SCORE',answered:true,selected:[0,1],fullByAll:false};
+assert.equal(vm.runInContext('disclosurePct(birth,testAnswer)',regularContext),10, 'regular HISTI full replaces its paired partial');
+regularContext.examplePair=context.examplePair;
+assert.equal(vm.runInContext('disclosurePct(examplePair,testAnswer)',regularContext),1.5, 'regular HISTI scores the example pair as 1.50 total');
+console.log('PASS: 120 prompts, 263 unique mappings, category counts, weighted scoring, exclusions, replacement full-detail rubrics, isolated storage, and no upload APIs.');
