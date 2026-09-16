@@ -4864,3 +4864,177 @@ body.debug-watermark-on .histi-120 .condensed-topic[data-debug-filled="true"]::a
     right:34px;
   }
 }
+
+
+/* ===== HISTI-120 collapsibles · match regular HISTI ===== */
+.histi-120 .condensed-topic{
+  border:1px solid var(--histi-edge)!important;
+  border-radius:14px!important;
+  background:#0c0c0c!important;
+  box-shadow:none!important;
+  overflow:hidden!important
+}
+.histi-120 .condensed-topic summary{
+  min-height:58px!important;
+  padding:12px 14px!important;
+  gap:10px!important;
+  color:var(--histi-copy)!important;
+  background:#0c0c0c!important;
+  border-left:4px solid transparent!important;
+  transition:background-color .14s ease,border-color .14s ease,color .14s ease!important
+}
+.histi-120 .condensed-topic summary:hover{
+  background:#15120d!important;
+  border-left-color:rgba(233,145,0,.45)!important
+}
+.histi-120 .condensed-topic[open] summary{
+  background:
+    radial-gradient(circle at 12% 20%,rgba(233,145,0,.10),transparent 35%),
+    #0b0b0a!important;
+  border-left-color:var(--histi-orange)!important
+}
+.histi-120 .condensed-topic summary::after{
+  content:"+"!important;
+  width:24px;
+  height:24px;
+  display:grid;
+  place-items:center;
+  flex:none;
+  border:1px solid rgba(233,145,0,.28);
+  border-radius:50%;
+  color:#f0b23a!important;
+  background:rgba(233,145,0,.06);
+  font-size:18px!important;
+  font-weight:760;
+  line-height:1
+}
+.histi-120 .condensed-topic[open] summary::after{
+  content:"−"!important;
+  border-color:rgba(233,145,0,.48);
+  background:rgba(233,145,0,.10)
+}
+.histi-120 .condensed-topic summary strong{
+  color:#f4f2ec!important;
+  font-size:14.5px!important;
+  font-weight:780!important;
+  line-height:1.32!important;
+  letter-spacing:-.01em!important
+}
+.histi-120 .topic-state{
+  color:#9f9a90!important;
+  font-size:10.5px!important;
+  font-weight:700!important
+}
+.histi-120 .condensed-topic[data-answered="true"]{
+  border-color:rgba(233,145,0,.38)!important
+}
+.histi-120 .condensed-topic[data-answered="true"] .topic-state{
+  color:#eab14a!important
+}
+.histi-120 .condensed-topic summary:focus-visible{
+  outline:3px solid rgba(233,145,0,.34)!important;
+  outline-offset:-3px!important
+}
+.histi-120 .topic-body{
+  padding:0 13px 13px!important;
+  border-top:1px solid rgba(255,255,255,.07)!important;
+  background:#090909!important
+}
+.histi-120 .topic-description{
+  margin:12px 1px!important;
+  color:#aaa79e!important;
+  font-size:12.5px!important;
+  line-height:1.5!important
+}
+.histi-120 .topic-note{
+  margin:11px 1px 0!important;
+  color:#8f897f!important;
+  font-size:10.8px!important;
+  line-height:1.5!important
+}
+.histi-120 .topic-quick-actions,
+.histi-120 .topic-exclusions{
+  gap:7px!important;
+  margin:10px 0!important
+}
+.histi-120 .topic-rubrics{
+  gap:7px!important
+}
+.histi-120 .topic-rubrics .answer-choice-row{
+  gap:7px!important
+}
+
+/* Reuse regular HISTI answer-card language inside collapsibles. */
+.histi-120 .assessment-card .rubric-list button{
+  min-height:52px!important;
+  padding:8px 10px!important;
+  border:1px solid var(--histi-edge)!important;
+  border-radius:12px!important;
+  color:#e9e8e3!important;
+  background:var(--histi-panel)!important;
+  box-shadow:none!important;
+  font-size:13px!important;
+  line-height:1.24!important
+}
+.histi-120 .assessment-card .rubric-list .none-button{
+  border-color:rgba(233,145,0,.22)!important;
+  background:#0b0b0b!important
+}
+.histi-120 .assessment-card .rubric-list button:hover{
+  color:#fff!important;
+  border-color:rgba(233,145,0,.38)!important;
+  background:#17130d!important
+}
+.histi-120 .assessment-card .rubric-list button::before{
+  width:18px!important;
+  height:18px!important;
+  flex:0 0 18px!important;
+  border:1.5px solid rgba(255,255,255,.28)!important;
+  border-radius:5px!important;
+  background:#080808!important;
+  box-shadow:none!important
+}
+.histi-120 .assessment-card .rubric-list button[aria-pressed="true"]{
+  color:#fff6e7!important;
+  border-color:rgba(255,173,0,.72)!important;
+  background:linear-gradient(135deg,rgba(233,145,0,.17),rgba(233,145,0,.08))!important;
+  box-shadow:inset 3px 0 0 var(--histi-orange)!important
+}
+.histi-120 .assessment-card .rubric-list button[aria-pressed="true"] span{
+  color:#fff6e7!important
+}
+.histi-120 .assessment-card .rubric-list button[aria-pressed="true"]::before{
+  border-color:var(--histi-orange-bright)!important;
+  background-color:var(--histi-orange-bright)!important;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.4 6.4 12 13 4.8' fill='none' stroke='%23090909' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+  background-size:13px 13px!important;
+  box-shadow:none!important
+}
+.histi-120 .standalone-full-action{
+  border-style:dashed!important;
+  border-color:rgba(233,145,0,.30)!important
+}
+.histi-120 .topic-exclusions button{
+  color:#b8b2a6!important;
+  background:#0d0d0c!important
+}
+
+@media(max-width:620px){
+  .histi-120 .condensed-topic summary{
+    min-height:56px!important;
+    padding:11px 12px!important
+  }
+  .histi-120 .condensed-topic summary strong{
+    font-size:13.5px!important
+  }
+  .histi-120 .topic-body{
+    padding:0 10px 11px!important
+  }
+  .histi-120 .assessment-card .rubric-list button{
+    min-height:50px!important;
+    font-size:12px!important;
+    line-height:1.25!important
+  }
+}
