@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; form-action 'none'; object-src 'none'; base-uri 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; media-src 'none'; img-src 'self' data:; font-src 'self'; script-src 'self'; style-src 'self'">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080806">
+  <meta name="robots" content="index,follow">
+  <meta name="description" content="Choose the HISTI check-in that fits you.">
+  <link rel="canonical" href="https://www.histi.org/checkin-page">
+  <link rel="icon" type="image/png" sizes="48x48" href="/histi-icon-48.png">
+  <title>Choose a Check-in | HISTI</title>
+  <link rel="stylesheet" href="/styles-checkin-page.css?v=1">
+</head>
+<body>
+  <header class="selector-header">
+    <a class="home-link" href="/" aria-label="Back to HISTI home">
+      <span aria-hidden="true">←</span>
+      <span>Home</span>
+    </a>
+    <a class="brand" href="/" aria-label="HISTI home">
+      <img src="/histi-logo.webp?v=facelift-1" alt="HISTI">
+    </a>
+    <span class="local-note">Private · on device</span>
+  </header>
+
+  <main>
+    <section class="selector" aria-labelledby="selector-title">
+      <div class="selector-heading">
+        <p>HISTI check-ins</p>
+        <h1 id="selector-title">Choose your check-in.</h1>
+      </div>
+
+      <div class="app-grid">
+        <a class="app-card available full" href="/checkin" aria-describedby="histi-description">
+          <span class="status">Available</span>
+          <span class="card-number">01</span>
+          <span class="card-name">HISTI</span>
+          <span class="card-description" id="histi-description">Full version</span>
+          <span class="card-action">Start check-in <b aria-hidden="true">→</b></span>
+        </a>
+
+        <a class="app-card available condensed" href="/checkin-120" aria-describedby="histi-120-description">
+          <span class="status">Available</span>
+          <span class="card-number">02</span>
+          <span class="card-name">HISTI-120</span>
+          <span class="card-description" id="histi-120-description">120-question version</span>
+          <span class="card-action">Start check-in <b aria-hidden="true">→</b></span>
+        </a>
+
+        <article class="app-card soon" aria-disabled="true">
+          <span class="status">Coming soon</span>
+          <span class="card-number">03</span>
+          <span class="card-name">HISTI-50</span>
+          <span class="card-description">50-question version</span>
+        </article>
+
+        <article class="app-card soon" aria-disabled="true">
+          <span class="status">Coming soon</span>
+          <span class="card-number">04</span>
+          <span class="card-name">HISTI-Children</span>
+          <span class="card-description">For younger participants</span>
+        </article>
+
+        <article class="app-card soon" aria-disabled="true">
+          <span class="status">Coming soon</span>
+          <span class="card-number">05</span>
+          <span class="card-name">HISTI-Children-Extended</span>
+          <span class="card-description">Extended children’s version</span>
+        </article>
+
+        <article class="app-card soon" aria-disabled="true">
+          <span class="status">Coming soon</span>
+          <span class="card-number">06</span>
+          <span class="card-name">HISTI For Schools</span>
+          <span class="card-description">Designed for school settings</span>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>Answers stay on this device.</span>
+    <nav aria-label="Legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a></nav>
+  </footer>
+</body>
+</html>
