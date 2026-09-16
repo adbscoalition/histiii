@@ -973,24 +973,9 @@ function renderQuestion() {
   a.selected = [...selected].sort((x, y) => x - y);
 
   const fragment = document.createDocumentFragment();
-  const panel = document.createElement('details');
-  panel.className = 'condensed-topic single-item-topic';
+  const panel = document.createElement('div');
+  panel.className = 'condensed-topic single-item-topic checkbox-sheet';
   panel.dataset.itemCode = q.code;
-  panel.open = true;
-
-  const summary = document.createElement('summary');
-  const title = document.createElement('strong');
-  title.textContent = q.title;
-  const badge = document.createElement('span');
-  badge.className = 'topic-state';
-  summary.append(title, badge);
-
-  const body = document.createElement('div');
-  body.className = 'topic-body';
-
-  const description = document.createElement('p');
-  description.className = 'topic-description';
-  description.textContent = q.applicability;
 
   const quick = document.createElement('div');
   quick.className = 'topic-quick-actions standalone-status-actions';
@@ -1002,15 +987,9 @@ function renderQuestion() {
   const fullAction = condensedButton('I shared every detail listed below', 'none-button standalone-full-action', { itemFull: 'true' });
 
   const options = document.createElement('div');
-  options.className = 'topic-rubrics';
-  let row;
+  options.className = 'topic-rubrics checkbox-grid';
   q.rubric.forEach((item, index) => {
-    if (index % 2 === 0) {
-      row = document.createElement('div');
-      row.className = 'answer-choice-row';
-      options.append(row);
-    }
-    row.append(condensedButton(rubricLabel(q, item, index), 'rubric-button', { rubric: String(index) }));
+    options.append(condensedButton(rubricLabel(q, item, index), 'rubric-button', { rubric: String(index) }));
   });
 
   const exclusions = document.createElement('div');
@@ -1020,12 +999,7 @@ function renderQuestion() {
     condensedButton('I’d rather not answer', 'none-button', { status: 'PNA' })
   );
 
-  const note = document.createElement('p');
-  note.className = 'topic-note';
-  note.textContent = `${q.code} · Original v2.8 rubric. “I didn’t share any of these” is scored at 0%. Not applicable, unsure, and refused answers are excluded from scoring.`;
-
-  body.append(description, quick, fullAction, options, exclusions, note);
-  panel.append(summary, body);
+  panel.append(quick, fullAction, options, exclusions);
   fragment.append(panel);
 
   els.rubricList.classList.remove('has-zero-pair');
