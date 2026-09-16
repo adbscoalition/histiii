@@ -1,4 +1,4 @@
-import condensedData from './questions-histi120.js';
+import condensedData from './questions-histi120.js?v=standalone-2';
 
 // Independent storage and administration; original catalogue remains the scoring authority.
 const scoreItems = condensedData.scoringItems;
@@ -7,8 +7,8 @@ let activeItemCode = null;
 function answerItem() { return itemByCode.get(activeItemCode) || itemByCode.get(questions[state.index]?.items[0]); }
 function answerRoot() { return [...els.rubricList.querySelectorAll('[data-item-code]')].find(el => el.dataset.itemCode === activeItemCode) || els.rubricList; }
 
-const STORAGE_PROGRESS = 'histi.120.progress.v1';
-const STORAGE_RESULTS = 'histi.120.results.v1';
+const STORAGE_PROGRESS = 'histi.120.progress.v2';
+const STORAGE_RESULTS = 'histi.120.results.v2';
 const CATEGORY_CAPS = { A: 50, B: 20, C: 20, D: 10 };
 const CATEGORY_NAMES = {
   A: 'Personal Events',
@@ -746,7 +746,10 @@ function debugWatermarkActive() {
 
 function syncDebugWatermark() {
   const enabled = state.debugWatermarkEnabled !== false;
-  if (els.debugWatermark) els.debugWatermark.hidden = !debugWatermarkActive();
+  const active = debugWatermarkActive();
+  document.body.classList.toggle('debug-generated-session', !!state.debugGenerated);
+  document.body.classList.toggle('debug-watermark-on', active);
+  if (els.debugWatermark) els.debugWatermark.hidden = !active;
   if (els.debugWatermarkValue) els.debugWatermarkValue.textContent = enabled ? 'On' : 'Off';
   const label = els.debugWatermarkToggle?.querySelector('span');
   if (label) label.textContent = enabled ? 'Disable debug watermark' : 'Enable debug watermark';
@@ -850,14 +853,32 @@ function syncCondensedItem(q) {
   for (const button of panel.querySelectorAll('[data-rubric]')) {
     button.setAttribute('aria-pressed', String(a.status === 'SCORE' && selected.has(Number(button.dataset.rubric))));
   }
-  panel.querySelector('[data-none]').setAttribute('aria-pressed', String(a.status === 'SCORE' && a.explicitNone));
-  panel.querySelector('[data-not-applicable]').setAttribute('aria-pressed', String(a.status === 'NAPP' && a.answered));
-  panel.querySelector('[data-item-full]').setAttribute('aria-pressed', String(a.status === 'SCORE' && a.fullByAll && a.answered));
-  for (const button of panel.querySelectorAll('[data-status]')) button.setAttribute('aria-pressed', String(a.answered && a.status === button.dataset.status));
-  panel.querySelector('[data-item-duplicate]').setAttribute('aria-pressed', String(a.status === 'DUP' && a.answered));
-  const status = !a.answered ? 'Not assessed' : a.status === 'NAPP' ? 'Not applicable' : a.status === 'U' ? 'Unsure · excluded' : a.status === 'PNA' ? 'Refused · excluded' : a.status === 'DUP' ? 'Already covered · excluded' : a.explicitNone ? 'Nothing shared' : `${fmt(disclosurePct(q, a))}% of listed details`;
-  panel.querySelector('.topic-state').textContent = status;
+  const none = panel.querySelector('[data-none]');
+  if (none) none.setAttribute('aria-pressed', String(a.status === 'SCORE' && a.explicitNone));
+  const notApplicable = panel.querySelector('[data-not-applicable]');
+  if (notApplicable) notApplicable.setAttribute('aria-pressed', String(a.status === 'NAPP' && a.answered));
+  const full = panel.querySelector('[data-item-full]');
+  if (full) full.setAttribute('aria-pressed', String(a.status === 'SCORE' && a.fullByAll && a.answered));
+  for (const button of panel.querySelectorAll('[data-status]')) {
+    button.setAttribute('aria-pressed', String(a.answered && a.status === button.dataset.status));
+  }
+  const duplicate = panel.querySelector('[data-item-duplicate]');
+  if (duplicate) duplicate.setAttribute('aria-pressed', String(a.status === 'DUP' && a.answered));
+  const status = !a.answered
+    ? 'Not assessed'
+    : a.status === 'NAPP'
+      ? 'Not applicable · excluded'
+      : a.status === 'U'
+        ? 'Unsure · excluded'
+        : a.status === 'PNA'
+          ? 'Refused · excluded'
+          : a.explicitNone
+            ? 'Nothing shared · 0%'
+            : `${fmt(disclosurePct(q, a))}% of listed details`;
+  const stateLabel = panel.querySelector('.topic-state');
+  if (stateLabel) stateLabel.textContent = status;
   panel.dataset.answered = String(a.answered);
+  panel.dataset.debugFilled = String(!!a.debugFilled);
   syncCondensedDomain();
 }
 
@@ -865,7 +886,8 @@ function syncCondensedDomain() {
   const domain = questions[state.index];
   const answers = domain.items.map(code => getAnswer(itemByCode.get(code)));
   const assessed = answers.filter(a => a.answered).length;
-  $('domain-completion').textContent = `${assessed} of ${answers.length} topics assessed`;
+  const completion = $('domain-completion');
+  if (completion) completion.textContent = `${assessed} of ${answers.length} topics assessed`;
   for (const button of els.rubricList.querySelectorAll('[data-domain-action]')) {
     const action = button.dataset.domainAction;
     button.setAttribute('aria-pressed', String(answers.every(a => a.answered && (action === 'none' ? a.status === 'SCORE' && a.explicitNone : a.status === action))));
@@ -901,95 +923,116 @@ function setItemFull(q) {
 function renderQuestion() {
   const domain = questions[state.index];
   if (!domain) return;
-  activeItemCode = null;
+  const q = itemByCode.get(domain.items[0]);
+  if (!q) return;
+  activeItemCode = q.code;
   document.title = `${state.index + 1} / 120 | HISTI-120`;
+
   const card = els.assessment.querySelector('.assessment-card');
-  const sensitive = ['C', 'D'].includes(domain.category);
-  card.dataset.category = domain.category;
+  const sensitive = ['C', 'D'].includes(q.category);
+  card.dataset.category = q.category;
   card.classList.toggle('sensitive-question', sensitive);
-  card.classList.toggle('very-sensitive-question', domain.category === 'D');
+  card.classList.toggle('very-sensitive-question', q.category === 'D');
   card.classList.remove('compact', 'ultra-compact');
+
   els.progress.textContent = `Question ${state.index + 1} of 120`;
   els.progressFill.style.width = `${((state.index + 1) / 120) * 100}%`;
-  els.questionCode.textContent = `HISTI-120 · ${domain.category} · ${state.index + 1}/120`;
-  els.questionTitle.textContent = domain.prompt;
-  els.questionHelp.textContent = `Think only about what you deliberately made known to ${answerRecipientPhrase()} during ${periodLabel()}.`;
-  els.answerPrompt.textContent = 'Answer together. Adjust each topic if needed.';
-  els.answerHint.textContent = 'Open a topic to choose the details you shared. Unassessed topics are excluded.';
-  els.risk.hidden = !sensitive;
-  els.risk.classList.toggle('risk-critical', domain.category === 'D');
-  els.riskTitle.textContent = domain.category === 'D' ? 'Never enter the actual secret or identifier' : 'Keep the real personal details private';
-  els.riskText.textContent = 'Choose descriptions of disclosure only. Do not type, paste, attach, or reproduce the actual value, document, image, password, or key.';
-  els.back.disabled = state.index === 0;
-  els.next.textContent = state.index === 119 ? 'Finish' : 'Next';
-  const fragment = document.createDocumentFragment();
-  const batch = document.createElement('div');
-  batch.className = 'domain-quick-actions';
-  batch.append(condensedButton('I shared nothing in this question', 'none-button', { domainAction: 'none' }), condensedButton('None of these topics apply', 'none-button', { domainAction: 'NAPP' }));
-  fragment.append(batch);
-  const meta = document.createElement('div');
-  meta.className = 'domain-meta';
-  const completion = document.createElement('strong');
-  completion.id = 'domain-completion';
-  completion.setAttribute('aria-live', 'polite');
-  const hint = document.createElement('span');
-  hint.textContent = 'Tap a topic to expand ↓';
-  meta.append(completion, hint);
-  fragment.append(meta);
-  for (const code of domain.items) {
-    const q = itemByCode.get(code), a = getAnswer(q);
-    a.visited = true;
-    // Repair cumulative full/partial prerequisites without inventing disclosure.
-    const selected = new Set(a.selected || []);
-    q.rubric.forEach((r, i) => {
-      if (selected.has(i) && /Full-detail increment/i.test(r.trigger) && /Partial\/limited evidence/i.test(q.rubric[i - 1]?.trigger || '')) selected.add(i - 1);
-    });
-    a.selected = [...selected].sort((x, y) => x - y);
-    const panel = document.createElement('details');
-    panel.className = 'condensed-topic';
-    panel.dataset.itemCode = code;
-    // A single-topic question needs no extra expansion step.
-    panel.open = domain.items.length === 1;
-    const summary = document.createElement('summary');
-    const title = document.createElement('strong');
-    title.textContent = q.title;
-    const badge = document.createElement('span');
-    badge.className = 'topic-state';
-    summary.append(title, badge);
-    const body = document.createElement('div');
-    body.className = 'topic-body';
-    const description = document.createElement('p');
-    description.className = 'topic-description';
-    description.textContent = q.description;
-    const quick = document.createElement('div');
-    quick.className = 'topic-quick-actions';
-    quick.append(condensedButton('Nothing shared', 'none-button', { none: 'true' }), condensedButton('Not applicable', 'none-button', { notApplicable: 'true' }), condensedButton('I shared every detail listed below', 'none-button', { itemFull: 'true' }));
-    const options = document.createElement('div');
-    options.className = 'topic-rubrics';
-    let row;
-    q.rubric.forEach((item, i) => {
-      if (i % 2 === 0) {
-        row = document.createElement('div');
-        row.className = 'answer-choice-row';
-        options.append(row);
-      }
-      row.append(condensedButton(rubricLabel(q, item, i), 'rubric-button', { rubric: String(i) }));
-    });
-    const exclusions = document.createElement('div');
-    exclusions.className = 'topic-exclusions';
-    exclusions.append(condensedButton('I don’t know', 'none-button', { status: 'U' }), condensedButton('I’d rather not answer', 'none-button', { status: 'PNA' }), condensedButton('Already covered by a more specific topic', 'none-button', { itemDuplicate: 'true' }));
-    const note = document.createElement('p');
-    note.className = 'topic-note';
-    note.textContent = `${code} · Original v2.8 rubric. Count each detail only once: if a more specific topic already captures it, leave the broader duplicate excluded. Unknown, refused, and not-applicable topics are not zero-sharing scores.`;
-    body.append(description, quick, options, exclusions, note);
-    panel.append(summary, body);
-    fragment.append(panel);
+  els.questionCode.textContent = `${q.code} · ${state.index + 1}/120`;
+
+  if (q.category === 'D') {
+    els.questionTitle.textContent = `Keeping the actual details private, did you / would you share anything about ${topicTitle(q)} with ${answerRecipientPhrase()}?`;
+  } else if (q.category === 'C') {
+    els.questionTitle.textContent = `Thinking generally, did you / would you share anything about ${topicTitle(q)} with ${answerRecipientPhrase()}?`;
+  } else {
+    els.questionTitle.textContent = `Did you / would you share anything about ${topicTitle(q)} with ${answerRecipientPhrase()}?`;
   }
+
+  els.questionHelp.textContent = `${q.description} Think only about what you deliberately made known during ${periodLabel()}.`;
+  els.answerPrompt.textContent = `What did you share, or what would you share, with ${answerRecipientPhrase()}?`;
+  els.answerHint.textContent = 'Select every answer that applies.';
+
+  els.risk.hidden = !sensitive;
+  els.risk.classList.toggle('risk-critical', q.category === 'D');
+  els.riskTitle.textContent = q.category === 'D' ? 'Never enter the actual secret or identifier' : 'Keep the real personal details private';
+  els.riskText.textContent = 'Choose descriptions of disclosure only. Do not type, paste, attach, or reproduce the actual value, document, image, password, or key.';
+
+  els.back.disabled = nextNavigableIndex(state.index, -1) < 0;
+  els.next.textContent = nextNavigableIndex(state.index, 1) >= questions.length ? 'Finish' : 'Next';
+
+  const a = getAnswer(q);
+  a.visited = true;
+
+  // Repair cumulative full/partial prerequisites without inventing disclosure.
+  const selected = new Set(a.selected || []);
+  q.rubric.forEach((item, index) => {
+    if (selected.has(index) && /Full-detail increment/i.test(String(item?.trigger || '')) &&
+        /Partial\/limited evidence/i.test(String(q.rubric[index - 1]?.trigger || ''))) {
+      selected.add(index - 1);
+    }
+  });
+  a.selected = [...selected].sort((x, y) => x - y);
+
+  const fragment = document.createDocumentFragment();
+  const panel = document.createElement('details');
+  panel.className = 'condensed-topic single-item-topic';
+  panel.dataset.itemCode = q.code;
+  panel.open = true;
+
+  const summary = document.createElement('summary');
+  const title = document.createElement('strong');
+  title.textContent = q.title;
+  const badge = document.createElement('span');
+  badge.className = 'topic-state';
+  summary.append(title, badge);
+
+  const body = document.createElement('div');
+  body.className = 'topic-body';
+
+  const description = document.createElement('p');
+  description.className = 'topic-description';
+  description.textContent = q.applicability;
+
+  const quick = document.createElement('div');
+  quick.className = 'topic-quick-actions standalone-status-actions';
+  quick.append(
+    condensedButton('I didn’t share any of these.', 'none-button', { none: 'true' }),
+    condensedButton(q.category === 'A' ? 'This didn’t happen / doesn’t apply to me.' : 'This doesn’t apply to me.', 'none-button', { notApplicable: 'true' })
+  );
+
+  const fullAction = condensedButton('I shared every detail listed below', 'none-button standalone-full-action', { itemFull: 'true' });
+
+  const options = document.createElement('div');
+  options.className = 'topic-rubrics';
+  let row;
+  q.rubric.forEach((item, index) => {
+    if (index % 2 === 0) {
+      row = document.createElement('div');
+      row.className = 'answer-choice-row';
+      options.append(row);
+    }
+    row.append(condensedButton(rubricLabel(q, item, index), 'rubric-button', { rubric: String(index) }));
+  });
+
+  const exclusions = document.createElement('div');
+  exclusions.className = 'topic-exclusions';
+  exclusions.append(
+    condensedButton('I don’t know', 'none-button', { status: 'U' }),
+    condensedButton('I’d rather not answer', 'none-button', { status: 'PNA' })
+  );
+
+  const note = document.createElement('p');
+  note.className = 'topic-note';
+  note.textContent = `${q.code} · Original v2.8 rubric. “I didn’t share any of these” is scored at 0%. Not applicable, unsure, and refused answers are excluded from scoring.`;
+
+  body.append(description, quick, fullAction, options, exclusions, note);
+  panel.append(summary, body);
+  fragment.append(panel);
+
   els.rubricList.classList.remove('has-zero-pair');
   els.rubricList.replaceChildren(fragment);
   els.rubricList.scrollTop = 0;
   card.scrollTop = 0;
-  for (const code of domain.items) syncCondensedItem(itemByCode.get(code));
+  syncCondensedItem(q);
 }
 
 function syncStatusButtons(a) {
@@ -1225,6 +1268,7 @@ function confirmSectionSkip() {
   if (!['exclude', 'private'].includes(reason)) return;
 
   const category = pending.to;
+  const target = Number(pending.targetIndex);
   state.categorySkips[category] = 'exclude';
   state.boundarySeen[pending.key] = true;
   clearCategoryAnswers(category);
@@ -1236,18 +1280,40 @@ function confirmSectionSkip() {
     return;
   }
 
-  const lastD = lastIndexForCategory('D');
-  if (lastD >= 0) state.index = lastD;
+  const start = Number.isFinite(target) ? target : state.index;
+  const next = nextNavigableIndex(start, 1);
+  if (next >= questions.length) {
+    saveNow();
+    finishAssessment();
+    return;
+  }
+
+  state.index = next;
+  showScreen('assessment');
+  renderQuestion();
   saveNow();
-  finishAssessment();
 }
 
 let questionTransitioning = false;
 
+function nextNavigableIndex(from, delta) {
+  let next = from + delta;
+  while (next >= 0 && next < questions.length && state.categorySkips?.[questions[next].category]) {
+    next += delta;
+  }
+  return next;
+}
+
 function go(delta) {
   saveNow();
-  const next = state.index + delta;
-  if (next < 0 || next >= questions.length || questionTransitioning) return;
+  if (questionTransitioning) return;
+
+  const next = nextNavigableIndex(state.index, delta);
+  if (next < 0) return;
+  if (next >= questions.length) {
+    if (delta > 0) finishAssessment();
+    return;
+  }
 
   const currentQuestion = questions[state.index];
   const nextQuestion = questions[next];
@@ -2064,7 +2130,7 @@ els.app.addEventListener('click', event => {
   else if (id === 'start-btn' && state.recipientType) { state.index = 0; startHandoff(); saveNow(); }
   else if (id === 'handoff-next') finishHandoff();
   else if (id === 'back-btn') go(-1);
-  else if (id === 'next-btn') { if (state.index >= questions.length - 1) finishAssessment(); else go(1); }
+  else if (id === 'next-btn') go(1);
   else if (id === 'review-btn') { showScreen('assessment'); renderQuestion(); }
   else if (id === 'restart-btn') resetAll(true);
   else if (id === 'reset-btn') resetAll(true);
