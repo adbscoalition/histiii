@@ -5034,3 +5034,139 @@ body.debug-watermark-on .histi-120 .condensed-topic[data-debug-filled="true"]::a
     line-height:1.25!important
   }
 }
+
+
+/* ===== HISTI-120 checkbox-only answer sheet ===== */
+.histi-120 .assessment-card .rubric-list{
+  display:flex!important;
+  flex-direction:column!important;
+  min-height:0!important;
+  height:100%!important;
+  overflow:auto!important;
+  padding:2px!important;
+}
+.histi-120 .checkbox-sheet{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:8px!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+}
+.histi-120 .checkbox-sheet::before,
+.histi-120 .checkbox-sheet::marker{
+  content:none!important;
+  display:none!important;
+}
+.histi-120 .checkbox-sheet .standalone-status-actions{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:7px!important;
+  margin:0!important;
+  flex:none!important;
+}
+.histi-120 .checkbox-sheet .standalone-status-actions > button,
+.histi-120 .checkbox-sheet .standalone-full-action{
+  width:100%!important;
+  min-height:50px!important;
+  grid-column:1 / -1!important;
+}
+.histi-120 .checkbox-sheet .standalone-full-action{
+  margin:0!important;
+}
+.histi-120 .checkbox-sheet .checkbox-grid{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  grid-auto-rows:minmax(52px,1fr)!important;
+  gap:8px!important;
+}
+.histi-120 .checkbox-sheet .checkbox-grid > button{
+  width:100%!important;
+  min-width:0!important;
+  height:100%!important;
+}
+.histi-120 .checkbox-sheet .topic-exclusions{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:8px!important;
+  margin:0!important;
+  flex:none!important;
+}
+.histi-120 .checkbox-sheet .topic-exclusions > button{
+  width:100%!important;
+  min-height:48px!important;
+  grid-column:auto!important;
+}
+
+/* Preserve HISTI-120's blue identity while removing accordion styling. */
+.histi-120 .checkbox-sheet .rubric-button,
+.histi-120 .checkbox-sheet .none-button{
+  border-color:rgba(83,169,237,.24)!important;
+  background:linear-gradient(180deg,rgba(34,49,65,.90),rgba(24,35,46,.94))!important;
+  color:#dceaf7!important;
+}
+.histi-120 .checkbox-sheet .rubric-button:hover,
+.histi-120 .checkbox-sheet .none-button:hover{
+  border-color:rgba(142,210,255,.48)!important;
+  background:linear-gradient(180deg,rgba(45,66,87,.96),rgba(29,44,58,.98))!important;
+}
+.histi-120 .checkbox-sheet .rubric-button[aria-pressed="true"],
+.histi-120 .checkbox-sheet .none-button[aria-pressed="true"]{
+  color:#071321!important;
+  border-color:#8ed2ff!important;
+  background:linear-gradient(135deg,#9bd9ff,#63b6f1 68%,#3f8fd7)!important;
+  box-shadow:inset 3px 0 0 #d8f1ff!important;
+}
+.histi-120 .checkbox-sheet .rubric-button[aria-pressed="true"] span,
+.histi-120 .checkbox-sheet .none-button[aria-pressed="true"] span{
+  color:#071321!important;
+}
+.histi-120 .checkbox-sheet .rubric-button::before,
+.histi-120 .checkbox-sheet .none-button::before{
+  border-radius:4px!important;
+  border-color:rgba(186,223,255,.48)!important;
+  background:#101820!important;
+}
+.histi-120 .checkbox-sheet .rubric-button[aria-pressed="true"]::before,
+.histi-120 .checkbox-sheet .none-button[aria-pressed="true"]::before{
+  border-color:#e9f7ff!important;
+  background-color:#e9f7ff!important;
+}
+body.debug-watermark-on .histi-120 .checkbox-sheet[data-debug-filled="true"]{
+  position:relative;
+}
+body.debug-watermark-on .histi-120 .checkbox-sheet[data-debug-filled="true"]::after{
+  content:"DEBUG FILL";
+  position:absolute;
+  top:8px;
+  right:8px;
+  z-index:4;
+  padding:3px 6px;
+  border:1px solid rgba(142,210,255,.20);
+  border-radius:999px;
+  color:rgba(142,210,255,.55);
+  background:rgba(8,15,22,.70);
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.10em;
+  pointer-events:none;
+}
+@media(max-width:760px){
+  .histi-120 .checkbox-sheet .checkbox-grid{
+    grid-template-columns:1fr!important;
+    grid-auto-rows:auto!important;
+  }
+  .histi-120 .checkbox-sheet .topic-exclusions{
+    grid-template-columns:1fr!important;
+  }
+  .histi-120 .assessment-card .rubric-list{
+    height:auto!important;
+    overflow:visible!important;
+  }
+}
