@@ -57,15 +57,29 @@ context.testAnswer.selected=[0];
 assert.equal(vm.runInContext('disclosurePct(birth,testAnswer)',context),10, 'partial still scores when selected alone');
 context.examplePair={rubric:[
   {trigger:'1A. Partial/limited evidence toward: example',share:0.75},
-  {trigger:'1B. Full-detail increment — completes 1A with exact detail',share:1.5}
+  {trigger:'1B. Full-detail increment — completes 1A with exact detail',share:1.5},
+  {trigger:'Another independent detail',share:98.5}
 ]};
 context.testAnswer.selected=[0,1];
 assert.equal(vm.runInContext('disclosurePct(examplePair,testAnswer)',context),1.5, '0.75 partial plus 1.50 full scores 1.50 total');
+for (const question of catalogue.questions) {
+  context.auditQuestion=question;
+  context.auditAnswer={status:'SCORE',answered:true,selected:question.rubric.map((_,i)=>i),fullByAll:false};
+  assert.equal(vm.runInContext('disclosurePct(auditQuestion,auditAnswer)',context),100, `${question.code} fills its maximum when every detail is selected`);
+}
+const allSelectedAnswers=Object.fromEntries(catalogue.questions.map(question=>[question.code,{
+  status:'SCORE',answered:true,selected:question.rubric.map((_,i)=>i),weight:question.suggestedWeight,explicitNone:false,fullByAll:false
+}]));
+context.state.answers=allSelectedAnswers;
+context.state.categorySkips={};
+const condensedMaximum=vm.runInContext('compute()',context);
+assert.equal(condensedMaximum.overall,100,'HISTI-120 reaches the overall maximum when every rubric is selected');
+assert.deepEqual(JSON.parse(JSON.stringify(Object.fromEntries(Object.entries(condensedMaximum.cats).map(([code,result])=>[code,result.points])))),{A:50,B:20,C:20,D:10});
 
 // The regular HISTI runtime must use the same replacement rule.
 const regularSource = fs.readFileSync(new URL('../app-public-sans.js', import.meta.url), 'utf8');
-const regularContext = vm.createContext({});
-for (const name of ['disclosurePct','pairedFullIndex']) {
+const regularContext = vm.createContext({questions:catalogue.questions,CATEGORY_CAPS:{A:50,B:20,C:20,D:10},state:{answers:{},categorySkips:{}}});
+for (const name of ['getAnswer','assignedWeight','disclosurePct','compute','pairedFullIndex']) {
   const start = regularSource.indexOf(`function ${name}(`);
   const tail = regularSource.slice(start);
   const next = tail.slice(1).search(/\n(?:async )?function /);
@@ -76,4 +90,13 @@ regularContext.testAnswer={status:'SCORE',answered:true,selected:[0,1],fullByAll
 assert.equal(vm.runInContext('disclosurePct(birth,testAnswer)',regularContext),10, 'regular HISTI full replaces its paired partial');
 regularContext.examplePair=context.examplePair;
 assert.equal(vm.runInContext('disclosurePct(examplePair,testAnswer)',regularContext),1.5, 'regular HISTI scores the example pair as 1.50 total');
-console.log('PASS: 120 prompts, 263 unique mappings, category counts, weighted scoring, exclusions, replacement full-detail rubrics, isolated storage, and no upload APIs.');
+for (const question of catalogue.questions) {
+  regularContext.auditQuestion=question;
+  regularContext.auditAnswer={status:'SCORE',answered:true,selected:question.rubric.map((_,i)=>i),fullByAll:false};
+  assert.equal(vm.runInContext('disclosurePct(auditQuestion,auditAnswer)',regularContext),100, `regular HISTI ${question.code} fills its maximum`);
+}
+regularContext.state.answers=allSelectedAnswers;
+const regularMaximum=vm.runInContext('compute()',regularContext);
+assert.equal(regularMaximum.overall,100,'regular HISTI reaches the overall maximum when every rubric is selected');
+assert.deepEqual(JSON.parse(JSON.stringify(Object.fromEntries(Object.entries(regularMaximum.cats).map(([code,result])=>[code,result.points])))),{A:50,B:20,C:20,D:10});
+console.log('PASS: 120 prompts, 263 unique mappings, category counts, weighted scoring, exclusions, replacement full-detail rubrics, all-selected maximums, isolated storage, and no upload APIs.');

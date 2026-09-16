@@ -210,6 +210,9 @@ function disclosurePct(q, a) {
   if (a.fullByAll) return 100;
   const hasLiteralAll = [...selected].some(idx => /\ball\b/i.test(String(q.rubric[idx]?.trigger || '')));
   if (hasLiteralAll) return 100;
+  // Manually selecting every available detail must be equivalent to the
+  // explicit "all details" choice and fill this item's full score.
+  if (q.rubric.length > 0 && q.rubric.every((_, idx) => selected.has(idx))) return 100;
   return Math.min(100, q.rubric.reduce((sum, item, idx) => {
     if (!selected.has(idx)) return sum;
     // A selected Full row replaces its paired Partial row for scoring. The
