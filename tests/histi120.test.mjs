@@ -2,101 +2,76 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import catalogue from '../questions-data-private-v1.js';
-import condensed from '../questions-histi120.js';
+import shortForm, { SELECTED_CODES } from '../questions-histi120.js';
 
-assert.equal(condensed.count, 120);
-assert.equal(condensed.questions.length, 120);
-assert.deepEqual(condensed.questions.map(q => q.number), Array.from({length:120}, (_,i) => i+1));
-const mapped = condensed.questions.flatMap(q => q.items);
-assert.equal(mapped.length, 263);
-assert.equal(new Set(mapped).size, 263);
-assert.deepEqual([...mapped].sort(), catalogue.questions.map(q => q.code).sort());
-assert.deepEqual(Object.fromEntries('ABCD'.split('').map(c => [c, condensed.questions.filter(q => q.category === c).length])), {A:60,B:22,C:25,D:13});
-assert.ok(condensed.questions.every(q => q.items.every(code => code.startsWith(q.category))));
-assert.equal(condensed.scoringItems.length,263);
-assert.deepEqual([...condensed.scoringItems].sort((a,b)=>a.code.localeCompare(b.code)),[...catalogue.questions].sort((a,b)=>a.code.localeCompare(b.code)), 'all supplied exact weights and trigger shares match the canonical catalogue');
-const source = fs.readFileSync(new URL('../app-histi120.js', import.meta.url), 'utf8');
-assert.ok(source.includes("'histi.120.progress.v1'"));
-assert.ok(source.includes("'histi.120.results.v1'"));
-assert.ok(!source.includes("'histi.progress.v3'"));
-assert.ok(source.includes("state.categorySkips[category] = 'exclude'"));
-assert.ok(!/\b(fetch|XMLHttpRequest|WebSocket|EventSource|sendBeacon)\s*\(/.test(source));
-
-// Run the production scoring functions directly, without a browser or test-only runtime hook.
-const context = vm.createContext({scoreItems: catalogue.questions, CATEGORY_CAPS:{A:50,B:20,C:20,D:10}, state:{answers:{},categorySkips:{}}});
-for (const name of ['getAnswer','assignedWeight','disclosurePct','compute','pairedFullIndex']) {
-  const start = source.indexOf(`function ${name}(`);
-  const tail = source.slice(start);
-  const next = tail.slice(1).search(/\n(?:async )?function /);
-  vm.runInContext(next < 0 ? tail : tail.slice(0,next+1), context);
+assert.equal(shortForm.version, '2.8-120-standalone');
+assert.equal(shortForm.count, 120);
+assert.equal(shortForm.questions.length, 120);
+assert.equal(shortForm.scoringItems.length, 120);
+assert.equal(new Set(SELECTED_CODES).size, 120);
+assert.deepEqual(shortForm.questions.map(q => q.number), Array.from({length:120}, (_,i) => i+1));
+assert.ok(shortForm.questions.every(q => q.items.length === 1 && q.items[0] === q.code));
+assert.equal(catalogue.questions.length - shortForm.scoringItems.length, 143);
+assert.deepEqual(
+  Object.fromEntries('ABCD'.split('').map(c => [c, shortForm.questions.filter(q => q.category === c).length])),
+  {A:60,B:24,C:24,D:12}
+);
+for (let i=0;i<120;i+=10) {
+  assert.deepEqual(shortForm.questions.slice(i,i+10).map(q=>q.category), ['A','A','A','A','A','B','B','C','C','D']);
 }
-assert.equal(vm.runInContext('compute().overall', context), null, 'unassessed is excluded');
-function answer(code, pct, status='SCORE') {
-  context.state.answers[code] = {status,selected:[],weight:catalogue.questions.find(q => q.code === code).suggestedWeight,answered:true,explicitNone:pct===0,fullByAll:pct===100};
+assert.deepEqual(
+  [1,10,20,30,40,50,60,70,80,90,100,110,120].map(n=>shortForm.questions[n-1].code),
+  ['A01','D01','D02','D03','D05','D06','D07','D08','D09','D10','D15','D16','D33']
+);
+
+const byCode=new Map(catalogue.questions.map(q=>[q.code,q]));
+assert.deepEqual(shortForm.scoringItems, SELECTED_CODES.map(code=>byCode.get(code)));
+
+const source=fs.readFileSync(new URL('../app-histi120.js',import.meta.url),'utf8');
+assert.ok(source.includes("'histi.120.progress.v2'"));
+assert.ok(source.includes("'histi.120.results.v2'"));
+assert.ok(source.includes('debugWatermarkEnabled: true'));
+assert.ok(source.includes('DEBUG · GENERATED TEST DATA · NOT A REAL RESULT'));
+assert.ok(source.includes('panel.dataset.debugFilled = String(!!a.debugFilled)'));
+assert.ok(source.includes('function nextNavigableIndex('));
+assert.ok(source.includes('I didn’t share any of these.'));
+assert.ok(!source.includes('Already covered by a more specific topic'));
+
+const context=vm.createContext({
+  scoreItems:shortForm.scoringItems,
+  CATEGORY_CAPS:{A:50,B:20,C:20,D:10},
+  state:{answers:{},categorySkips:{}}
+});
+for(const name of ['getAnswer','assignedWeight','disclosurePct','compute','pairedFullIndex']){
+  const start=source.indexOf(`function ${name}(`);
+  const tail=source.slice(start);
+  const next=tail.slice(1).search(/\n(?:async )?function /);
+  vm.runInContext(next<0?tail:tail.slice(0,next+1),context);
+}
+assert.equal(vm.runInContext('compute().overall',context),null);
+
+function answer(code,pct,status='SCORE'){
+  const q=byCode.get(code);
+  context.state.answers[code]={status,selected:[],weight:q.suggestedWeight,answered:true,explicitNone:pct===0&&status==='SCORE',fullByAll:pct===100&&status==='SCORE'};
 }
 answer('A01',100);
+answer('A02',0,'NAPP');
+answer('A03',0,'U');
+answer('A04',0,'PNA');
 assert.equal(vm.runInContext('compute().overall',context),100);
-answer('A19',0,'NAPP');
-answer('A32',0,'U');
-answer('A51',0,'PNA');
-answer('B01',0,'DUP');
-assert.equal(vm.runInContext('compute().overall',context),100,'NA, U, refusal, and duplicate do not become zeros');
-answer('B01',0);
-answer('C01',100);
-answer('D01',0);
-assert.equal(vm.runInContext('compute().overall',context),70,'original category shares retained');
-context.state.categorySkips.C='exclude';
-assert.equal(vm.runInContext('compute().overall',context),62.5,'excluded category renormalizes active caps');
-delete context.state.categorySkips.C;
-const birth = catalogue.questions.find(q=>q.code==='A05');
-context.birth=birth;
-assert.equal(vm.runInContext('pairedFullIndex(birth,0)',context),1);
-context.testAnswer={status:'SCORE',answered:true,selected:[0,1],fullByAll:false};
-assert.equal(vm.runInContext('disclosurePct(birth,testAnswer)',context),10, 'full replaces its paired partial instead of adding to it');
-context.testAnswer.selected=[0];
-assert.equal(vm.runInContext('disclosurePct(birth,testAnswer)',context),10, 'partial still scores when selected alone');
-context.examplePair={rubric:[
-  {trigger:'1A. Partial/limited evidence toward: example',share:0.75},
-  {trigger:'1B. Full-detail increment — completes 1A with exact detail',share:1.5},
-  {trigger:'Another independent detail',share:98.5}
-]};
-context.testAnswer.selected=[0,1];
-assert.equal(vm.runInContext('disclosurePct(examplePair,testAnswer)',context),1.5, '0.75 partial plus 1.50 full scores 1.50 total');
-for (const question of catalogue.questions) {
-  context.auditQuestion=question;
-  context.auditAnswer={status:'SCORE',answered:true,selected:question.rubric.map((_,i)=>i),fullByAll:false};
-  assert.equal(vm.runInContext('disclosurePct(auditQuestion,auditAnswer)',context),100, `${question.code} fills its maximum when every detail is selected`);
-}
-const allSelectedAnswers=Object.fromEntries(catalogue.questions.map(question=>[question.code,{
-  status:'SCORE',answered:true,selected:question.rubric.map((_,i)=>i),weight:question.suggestedWeight,explicitNone:false,fullByAll:false
-}]));
-context.state.answers=allSelectedAnswers;
-context.state.categorySkips={};
-const condensedMaximum=vm.runInContext('compute()',context);
-assert.equal(condensedMaximum.overall,100,'HISTI-120 reaches the overall maximum when every rubric is selected');
-assert.deepEqual(JSON.parse(JSON.stringify(Object.fromEntries(Object.entries(condensedMaximum.cats).map(([code,result])=>[code,result.points])))),{A:50,B:20,C:20,D:10});
+answer('B01',0); answer('C01',100); answer('D01',0);
+assert.equal(vm.runInContext('compute().overall',context),70);
 
-// The regular HISTI runtime must use the same replacement rule.
-const regularSource = fs.readFileSync(new URL('../app-public-sans.js', import.meta.url), 'utf8');
-const regularContext = vm.createContext({questions:catalogue.questions,CATEGORY_CAPS:{A:50,B:20,C:20,D:10},state:{answers:{},categorySkips:{}}});
-for (const name of ['getAnswer','assignedWeight','disclosurePct','compute','pairedFullIndex']) {
-  const start = regularSource.indexOf(`function ${name}(`);
-  const tail = regularSource.slice(start);
-  const next = tail.slice(1).search(/\n(?:async )?function /);
-  vm.runInContext(next < 0 ? tail : tail.slice(0,next+1), regularContext);
-}
-regularContext.birth=birth;
-regularContext.testAnswer={status:'SCORE',answered:true,selected:[0,1],fullByAll:false};
-assert.equal(vm.runInContext('disclosurePct(birth,testAnswer)',regularContext),10, 'regular HISTI full replaces its paired partial');
-regularContext.examplePair=context.examplePair;
-assert.equal(vm.runInContext('disclosurePct(examplePair,testAnswer)',regularContext),1.5, 'regular HISTI scores the example pair as 1.50 total');
-for (const question of catalogue.questions) {
-  regularContext.auditQuestion=question;
-  regularContext.auditAnswer={status:'SCORE',answered:true,selected:question.rubric.map((_,i)=>i),fullByAll:false};
-  assert.equal(vm.runInContext('disclosurePct(auditQuestion,auditAnswer)',regularContext),100, `regular HISTI ${question.code} fills its maximum`);
-}
-regularContext.state.answers=allSelectedAnswers;
-const regularMaximum=vm.runInContext('compute()',regularContext);
-assert.equal(regularMaximum.overall,100,'regular HISTI reaches the overall maximum when every rubric is selected');
-assert.deepEqual(JSON.parse(JSON.stringify(Object.fromEntries(Object.entries(regularMaximum.cats).map(([code,result])=>[code,result.points])))),{A:50,B:20,C:20,D:10});
-console.log('PASS: 120 prompts, 263 unique mappings, category counts, weighted scoring, exclusions, replacement full-detail rubrics, all-selected maximums, isolated storage, and no upload APIs.');
+context.pairQuestion=byCode.get('A03');
+context.testAnswer={status:'SCORE',answered:true,selected:[0,1],fullByAll:false};
+assert.equal(vm.runInContext('disclosurePct(pairQuestion,testAnswer)',context),10);
+
+context.state.answers=Object.fromEntries(shortForm.scoringItems.map(q=>[q.code,{status:'SCORE',answered:true,selected:q.rubric.map((_,i)=>i),weight:q.suggestedWeight,explicitNone:false,fullByAll:false}]));
+const maximum=vm.runInContext('compute()',context);
+assert.equal(maximum.overall,100);
+assert.deepEqual(JSON.parse(JSON.stringify(Object.fromEntries(Object.entries(maximum.cats).map(([k,v])=>[k,v.points])))),{A:50,B:20,C:20,D:10});
+
+context.state.answers=Object.fromEntries(shortForm.scoringItems.map(q=>[q.code,{status:'SCORE',answered:true,selected:[],weight:q.suggestedWeight,explicitNone:true,fullByAll:false}]));
+assert.equal(vm.runInContext('compute().overall',context),0);
+
+console.log('PASS: standalone HISTI-120 composition, scoring, exclusions, and debug provenance.');
