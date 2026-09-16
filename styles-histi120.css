@@ -4791,3 +4791,76 @@ body.a11y-spacing .zero-choice-row{
  .histi-120 .topic-body{padding:0 10px 12px}
  .histi-120 .assessment-card .rubric-list button{font-size:14px!important;min-height:58px!important}
 }
+
+
+/* ===== Standalone HISTI-120 status rows + debug provenance ===== */
+.histi-120 .standalone-status-actions{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:7px!important;
+  margin:10px 0!important;
+}
+.histi-120 .standalone-status-actions > button{
+  width:100%!important;
+  grid-column:1 / -1!important;
+  min-height:46px!important;
+}
+.histi-120 .standalone-full-action{
+  width:100%!important;
+  margin:0 0 10px!important;
+  min-height:44px!important;
+  border-style:dashed!important;
+  opacity:.88;
+}
+.histi-120 .topic-exclusions{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+}
+.histi-120 .topic-exclusions > button:last-child{
+  grid-column:auto!important;
+}
+
+/* Random debug fills are visibly marked while the default debug watermark is enabled. */
+body.debug-watermark-on .histi-120 .condensed-topic[data-debug-filled="true"]{
+  position:relative;
+}
+body.debug-watermark-on .histi-120 .condensed-topic[data-debug-filled="true"]::after{
+  content:"DEBUG FILL";
+  position:absolute;
+  top:9px;
+  right:42px;
+  z-index:3;
+  padding:3px 6px;
+  border:1px solid rgba(142,210,255,.18);
+  border-radius:999px;
+  color:rgba(142,210,255,.48);
+  background:rgba(8,15,22,.52);
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.10em;
+  pointer-events:none;
+}
+
+/* Keep debug available without making it part of the visual hierarchy. */
+.histi-120 .screen-debug-trigger{
+  opacity:.12!important;
+  border-color:transparent!important;
+  background:transparent!important;
+  color:#718091!important;
+}
+.histi-120 .screen-debug-trigger:hover,
+.histi-120 .screen-debug-trigger:focus-visible{
+  opacity:.68!important;
+  border-color:rgba(48,141,238,.18)!important;
+  background:rgba(8,11,14,.58)!important;
+  color:#8eaac8!important;
+}
+
+@media(max-width:620px){
+  .histi-120 .topic-exclusions{
+    grid-template-columns:1fr!important;
+  }
+  body.debug-watermark-on .histi-120 .condensed-topic[data-debug-filled="true"]::after{
+    top:7px;
+    right:34px;
+  }
+}
