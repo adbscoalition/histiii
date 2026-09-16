@@ -974,7 +974,7 @@ function renderQuestion() {
 
   const fragment = document.createDocumentFragment();
   const panel = document.createElement('div');
-  panel.className = 'condensed-topic single-item-topic checkbox-sheet';
+  panel.className = 'single-item-topic checkbox-sheet';
   panel.dataset.itemCode = q.code;
 
   const quick = document.createElement('div');
