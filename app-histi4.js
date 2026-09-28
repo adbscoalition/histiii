@@ -45,18 +45,24 @@ function show(screen, scroll = true) {
   if (scroll) window.scrollTo(0, 0);
   save();
 }
-function setAnswer(code, status, value = null) {
+function setAnswer(code, status, value = null, redraw = true) {
   const previous = state.answers[code];
   if (previous?.status === status && JSON.stringify(previous.value) === JSON.stringify(value)) return;
   state.answers[code] = { status, value };
   save();
-  renderSlide(false);
+  if (redraw) renderSlide(false);
+  else {
+    const result = calculate(state.answers);
+    $('answered-label').textContent = `${result.answered} of ${FAMILIES.length} scored`;
+    $('partial-btn').hidden = result.answered === 0;
+  }
 }
 function questionCard(row, slideNumber, animate = false) {
   const [code, topic, prompt, type, max, anchors] = row;
   const answer = state.answers[code];
   const card = el('article', 'h4-question');
   if (animate) card.classList.add('h4-reveal');
+  card.classList.toggle('is-answered', answer?.status === 'score');
   const top = el('div', 'h4-question-top');
   top.append(el('span', 'h4-question-code', code), el('h2', '', prompt));
   card.append(top, el('p', 'h4-topic', topic));
@@ -65,37 +71,42 @@ function questionCard(row, slideNumber, animate = false) {
     const numericAnchors = anchors.map((anchor, index) => anchor[0] ?? index);
     const stored = answer?.status === 'score' ? Number(answer.value) : null;
     const selectedIndex = stored === null || !Number.isFinite(stored) ? null : numericAnchors.indexOf(stored);
-    const slider = el('input', 'h4-segment-slider');
-    slider.type = 'range'; slider.min = '0'; slider.max = String(anchors.length - 1); slider.step = '1';
-    slider.value = String(selectedIndex === null || selectedIndex < 0 ? Math.floor((anchors.length - 1) / 2) : selectedIndex);
-    slider.setAttribute('aria-label', `Question ${slideNumber}: ${prompt}`);
     const readout = el('div', 'h4-level-value');
     const caption = el('span');
     const description = el('strong');
     readout.append(caption, description);
     const track = el('div', 'h4-segment-control');
-    const rail = el('div', 'h4-segment-rail');
-    rail.style.setProperty('--segments', String(anchors.length));
-    const segments = anchors.map(() => { const item = el('span'); rail.append(item); return item; });
-    track.append(rail, slider);
-    const update = active => {
-      const index = Number(slider.value);
+    track.style.setProperty('--segments', String(anchors.length));
+    track.setAttribute('role', 'group');
+    track.setAttribute('aria-label', `Question ${slideNumber}: ${prompt} Choose one discrete level.`);
+    const segments = anchors.map((anchor, index) => {
+      const button = el('button', 'h4-segment', String(index + 1));
+      button.type = 'button';
+      button.setAttribute('aria-label', `Level ${index + 1}: ${anchor[1]}`);
+      button.addEventListener('click', () => {
+        update(index);
+        setAnswer(code, 'score', numericAnchors[index], false);
+        card.querySelectorAll('.h4-status button').forEach(statusButton => statusButton.setAttribute('aria-pressed', 'false'));
+      });
+      track.append(button);
+      return button;
+    });
+    const update = index => {
+      const active = index !== null && index >= 0;
       caption.textContent = active ? `Level ${index + 1} of ${anchors.length}` : 'Choose a level';
-      description.textContent = active ? anchors[index][1] : 'Move the slider to answer';
+      description.textContent = active ? anchors[index][1] : 'Select a numbered segment';
       readout.classList.toggle('is-unanswered', !active);
-      segments.forEach((segment, n) => segment.classList.toggle('is-active', active && n <= index));
-      slider.setAttribute('aria-valuetext', active ? `Level ${index + 1}: ${anchors[index][1]}` : 'No level selected');
+      card.classList.toggle('is-answered', active);
+      segments.forEach((segment, n) => {
+        segment.classList.toggle('is-active', active && n <= index);
+        segment.classList.toggle('is-current', active && n === index);
+        segment.setAttribute('aria-pressed', String(active && n === index));
+      });
     };
-    update(selectedIndex !== null && selectedIndex >= 0);
-    slider.addEventListener('input', () => update(true));
-    const commit = () => setAnswer(code, 'score', numericAnchors[Number(slider.value)]);
-    slider.addEventListener('change', commit);
-    slider.addEventListener('click', commit);
-    const counts = el('div', 'h4-segment-count');
-    anchors.forEach((_, index) => counts.append(el('span', '', String(index + 1))));
+    update(selectedIndex !== null && selectedIndex >= 0 ? selectedIndex : null);
     const ends = el('div', 'h4-endpoints');
     ends.append(el('span', '', anchors[0][1]), el('span', '', anchors.at(-1)[1]));
-    control.append(readout, track, counts, ends);
+    control.append(readout, track, ends);
   } else if (type === 'yn') {
     const choices = el('div', 'h4-yn');
     ['No', 'Yes'].forEach((label, index) => {
@@ -143,6 +154,9 @@ function renderSlide(scroll = true) {
   $('category-label').textContent = `${slide.category} · ${meta.label} · ${recipient.label}`;
   $('slide-title').textContent = slide.type === 'yn' ? 'A few quick choices.' : slide.type === 'multi' ? 'Select all that apply.' : 'Choose the closest levels.';
   $('slide-help').textContent = `Answering for ${recipient.label.toLowerCase()}. You can leave any question unanswered or use the options below it.`;
+  const header = document.querySelector('.question-top');
+  header.classList.remove('h4-header-reveal');
+  if (scroll) { void header.offsetWidth; header.classList.add('h4-header-reveal'); }
   const warning = slide.category === 'C' || slide.category === 'D';
   $('caution').hidden = !warning;
   if (warning) $('caution').textContent = slide.category === 'D' ? 'Very sensitive: never enter a real password, PIN, ID number, account number, code, key, or document content. Choose a level only.' : 'Sensitive information: choose a level only. Do not enter real location, financial, medical, or other private details.';
