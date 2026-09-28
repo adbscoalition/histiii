@@ -3,11 +3,10 @@ import { FAMILIES, CATEGORY_META } from './histi4-data.js';
 export const CATEGORIES = Object.keys(CATEGORY_META);
 export const CATEGORY_TOTAL = Object.values(CATEGORY_META).reduce((sum, item) => sum + item.weight, 0);
 
-export function makeSlides(families = FAMILIES) {
+export function makeLegacySlides(families = FAMILIES) {
   const slides = [];
   for (const category of CATEGORIES) {
     const rows = families.filter(row => row[0].split('-')[0] === category);
-    // Keeping answer types together makes three controls fit and behave consistently.
     for (const type of ['slider', 'yn', 'multi']) {
       const matching = rows.filter(row => row[3] === type);
       const size = type === 'multi' ? 1 : 3;
@@ -17,6 +16,39 @@ export function makeSlides(families = FAMILIES) {
     }
   }
   return slides;
+}
+
+export function makeSlides(families = FAMILIES) {
+  const slides = [];
+  // Show level questions across all categories, then yes/no, then multi-select.
+  for (const type of ['slider', 'yn', 'multi']) {
+    for (const category of CATEGORIES) {
+      const rows = families.filter(row => row[0].split('-')[0] === category && row[3] === type);
+      if (!rows.length) continue;
+      const maxSize = type === 'yn' ? 3 : 12;
+      const cardCount = Math.ceil(rows.length / maxSize);
+      const baseSize = Math.floor(rows.length / cardCount);
+      const extra = rows.length % cardCount;
+      let offset = 0;
+      for (let card = 0; card < cardCount; card++) {
+        const size = baseSize + (card < extra ? 1 : 0);
+        slides.push({ category, type, questions: rows.slice(offset, offset + size) });
+        offset += size;
+      }
+    }
+  }
+  return slides;
+}
+
+export function remapLegacySlideIndex(index, families = FAMILIES) {
+  const oldSlides = makeLegacySlides(families);
+  const newSlides = makeSlides(families);
+  if (!oldSlides.length || !newSlides.length) return 0;
+  const oldIndex = Math.max(0, Math.min(oldSlides.length - 1, Number(index) || 0));
+  // Reordering by type can put previously unseen categories before the old
+  // current question. Resume at the earliest new card containing an unseen row.
+  const unseen = new Set(oldSlides.slice(oldIndex).flatMap(slide => slide.questions.map(row => row[0])));
+  return Math.max(0, newSlides.findIndex(slide => slide.questions.some(row => unseen.has(row[0]))));
 }
 
 export function rubricPoints(row, value) {

@@ -1,5 +1,5 @@
 import { FAMILIES, CATEGORY_META, RECIPIENTS } from './histi4-data.js';
-import { makeSlides, calculate, rubricPoints, displayScore } from './histi4-core.js';
+import { makeSlides, remapLegacySlideIndex, calculate, rubricPoints, displayScore } from './histi4-core.js';
 
 const group = document.body.dataset.recipient;
 const recipient = RECIPIENTS[group];
@@ -15,12 +15,14 @@ const el = (tag, className, text) => {
   return node;
 };
 
-function freshState() { return { index: 0, answers: {}, started: false, completed: false, screen: 'intro' }; }
+function freshState() { return { index: 0, answers: {}, started: false, completed: false, screen: 'intro', layoutVersion: 2 }; }
 function loadState() {
   try {
     const stored = JSON.parse(localStorage.getItem(storageKey) || 'null');
     if (!stored || typeof stored !== 'object') return freshState();
     const state = { ...freshState(), ...stored, answers: stored.answers && typeof stored.answers === 'object' ? stored.answers : {} };
+    if (stored.layoutVersion !== 2) state.index = remapLegacySlideIndex(stored.index);
+    state.layoutVersion = 2;
     // Existing freeform answers are snapped to the nearest documented rubric stop.
     for (const [code, answer] of Object.entries(state.answers)) {
       const row = familyByCode.get(code);
@@ -225,7 +227,7 @@ function reset() {
 
 $('intro-recipient').textContent = recipient.label.toLowerCase();
 $('intro-description').textContent = recipient.description;
-$('slide-count').textContent = `${slides.length} short cards.`;
+$('slide-count').textContent = `${slides.length} cards.`;
 const groupLinks = document.createDocumentFragment();
 for (const [key, info] of Object.entries(RECIPIENTS)) {
   if (key === group) continue;

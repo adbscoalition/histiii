@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { FAMILIES, CATEGORY_META, RECIPIENTS } from '../histi4-data.js';
-import { makeSlides, rubricPoints, calculate, displayScore } from '../histi4-core.js';
+import { makeSlides, makeLegacySlides, remapLegacySlideIndex, rubricPoints, calculate, displayScore } from '../histi4-core.js';
 
 assert.equal(FAMILIES.length, 245);
 assert.equal(new Set(FAMILIES.map(row => row[0])).size, 245);
@@ -11,10 +11,24 @@ for (const [key, meta] of Object.entries(CATEGORY_META)) {
   assert.equal(rows.reduce((sum, row) => sum + row[4], 0), meta.max, `${key} maximum matches document`);
 }
 const slides = makeSlides();
+assert.equal(slides.length, 29);
 assert.equal(new Set(slides.flatMap(slide => slide.questions.map(row => row[0]))).size, 245);
 assert.equal(slides.flatMap(slide => slide.questions).length, 245);
-assert.ok(slides.every(slide => slide.questions.length <= (slide.type === 'multi' ? 1 : 3)));
+assert.ok(slides.every(slide => slide.questions.length <= (slide.type === 'yn' ? 3 : 12)));
+assert.ok(slides.filter(slide => slide.type === 'slider').every(slide => slide.questions.length >= 10));
+assert.deepEqual([...new Set(slides.map(slide => slide.type))], ['slider', 'yn']);
+assert.equal(slides.findIndex(slide => slide.type === 'yn'), 21);
 assert.ok(slides.every(slide => slide.questions.every(row => row[3] === slide.type && row[0].startsWith(`${slide.category}-`))));
+const legacySlides = makeLegacySlides();
+assert.equal(legacySlides.length, 85);
+legacySlides.forEach((slide, index) => {
+  const newIndex = remapLegacySlideIndex(index);
+  const unseen = new Set(legacySlides.slice(index).flatMap(item => item.questions.map(row => row[0])));
+  assert.ok(slides[newIndex].questions.some(row => unseen.has(row[0])), `old slide ${index + 1} resumes with an unseen question`);
+  assert.ok(slides.slice(0, newIndex).every(item => item.questions.every(row => !unseen.has(row[0]))), `old slide ${index + 1} does not skip unseen cards`);
+});
+const futureMultiRows = Array.from({ length: 23 }, (_, index) => [`A1-M${index}`, 'Test', 'Test?', 'multi', 1, []]);
+assert.deepEqual(makeSlides(futureMultiRows).map(slide => slide.questions.length), [12, 11]);
 for (const row of FAMILIES.filter(item => item[3] === 'slider')) {
   const stops = row[5].map((anchor, index) => anchor[0] ?? index);
   assert.equal(new Set(stops).size, stops.length, `${row[0]} has distinct slider stops`);
