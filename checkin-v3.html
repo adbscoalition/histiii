@@ -9,7 +9,7 @@
   <link rel="canonical" href="https://www.histi.org/checkin-v3">
   <link rel="icon" type="image/png" sizes="48x48" href="/histi-icon-48.png">
   <link rel="manifest" href="/site.webmanifest">
-  <link rel="stylesheet" href="/styles-histi-v3.css?v=question-card-2">
+  <link rel="stylesheet" href="/styles-histi-v3.css?v=levels-cautions-1">
   <title>HISTI 3.0 | Check In</title>
 </head>
 <body>
@@ -29,9 +29,23 @@
         <p class="start-lede">Think about one specific person you interact with directly. Answer one clear question at a time, and keep your answers on this device.</p>
         <div class="start-rights-card" role="note"><strong>What changed in 3.0</strong><div class="start-rights-grid">
           <span>One question per card.</span><span>Phone and email are simple yes/no.</span><span>Overlapping answer choices are replaced with ordered scales.</span><span>Partial results include coverage.</span>
-        </div></div>
+        </div><p class="start-safety-note">You’ll see a caution before the questions become more personal, and warnings before sensitive sections. You can skip either sensitive section.</p></div>
         <p class="start-disclaimer"><strong>HISTI is a reflection tool.</strong> It is not a diagnosis, legal opinion, safety certificate, or measure of character.</p>
         <button id="begin-btn" class="primary start-primary" type="button">Start HISTI 3.0</button>
+      </section>
+    </main>
+
+    <main id="boundary-screen" class="screen boundary-screen" hidden>
+      <section id="boundary-card" class="boundary-card" data-level="caution" aria-labelledby="boundary-title">
+        <div class="boundary-heading-row"><span id="boundary-level" class="boundary-level">Caution</span><span id="boundary-route" class="boundary-route">A → B</span></div>
+        <h1 id="boundary-title">The next section gets more personal.</h1>
+        <p id="boundary-copy" class="boundary-copy"></p>
+        <div class="boundary-rights" role="note"><strong>Know your rights</strong><ul>
+          <li>Choose descriptions only. Never type or paste real private details, passwords, codes, or identifiers.</li>
+          <li>You may refuse any question, go back, or stop at any time.</li>
+          <li id="boundary-skip-right" hidden>You may skip this whole section; skipped answers are not scored as zero disclosure.</li>
+        </ul></div>
+        <div class="boundary-actions"><button id="boundary-back" class="secondary" type="button">Back</button><button id="boundary-skip" class="secondary" type="button" hidden>Skip this section</button><button id="boundary-continue" class="primary" type="button">Continue</button></div>
       </section>
     </main>
 
@@ -40,15 +54,26 @@
         <div class="question-top">
           <div class="question-meta"><span id="question-code" class="v3-progress-copy"></span><span id="question-eta"></span></div>
           <h1 id="question-title"></h1><p id="question-help" class="muted"></p>
+          <div id="risk-note" class="risk-note" hidden role="note"><strong id="risk-title"></strong><span id="risk-text"></span></div>
         </div>
-        <div class="answer-panel"><div class="answer-panel-heading"><strong id="answer-prompt">Choose one answer</strong><span id="answer-hint"></span></div><div id="rubric-list" class="rubric-list" role="group" aria-label="Your answer"></div></div>
+        <div class="answer-panel"><div class="answer-panel-heading"><strong id="answer-prompt">Choose one answer</strong><span id="answer-hint"></span></div><div id="rubric-list" class="rubric-list" role="group" aria-label="Your answer"></div>
+          <div id="status-list" class="status-list" role="group" aria-label="Other ways to answer" hidden><span class="status-label">Other ways to answer</span><div class="status-buttons"><button type="button" data-status="PNA" aria-pressed="false">I’d rather not answer</button><button type="button" data-status="U" aria-pressed="false">I don’t know</button><button type="button" data-status="NA" aria-pressed="false">This doesn’t apply</button></div></div>
+        </div>
         <nav class="quiz-nav" aria-label="Question navigation"><div class="quiz-nav-inner">
           <button id="back-btn" class="nav-primary previous" type="button">Back</button>
           <button id="next-btn" class="nav-primary next" type="button">Next</button>
-          <div id="status-list" class="status-list" role="group" aria-label="Other answers"><button type="button" data-status="PNA" aria-pressed="false">I’d rather not answer</button><button type="button" data-status="U" aria-pressed="false">I don’t know</button><button id="view-results-btn" class="v3-current-results" type="button" hidden>View current results</button></div>
+          <button id="view-results-btn" class="v3-current-results" type="button" hidden>View current results</button>
         </div></nav>
       </section>
     </main>
+
+    <section id="section-skip-dialog" class="section-skip-dialog" hidden role="dialog" aria-modal="true" aria-labelledby="section-skip-title"><div class="section-skip-card">
+      <p class="eyebrow">Skip sensitive section <span id="section-skip-category">C</span></p>
+      <h2 id="section-skip-title">Skip these questions?</h2>
+      <p>There’s no need to enter any real private information. If you skip, the section is excluded from your score—not counted as zero disclosure.</p>
+      <div class="section-skip-reasons" role="radiogroup" aria-label="Reason for skipping"><label><input type="radio" name="section-skip-reason" value="uncomfortable"><span>I’m uncomfortable answering these questions</span></label><label><input type="radio" name="section-skip-reason" value="refuse"><span>I refuse to answer these questions</span></label></div>
+      <div class="section-skip-actions"><button id="section-skip-back" class="secondary" type="button">Back</button><button id="section-skip-confirm" class="primary" type="button" disabled>Skip section</button></div>
+    </div></section>
 
     <main id="results-screen" class="screen results-screen" hidden>
       <section class="result-card" aria-labelledby="result-title">
@@ -58,6 +83,7 @@
         </div>
         <div class="subscore-section"><div class="subscore-heading"><h2>Topic spectra</h2><span>Different topics use different descriptive endpoints</span></div><div id="category-results" class="category-grid"></div></div>
         <div class="result-disclaimer"><img src="/histi-logo.webp?v=facelift-1" alt="HISTI"><div><strong>WHAT THIS RESULT MEANS</strong><p>The score summarizes the answers you chose. It does not say that being more private or more open is better.</p></div></div>
+        <div id="result-warning-card" class="result-warning-card" role="note"><strong id="result-warning-title">A note about very sensitive information</strong><p id="result-warning-text"></p></div>
         <div class="actions result-actions"><button id="share-btn" class="primary" type="button">Share result summary</button><button id="copy-result-btn" class="secondary" type="button">Copy result summary</button><button id="review-btn" class="secondary" type="button">Review answers</button><button id="restart-btn" class="secondary" type="button">Start over</button></div><p id="share-status" class="muted small" aria-live="polite"></p>
       </section>
     </main>
@@ -66,6 +92,6 @@
 
     <footer id="bottom-utility" class="bottom-utility"><div class="bottom-utility-inner"><div class="footer-links"><button id="footer-disclosure-btn" type="button">Live privacy proof</button><button id="footer-export-btn" type="button">Export my data</button><a href="/privacy">Privacy policy</a><a href="/terms">Terms</a></div><span class="device-note"><span class="device-dot" aria-hidden="true"></span>Saved only on this device</span><button id="footer-reset-btn" type="button">Reset</button></div></footer>
   </div>
-  <script type="module" src="/app-histi-v3.js?v=question-card-2"></script>
+  <script type="module" src="/app-histi-v3.js?v=levels-cautions-1"></script>
 </body>
 </html>
