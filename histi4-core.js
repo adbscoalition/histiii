@@ -43,12 +43,13 @@ export function rubricPoints(row, value) {
 }
 
 export function signedScore(earned, available) {
-  return available > 0 ? Math.round((earned / available) * 200 - 100) : null;
+  return available > 0 ? (earned / available) * 200 - 100 : null;
 }
 
 export function displayScore(score) {
   if (score === null) return '—';
-  return score < 0 ? `P${Math.abs(score)}` : score > 0 ? `O${score}` : 'N0';
+  const rounded = Math.round(score);
+  return rounded < 0 ? `P${Math.abs(rounded)}` : rounded > 0 ? `O${rounded}` : 'N0';
 }
 
 export function calculate(answers, families = FAMILIES) {
