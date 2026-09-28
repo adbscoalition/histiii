@@ -40,13 +40,13 @@ html,body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
 .h4-yn button,.h4-multi button{min-height:52px;padding:10px 14px;border:1px solid rgba(255,255,255,.19);border-radius:11px;background:#22221d;color:#e7e2d8;font-size:14px;font-weight:800;transition:background-color .15s ease,border-color .15s ease,transform .15s ease}
 .h4-yn button:hover,.h4-multi button:hover{border-color:rgba(245,195,77,.6);background:#29261d}
 .h4-yn button:active,.h4-multi button:active{transform:scale(.99)}
-.h4-yn button[aria-pressed=true],.h4-multi button[aria-pressed=true]{border-color:#edb93f;background:linear-gradient(135deg,#ffdc72,#e8aa31);color:#171108}
+.h4-yn button[aria-pressed=true],.h4-multi button[aria-pressed=true]{border-color:#edb93f;background:linear-gradient(135deg,#ffdc72,#e8aa31);color:#171108;animation:h4-choose .26s ease-out}
 .h4-multi{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
 .h4-multi button{text-align:left}
 .h4-status{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px;padding-top:12px;border-top:1px solid rgba(255,255,255,.1)}
 .h4-status button{min-height:37px;padding:7px 11px;border:1px solid rgba(255,255,255,.18);border-radius:9px;background:#20201b;color:#d5cfc3;font-size:12px;font-weight:750;transition:background-color .15s ease,border-color .15s ease}
 .h4-status button:hover{border-color:rgba(245,195,77,.55)}
-.h4-status button[aria-pressed=true]{border-color:#e9b83e;background:#f3c550;color:#171108}
+.h4-status button[aria-pressed=true]{border-color:#e9b83e;background:#f3c550;color:#171108;animation:h4-choose .26s ease-out}
 .h4-reset-row{display:flex;justify-content:flex-end;margin-top:15px}
 .h4-reset-row button{padding:7px 0;border:0;background:none;color:#c7a59b;font-size:12px;font-weight:750;text-decoration:underline;text-underline-offset:3px}
 .h4-reset-row button:hover{color:#fff}
@@ -60,4 +60,4 @@ html,body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
 @keyframes h4-choose{from{transform:scale(.91)}to{transform:scale(1)}}
 @media(max-width:680px){.h4-choice-grid{grid-template-columns:1fr;gap:9px}.h4-choice{min-height:140px}.h4-choice strong{margin-top:3px}.h4-question{padding:18px 15px}.h4-question-top{display:block}.h4-question-code{display:inline-block;margin-bottom:9px}.h4-topic{margin-left:0}.h4-yn{gap:8px}.h4-multi{grid-template-columns:1fr}.h4-status button{flex:1 1 calc(50% - 8px)}}
 @media(max-width:380px){.h4-status button{flex:1 1 100%}.h4-switch a{width:100%}.topbar-right .privacy-live-badge{padding-inline:7px}}
-@media(prefers-reduced-motion:reduce){.h4-choice,.h4-question,.h4-yn button,.h4-multi button,.h4-status button,.h4-segment,.progress-track span{transition:none}.h4-choice,.h4-reveal,.h4-header-reveal,.h4-segment.is-current,.start-card,.result-card{animation:none}}
+@media(prefers-reduced-motion:reduce){.h4-choice,.h4-question,.h4-yn button,.h4-multi button,.h4-status button,.h4-segment,.progress-track span{transition:none}.h4-choice,.h4-reveal,.h4-header-reveal,.h4-segment.is-current,.h4-yn button[aria-pressed=true],.h4-multi button[aria-pressed=true],.h4-status button[aria-pressed=true],.start-card,.result-card{animation:none}}

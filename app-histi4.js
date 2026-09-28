@@ -45,17 +45,14 @@ function show(screen, scroll = true) {
   if (scroll) window.scrollTo(0, 0);
   save();
 }
-function setAnswer(code, status, value = null, redraw = true) {
+function setAnswer(code, status, value = null) {
   const previous = state.answers[code];
   if (previous?.status === status && JSON.stringify(previous.value) === JSON.stringify(value)) return;
   state.answers[code] = { status, value };
   save();
-  if (redraw) renderSlide(false);
-  else {
-    const result = calculate(state.answers);
-    $('answered-label').textContent = `${result.answered} of ${FAMILIES.length} scored`;
-    $('partial-btn').hidden = result.answered === 0;
-  }
+  const result = calculate(state.answers);
+  $('answered-label').textContent = `${result.answered} of ${FAMILIES.length} scored`;
+  $('partial-btn').hidden = result.answered === 0;
 }
 function questionCard(row, slideNumber, animate = false) {
   const [code, topic, prompt, type, max, anchors] = row;
@@ -67,6 +64,8 @@ function questionCard(row, slideNumber, animate = false) {
   top.append(el('span', 'h4-question-code', code), el('h2', '', prompt));
   card.append(top, el('p', 'h4-topic', topic));
   const control = el('div', 'h4-control');
+  let clearChoice = () => {};
+  const clearStatus = () => card.querySelectorAll('.h4-status button').forEach(button => button.setAttribute('aria-pressed', 'false'));
   if (type === 'slider') {
     const numericAnchors = anchors.map((anchor, index) => anchor[0] ?? index);
     const stored = answer?.status === 'score' ? Number(answer.value) : null;
@@ -85,8 +84,8 @@ function questionCard(row, slideNumber, animate = false) {
       button.setAttribute('aria-label', `Level ${index + 1}: ${anchor[1]}`);
       button.addEventListener('click', () => {
         update(index);
-        setAnswer(code, 'score', numericAnchors[index], false);
-        card.querySelectorAll('.h4-status button').forEach(statusButton => statusButton.setAttribute('aria-pressed', 'false'));
+        setAnswer(code, 'score', numericAnchors[index]);
+        clearStatus();
       });
       track.append(button);
       return button;
@@ -104,30 +103,48 @@ function questionCard(row, slideNumber, animate = false) {
       });
     };
     update(selectedIndex !== null && selectedIndex >= 0 ? selectedIndex : null);
+    clearChoice = () => update(null);
     const ends = el('div', 'h4-endpoints');
     ends.append(el('span', '', anchors[0][1]), el('span', '', anchors.at(-1)[1]));
     control.append(readout, track, ends);
   } else if (type === 'yn') {
     const choices = el('div', 'h4-yn');
+    const buttons = [];
+    const update = selected => {
+      buttons.forEach((button, index) => button.setAttribute('aria-pressed', String(selected === index)));
+      card.classList.toggle('is-answered', selected !== null);
+    };
     ['No', 'Yes'].forEach((label, index) => {
       const button = el('button', '', label); button.type = 'button';
       button.setAttribute('aria-pressed', String(answer?.status === 'score' && Number(answer.value) === index));
-      button.addEventListener('click', () => setAnswer(code, 'score', index));
+      button.addEventListener('click', () => { update(index); setAnswer(code, 'score', index); clearStatus(); });
+      buttons.push(button);
       choices.append(button);
     });
+    clearChoice = () => update(null);
     control.append(choices);
   } else if (type === 'multi') {
     const choices = el('div', 'h4-multi');
+    const buttons = [];
+    const update = (values, scored = true) => {
+      buttons.forEach((button, index) => button.setAttribute('aria-pressed', String(values.includes(index))));
+      card.classList.toggle('is-answered', scored);
+    };
     anchors.forEach((option, index) => {
       const button = el('button', '', option[1]); button.type = 'button';
       button.setAttribute('aria-pressed', String(answer?.status === 'score' && answer.value?.includes(index)));
       button.addEventListener('click', () => {
-        const values = answer?.status === 'score' && Array.isArray(answer.value) ? [...answer.value] : [];
+        const current = state.answers[code];
+        const values = current?.status === 'score' && Array.isArray(current.value) ? [...current.value] : [];
         const selected = values.includes(index) ? values.filter(item => item !== index) : [...values, index];
+        update(selected);
         setAnswer(code, 'score', selected);
+        clearStatus();
       });
+      buttons.push(button);
       choices.append(button);
     });
+    clearChoice = () => update([], false);
     control.append(choices);
   }
   card.append(control);
@@ -135,7 +152,11 @@ function questionCard(row, slideNumber, animate = false) {
   for (const [status, label] of [['unknown', "I don't know"], ['pna', 'Prefer not to answer'], ['na', 'Not applicable']]) {
     const button = el('button', '', label); button.type = 'button';
     button.setAttribute('aria-pressed', String(answer?.status === status));
-    button.addEventListener('click', () => setAnswer(code, status));
+    button.addEventListener('click', () => {
+      clearChoice();
+      setAnswer(code, status);
+      statuses.querySelectorAll('button').forEach(option => option.setAttribute('aria-pressed', String(option === button)));
+    });
     statuses.append(button);
   }
   card.append(statuses);
