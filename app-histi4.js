@@ -61,7 +61,7 @@ function questionCard(row, slideNumber, animate = false) {
   if (animate) card.classList.add('h4-reveal');
   card.classList.toggle('is-answered', answer?.status === 'score');
   const top = el('div', 'h4-question-top');
-  top.append(el('span', 'h4-question-code', code), el('h2', '', prompt));
+  top.append(el('h2', '', prompt));
   card.append(top, el('p', 'h4-topic', topic));
   const control = el('div', 'h4-control');
   let clearChoice = () => {};
