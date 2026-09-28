@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; form-action 'none'; object-src 'none'; base-uri 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; media-src 'none'; img-src 'self' data: blob:; font-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#090907">
+  <meta name="description" content="HISTI 3.0 — a private, on-device person-to-person information-sharing check-in.">
+  <link rel="canonical" href="https://www.histi.org/checkin-v3">
+  <link rel="icon" type="image/png" sizes="48x48" href="/histi-icon-48.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="stylesheet" href="/styles-public-sans-v2.css?v=histi-v3-beta-1">
+  <title>HISTI 3.0 | Check In</title>
+</head>
+<body>
+  <div class="ambient ambient-a" aria-hidden="true"></div><div class="ambient ambient-b" aria-hidden="true"></div>
+  <div id="app" class="app-shell">
+    <header class="topbar"><div class="topbar-inner">
+      <div class="topbar-left"><a class="home-button" href="/">Home</a></div>
+      <a class="brand-home-link" href="/" aria-label="HISTI home"><img class="brand-logo" src="/histi-logo.webp?v=facelift-1" alt="HISTI"></a>
+      <div class="topbar-right"><button id="privacy-live-btn" class="privacy-live-badge" type="button"><span class="privacy-live-dot" aria-hidden="true"></span><span>LIVE · local only</span></button></div>
+    </div></header>
+
+    <div class="progress-track" aria-hidden="true"><span id="progress-fill"></span></div>
+
+    <main id="intro-screen" class="screen landing-screen">
+      <section class="start-card" aria-labelledby="start-title">
+        <p class="eyebrow">Human Information-Sharing Transparency Index · 3.0 beta</p>
+        <h1 id="start-title">One person. One question. One card.</h1>
+        <p class="start-lede">Think about one specific person you interact with directly. HISTI 3.0 uses faster sliders and yes/no cards, removes redaction-style choices, and keeps scoring on this device.</p>
+        <div class="start-rights-card" role="note"><strong>What changed in 3.0</strong><div class="start-rights-grid">
+          <span>One question per card.</span><span>Phone and email are simple yes/no.</span><span>Overlapping answer choices are replaced with ordered scales.</span><span>Partial results include coverage.</span>
+        </div></div>
+        <p class="start-disclaimer"><strong>HISTI is a reflection tool.</strong> It is not a diagnosis, legal opinion, safety certificate, or measure of character.</p>
+        <button id="begin-btn" class="primary start-primary" type="button">Start HISTI 3.0</button>
+      </section>
+    </main>
+
+    <main id="assessment-screen" class="screen assessment" hidden>
+      <section class="assessment-card" aria-live="polite">
+        <div class="question-top">
+          <div class="question-meta"><span id="question-code" class="v3-progress-copy"></span></div>
+          <h1 id="question-title"></h1><p id="question-help" class="muted"></p>
+        </div>
+        <div class="answer-panel"><div class="answer-panel-heading"><strong id="answer-prompt">Choose one answer</strong><span id="answer-hint">One question, one card.</span></div><div id="rubric-list" class="rubric-list" role="group" aria-label="Your answer"></div></div>
+      </section>
+      <nav class="quiz-nav" aria-label="Question navigation"><div class="quiz-nav-inner">
+        <button id="back-btn" class="nav-primary previous" type="button">Back</button>
+        <div id="status-list" class="status-list" role="group" aria-label="Other answers"><button type="button" data-status="PNA" aria-pressed="false">I’d rather not answer</button><button type="button" data-status="U" aria-pressed="false">I don’t know</button><button id="view-results-btn" class="v3-current-results" type="button" hidden>View current results</button></div>
+        <button id="next-btn" class="nav-primary next" type="button">Next</button>
+      </div></nav>
+    </main>
+
+    <main id="results-screen" class="screen results-screen" hidden>
+      <section class="result-card" aria-labelledby="result-title">
+        <div class="result-hero"><p class="eyebrow">Your disclosure preference</p><h1 id="result-title" class="result-title"></h1>
+          <div class="result-spectrum" aria-label="HISTI spectrum from P100 private through N0 neutral to O100 open"><div class="spectrum-labels" aria-hidden="true"><span>Private</span><span>Open</span></div><div class="spectrum-track"><span class="spectrum-center" aria-hidden="true"></span><span id="result-marker" class="spectrum-marker" aria-hidden="true"></span></div><div class="spectrum-values" aria-hidden="true"><span>P100</span><span>N0</span><span>O100</span></div></div>
+          <div class="result-score-line"><span>HISTI</span><strong id="result-score" class="score"></strong></div><p id="result-note" class="muted"></p>
+        </div>
+        <div class="subscore-section"><div class="subscore-heading"><h2>Topic spectra</h2><span>Different topics use different descriptive endpoints</span></div><div id="category-results" class="category-grid"></div></div>
+        <div class="result-disclaimer"><img src="/histi-logo.webp?v=facelift-1" alt="HISTI"><div><strong>WHAT THIS RESULT MEANS</strong><p>The score summarizes the answers you chose. It does not say that being more private or more open is better.</p></div></div>
+        <div class="actions result-actions"><button id="share-btn" class="primary" type="button">Share result summary</button><button id="copy-result-btn" class="secondary" type="button">Copy result summary</button><button id="review-btn" class="secondary" type="button">Review answers</button><button id="restart-btn" class="secondary" type="button">Start over</button></div><p id="share-status" class="muted small" aria-live="polite"></p>
+      </section>
+    </main>
+
+    <section id="disclosure-panel" class="disclosure-sheet" hidden role="dialog" aria-modal="true" aria-labelledby="disclosure-title"><div class="disclosure-card disclosure-proof-card"><div class="disclosure-head"><p class="eyebrow">Privacy proof</p><button id="disclosure-close" type="button">Close</button></div><div class="proof-hero"><span class="proof-zero">0 answer uploads</span><div><h2 id="disclosure-title">Your answers stay in this browser.</h2><p>HISTI 3.0 stores progress and scoring locally. The page policy blocks connection APIs.</p></div></div><div class="proof-telemetry"><article><span id="proof-network-value" class="proof-telemetry-value">Blocked</span><strong>Connection APIs</strong></article><article><span id="proof-cookie-value" class="proof-telemetry-value">0</span><strong>Page-visible cookies</strong></article><article><span id="proof-external-value" class="proof-telemetry-value">0</span><strong>Third-party runtime hosts</strong></article><article><span id="proof-storage-value" class="proof-telemetry-value">Local only</span><strong>Answer storage</strong></article></div><p id="privacy-proof-result" class="proof-updated">Open this panel to verify local-only behavior.</p><div class="proof-actions"><a class="disclosure-policy-link" href="/privacy">Privacy policy</a><button id="disclosure-done" class="primary" type="button">Got it</button></div></div></section>
+
+    <footer id="bottom-utility" class="bottom-utility"><div class="bottom-utility-inner"><div class="footer-links"><button id="footer-disclosure-btn" type="button">Live privacy proof</button><button id="footer-export-btn" type="button">Export my data</button><a href="/privacy">Privacy policy</a><a href="/terms">Terms</a></div><span class="device-note"><span class="device-dot" aria-hidden="true"></span>Saved only on this device</span><button id="footer-reset-btn" type="button">Reset</button></div></footer>
+  </div>
+  <script type="module" src="/app-histi-v3.js?v=histi-v3-beta-1"></script>
+</body>
+</html>
