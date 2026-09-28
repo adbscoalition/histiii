@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; form-action 'none'; object-src 'none'; base-uri 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; img-src 'self'; font-src 'self'; script-src 'self'; style-src 'self'">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#090b11">
+  <meta name="description" content="HISTI four-group check-in for Spouse / partner.">
+  <link rel="icon" type="image/png" href="/histi-icon-48.png">
+  <link rel="stylesheet" href="/styles-histi4.css">
+  <title>Spouse / partner | HISTI Four Groups</title>
+</head>
+<body data-recipient="G4">
+  <header class="h4-header"><a href="/checkin-4">← Four groups</a><a class="h4-brand" href="/">HISTI<span> FOUR GROUPS</span></a><span>Private · on device</span></header>
+  <main class="h4-main">
+    <section id="intro-screen" class="h4-intro">
+      <p class="h4-eyebrow">HISTI · Four-group suite</p>
+      <h1>Sharing with <span id="intro-recipient"></span>.</h1>
+      <p id="intro-description" class="h4-lead"></p>
+      <div class="h4-intro-facts"><span>245 questions</span><span id="slide-count"></span><span>Answers stay on this device</span></div>
+      <p class="h4-safety">Choose only how willing you would be to disclose. Never type the real address, identifier, medical detail, password, or other private value.</p>
+      <button id="start-btn" class="h4-primary" type="button">Start this check-in →</button>
+      <div class="h4-switch"><span>Or choose another recipient:</span><nav id="intro-group-links" aria-label="Other recipients"></nav></div>
+    </section>
+    <section id="assessment-screen" class="h4-assessment" hidden>
+      <div class="h4-progress-top"><span id="progress-label"></span><span id="answered-label"></span></div>
+      <div class="h4-progress" role="progressbar" aria-label="Check-in progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="progress-fill"></span></div>
+      <div class="h4-section"><p id="category-label" class="h4-eyebrow"></p><h1 id="slide-title"></h1><p id="slide-help"></p></div>
+      <div id="caution" class="h4-caution" hidden></div>
+      <div id="question-list" class="h4-question-list"></div>
+      <div class="h4-nav"><button id="back-btn" class="h4-secondary" type="button">← Back</button><button id="next-btn" class="h4-primary" type="button">Next →</button></div>
+      <div class="h4-below"><button id="partial-btn" type="button">View partial result</button><button id="reset-btn" type="button">Reset answers</button></div>
+    </section>
+    <section id="results-screen" class="h4-results" hidden>
+      <p class="h4-eyebrow">HISTI · Four-group result</p>
+      <h1 id="result-heading"></h1>
+      <div class="h4-result-hero"><span id="result-score"></span><div class="h4-spectrum"><span>P100</span><span>N0</span><span>O100</span><i id="result-marker"></i></div></div>
+      <p id="result-coverage" class="h4-result-coverage"></p>
+      <h2>Information categories</h2>
+      <div id="category-results" class="h4-category-results"></div>
+      <p class="h4-disclaimer">The score is not fully accurate to true privacy and openness values.</p>
+      <div class="h4-nav"><button id="resume-btn" class="h4-secondary" type="button">Review questions</button><a class="h4-primary" href="/checkin-4">Try another recipient →</a></div>
+      <div class="h4-below"><button id="result-reset-btn" type="button">Reset this check-in</button></div>
+    </section>
+  </main>
+  <footer class="h4-footer"><a href="/privacy">Privacy</a><a href="/terms">Terms</a></footer>
+  <script type="module" src="/app-histi4.js"></script>
+</body>
+</html>

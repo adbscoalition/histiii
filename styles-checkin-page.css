@@ -22,13 +22,16 @@ main{min-height:0;display:grid;align-items:center}
 .app-card::after{content:"";position:absolute;inset:auto -15% -55% 30%;height:72%;border-radius:50%;opacity:.18;filter:blur(28px);pointer-events:none}
 .app-card.full::after{background:var(--yellow)}
 .app-card.condensed::after{background:var(--blue)}
+.app-card.four::after{background:#ab9dff}
 .app-card.available{transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
 .app-card.available:hover{transform:translateY(-4px);box-shadow:0 22px 55px rgba(0,0,0,.3)}
 .app-card.full:hover{border-color:rgba(244,181,38,.55)}
 .app-card.condensed:hover{border-color:rgba(79,145,239,.62)}
+.app-card.four:hover{border-color:rgba(171,157,255,.65)}
 .status{width:max-content;padding:6px 9px;border:1px solid rgba(255,255,255,.12);border-radius:999px;color:#bdb6aa;background:rgba(255,255,255,.035);font-size:12px;font-weight:850;line-height:1}
 .available.full .status{border-color:rgba(244,181,38,.32);color:#f1c867;background:rgba(244,181,38,.07)}
 .available.condensed .status{border-color:rgba(79,145,239,.36);color:#87b8ff;background:rgba(79,145,239,.08)}
+.available.four .status{border-color:rgba(171,157,255,.42);color:#c6bbff;background:rgba(171,157,255,.09)}
 .card-number{position:absolute;top:22px;right:22px;color:#4f4d47;font-size:13px;font-weight:900;letter-spacing:.1em}
 .card-name{position:relative;z-index:1;margin-top:auto;color:#f7f3e9;font-size:clamp(26px,2.4vw,36px);font-weight:900;line-height:1;letter-spacing:-.045em;overflow-wrap:anywhere}
 .card-description{position:relative;z-index:1;margin-top:9px;color:#9b958a;font-size:15px;line-height:1.4}
@@ -36,6 +39,7 @@ main{min-height:0;display:grid;align-items:center}
 .card-action{position:relative;z-index:1;margin-top:24px;display:flex;align-items:center;justify-content:space-between;color:#f7f3e9;font-size:14px;font-weight:850}
 .full .card-action b{color:var(--yellow)}
 .condensed .card-action b{color:#72aaf6}
+.four .card-action b{color:#b7a9ff}
 .soon{border-style:dashed;background:#0c0c0a}
 .soon .status{color:#77736b}
 .soon .card-name{color:#aaa59b}
