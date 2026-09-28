@@ -422,7 +422,7 @@ function scheduleApply() {
 
 const resultsScreen = document.getElementById('results-screen');
 if (resultsScreen) {
-  new MutationObserver(scheduleApply).observe(resultsScreen, { attributes: true, attributeFilter: ['hidden'] });
+  new MutationObserver(scheduleApply).observe(resultsScreen, { attributes: true, attributeFilter: ['hidden', 'class'] });
 }
 
 document.addEventListener('click', event => {
