@@ -349,12 +349,12 @@ export function applySpectrumResultsToPage() {
       for (const topic of TOPIC_SPECTRA) frag.append(createTopicCard(result.topics[topic.id]));
       grid.replaceChildren(frag);
 
+      const priorCoverage = grid.parentElement?.querySelector('.histi-coverage-note');
+      if (priorCoverage) priorCoverage.remove();
       const coverage = document.createElement('div');
       coverage.className = 'histi-coverage-note';
       coverage.innerHTML = `<span>Assessment coverage</span><strong>${Math.round(result.coverage * 100)}%</strong>`;
       grid.after(coverage);
-      const prior = coverage.parentElement?.querySelectorAll('.histi-coverage-note');
-      if (prior && prior.length > 1) [...prior].slice(0, -1).forEach(node => node.remove());
     }
 
     const share = document.getElementById('share-btn');
@@ -422,7 +422,7 @@ function scheduleApply() {
 
 const resultsScreen = document.getElementById('results-screen');
 if (resultsScreen) {
-  new MutationObserver(scheduleApply).observe(resultsScreen, { attributes: true, attributeFilter: ['hidden'], childList: true, subtree: true, characterData: true });
+  new MutationObserver(scheduleApply).observe(resultsScreen, { attributes: true, attributeFilter: ['hidden'] });
 }
 
 document.addEventListener('click', event => {
