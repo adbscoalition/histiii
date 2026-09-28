@@ -26,7 +26,7 @@ for(const [section,rows] of sections){
 const $=id=>document.getElementById(id);
 const els={
   intro:$('intro-screen'), assessment:$('assessment-screen'), results:$('results-screen'), begin:$('begin-btn'),
-  progress:$('progress-fill'), qmeta:$('question-code'), qtitle:$('question-title'), qhelp:$('question-help'),
+  progress:$('progress-fill'), qmeta:$('question-code'), qeta:$('question-eta'), qtitle:$('question-title'), qhelp:$('question-help'),
   answerPrompt:$('answer-prompt'), answerHint:$('answer-hint'), list:$('rubric-list'), back:$('back-btn'), next:$('next-btn'),
   status:$('status-list'), partial:$('view-results-btn'), resultTitle:$('result-title'), resultScore:$('result-score'),
   marker:$('result-marker'), resultNote:$('result-note'), topicGrid:$('category-results'), review:$('review-btn'), restart:$('restart-btn'),
@@ -135,6 +135,7 @@ function show(name){
   els.intro.hidden=name!=='intro';
   els.assessment.hidden=name!=='assessment';
   els.results.hidden=name!=='results';
+  window.scrollTo(0,0);
   save();
 }
 
@@ -171,37 +172,20 @@ function buttonChoice(q,a){
   const frag=document.createDocumentFragment();
   const wrap=document.createElement('div'); wrap.className='v3-choice-grid';
   q.options.forEach((label,idx)=>{
-    const b=document.createElement('button'); b.type='button'; b.className='v3-choice'; b.textContent=label;
+    const b=document.createElement('button'); b.type='button'; b.className='v3-choice';
+    const mark=document.createElement('span'); mark.className='v3-choice-mark'; mark.setAttribute('aria-hidden','true');
+    const text=document.createElement('span'); text.textContent=label;
+    b.append(mark,text);
     const status=label==='Not applicable'?'na':label==='Prefer not to answer'?'pna':'score';
     b.setAttribute('aria-pressed',String(a?.value===idx&&a?.status===status));
     b.addEventListener('click',()=>{
-      setAnswer(q,idx,status); renderQuestion();
-      if(['recipient','mode','period','yesno'].includes(q.control)&&!['Q005'].includes(q.code)) setTimeout(()=>go(1),160);
+      setAnswer(q,idx,status);
+      for(const choice of wrap.children) choice.setAttribute('aria-pressed',String(choice===b));
+      els.next.disabled=false;
+      for(const other of els.status.querySelectorAll('[data-status]')) other.setAttribute('aria-pressed','false');
     });
     wrap.append(b);
   });
-  frag.append(wrap); return frag;
-}
-
-function sliderChoice(q,a){
-  const frag=document.createDocumentFragment();
-  const wrap=document.createElement('div'); wrap.className='v3-slider-wrap';
-  const value=document.createElement('div'); value.className='v3-slider-value';
-  const answered=a?.status==='score'&&Number.isInteger(Number(a?.value));
-  const start=answered?Number(a.value):0;
-  value.textContent=answered?q.options[start]:'Move the slider to answer';
-  const input=document.createElement('input'); input.type='range'; input.min='0'; input.max=String(q.options.length-1); input.step='1'; input.value=String(start); input.className='v3-slider';
-  input.setAttribute('aria-label',q.title);
-  const scale=document.createElement('div'); scale.className='v3-slider-scale';
-  scale.innerHTML=`<span>${q.options[0]}</span><span>${q.options[q.options.length-1]}</span>`;
-  input.addEventListener('input',()=>{ value.textContent=q.options[Number(input.value)]; });
-  input.addEventListener('change',()=>{ setAnswer(q,Number(input.value),'score'); renderQuestion(); });
-  wrap.append(value,input,scale);
-  if(q.control==='event'){
-    const hint=document.createElement('div'); hint.className='v3-event-hint';
-    hint.textContent='“Did not happen” is excluded from scoring. “Happened but not shared” counts as private for this event.';
-    wrap.append(hint);
-  }
   frag.append(wrap); return frag;
 }
 
@@ -210,12 +194,13 @@ function renderQuestion(){
   show('assessment');
   const a=currentAnswer(q);
   els.progress.style.width=`${((state.index+1)/questions.length)*100}%`;
-  els.qmeta.textContent=`${q.section} · ${state.index+1}/${questions.length} · ${etaText()}`;
+  els.qmeta.textContent=`${q.section} · ${state.index+1} of ${questions.length}`;
+  els.qeta.textContent=etaText();
   els.qtitle.textContent=modeQuestion(q.title);
   els.qhelp.textContent=helperFor(q);
-  els.answerPrompt.textContent=q.control==='yesno'?'Choose one answer':q.control==='recipient'?'Choose one person':q.control==='mode'?'Choose one mode':q.control==='period'?'Choose one period':'Choose the closest point on the scale';
-  els.answerHint.textContent=q.number>=236?'No real secret values are ever entered.':'One question, one card.';
-  els.list.replaceChildren(['recipient','mode','period','yesno'].includes(q.control)?buttonChoice(q,a):sliderChoice(q,a));
+  els.answerPrompt.textContent=q.control==='recipient'?'Choose one person':q.control==='mode'?'Choose one mode':q.control==='period'?'Choose one period':'Choose one answer';
+  els.answerHint.textContent=q.control==='event'?'“Did not happen” is excluded from scoring.':q.number>=236?'Never enter the actual secret or credential.':'';
+  els.list.replaceChildren(buttonChoice(q,a));
   els.back.disabled=state.index===0;
   els.next.textContent=state.index===questions.length-1?'Finish':'Next';
   const required=['Q001','Q002','Q003'].includes(q.code);
@@ -301,11 +286,6 @@ function openPrivacy(){
   const storage=$('proof-storage-value'); if(storage) storage.textContent='Local only';
 }
 
-function installStyles(){
-  const style=document.createElement('style'); style.textContent=`
-  .v3-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.v3-choice{min-height:62px;border:1px solid rgba(255,255,255,.14);border-radius:16px;background:#171714;color:#f6f1e6;font:inherit;font-weight:700;padding:14px 16px;text-align:left;cursor:pointer}.v3-choice[aria-pressed="true"]{border-color:#efb92b;background:rgba(239,185,43,.13);box-shadow:0 0 0 1px rgba(239,185,43,.35) inset}.v3-slider-wrap{padding:20px 4px 6px}.v3-slider-value{min-height:58px;display:grid;place-items:center;text-align:center;font-size:1.12rem;font-weight:800;color:#f6f1e6;margin-bottom:12px;padding:10px 14px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:#171714}.v3-slider{width:100%;accent-color:#efb92b;min-height:44px}.v3-slider-scale,.v3-topic-labels{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;color:#999284;font-size:.75rem;font-weight:650}.v3-slider-scale span:last-child,.v3-topic-labels span:last-child{text-align:right}.v3-slider-scale span:nth-child(2),.v3-topic-labels span:nth-child(2){text-align:center}.v3-event-hint{margin-top:12px;color:#9d968a;font-size:.8rem;line-height:1.45}.v3-topic-card{min-height:118px}.v3-topic-labels{margin-top:8px}.v3-current-results{border-color:rgba(239,185,43,.45)!important;color:#f1c75f!important}.v3-progress-copy{font-variant-numeric:tabular-nums}@media(max-width:720px){.v3-choice-grid{grid-template-columns:1fr}.question-meta{font-size:.72rem}.v3-slider-value{font-size:1rem}}
-  `;document.head.append(style);
-}
 
 els.begin?.addEventListener('click',()=>{state.startedAt||=Date.now();state.index=Math.max(0,Math.min(state.index,questions.length-1));renderQuestion();});
 els.back?.addEventListener('click',()=>go(-1));
@@ -320,7 +300,6 @@ els.privacy?.addEventListener('click',openPrivacy); els.footerPrivacy?.addEventL
 els.footerExport?.addEventListener('click',exportData); els.footerReset?.addEventListener('click',reset);
 $('disclosure-done')?.addEventListener('click',()=>{els.privacyPanel.hidden=true;});
 
-installStyles();
 const values=document.querySelector('.spectrum-values'); if(values) values.innerHTML='<span>P100</span><span>N0</span><span>O100</span>';
 const subheading=document.querySelector('.subscore-heading h2');if(subheading)subheading.textContent='Topic spectra';
 const subnote=document.querySelector('.subscore-heading span');if(subnote)subnote.textContent='Different topics use different descriptive endpoints';

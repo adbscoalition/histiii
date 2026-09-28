@@ -9,11 +9,10 @@
   <link rel="canonical" href="https://www.histi.org/checkin-v3">
   <link rel="icon" type="image/png" sizes="48x48" href="/histi-icon-48.png">
   <link rel="manifest" href="/site.webmanifest">
-  <link rel="stylesheet" href="/styles-public-sans-v2.css?v=histi-v3-beta-1">
+  <link rel="stylesheet" href="/styles-histi-v3.css?v=question-card-2">
   <title>HISTI 3.0 | Check In</title>
 </head>
 <body>
-  <div class="ambient ambient-a" aria-hidden="true"></div><div class="ambient ambient-b" aria-hidden="true"></div>
   <div id="app" class="app-shell">
     <header class="topbar"><div class="topbar-inner">
       <div class="topbar-left"><a class="home-button" href="/">Home</a></div>
@@ -27,7 +26,7 @@
       <section class="start-card" aria-labelledby="start-title">
         <p class="eyebrow">Human Information-Sharing Transparency Index · 3.0 beta</p>
         <h1 id="start-title">One person. One question. One card.</h1>
-        <p class="start-lede">Think about one specific person you interact with directly. HISTI 3.0 uses faster sliders and yes/no cards, removes redaction-style choices, and keeps scoring on this device.</p>
+        <p class="start-lede">Think about one specific person you interact with directly. Answer one clear question at a time, and keep your answers on this device.</p>
         <div class="start-rights-card" role="note"><strong>What changed in 3.0</strong><div class="start-rights-grid">
           <span>One question per card.</span><span>Phone and email are simple yes/no.</span><span>Overlapping answer choices are replaced with ordered scales.</span><span>Partial results include coverage.</span>
         </div></div>
@@ -39,16 +38,16 @@
     <main id="assessment-screen" class="screen assessment" hidden>
       <section class="assessment-card" aria-live="polite">
         <div class="question-top">
-          <div class="question-meta"><span id="question-code" class="v3-progress-copy"></span></div>
+          <div class="question-meta"><span id="question-code" class="v3-progress-copy"></span><span id="question-eta"></span></div>
           <h1 id="question-title"></h1><p id="question-help" class="muted"></p>
         </div>
-        <div class="answer-panel"><div class="answer-panel-heading"><strong id="answer-prompt">Choose one answer</strong><span id="answer-hint">One question, one card.</span></div><div id="rubric-list" class="rubric-list" role="group" aria-label="Your answer"></div></div>
+        <div class="answer-panel"><div class="answer-panel-heading"><strong id="answer-prompt">Choose one answer</strong><span id="answer-hint"></span></div><div id="rubric-list" class="rubric-list" role="group" aria-label="Your answer"></div></div>
+        <nav class="quiz-nav" aria-label="Question navigation"><div class="quiz-nav-inner">
+          <button id="back-btn" class="nav-primary previous" type="button">Back</button>
+          <button id="next-btn" class="nav-primary next" type="button">Next</button>
+          <div id="status-list" class="status-list" role="group" aria-label="Other answers"><button type="button" data-status="PNA" aria-pressed="false">I’d rather not answer</button><button type="button" data-status="U" aria-pressed="false">I don’t know</button><button id="view-results-btn" class="v3-current-results" type="button" hidden>View current results</button></div>
+        </div></nav>
       </section>
-      <nav class="quiz-nav" aria-label="Question navigation"><div class="quiz-nav-inner">
-        <button id="back-btn" class="nav-primary previous" type="button">Back</button>
-        <div id="status-list" class="status-list" role="group" aria-label="Other answers"><button type="button" data-status="PNA" aria-pressed="false">I’d rather not answer</button><button type="button" data-status="U" aria-pressed="false">I don’t know</button><button id="view-results-btn" class="v3-current-results" type="button" hidden>View current results</button></div>
-        <button id="next-btn" class="nav-primary next" type="button">Next</button>
-      </div></nav>
     </main>
 
     <main id="results-screen" class="screen results-screen" hidden>
@@ -67,6 +66,6 @@
 
     <footer id="bottom-utility" class="bottom-utility"><div class="bottom-utility-inner"><div class="footer-links"><button id="footer-disclosure-btn" type="button">Live privacy proof</button><button id="footer-export-btn" type="button">Export my data</button><a href="/privacy">Privacy policy</a><a href="/terms">Terms</a></div><span class="device-note"><span class="device-dot" aria-hidden="true"></span>Saved only on this device</span><button id="footer-reset-btn" type="button">Reset</button></div></footer>
   </div>
-  <script type="module" src="/app-histi-v3.js?v=histi-v3-beta-1"></script>
+  <script type="module" src="/app-histi-v3.js?v=question-card-2"></script>
 </body>
 </html>
