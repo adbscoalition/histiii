@@ -15,6 +15,11 @@ assert.equal(new Set(slides.flatMap(slide => slide.questions.map(row => row[0]))
 assert.equal(slides.flatMap(slide => slide.questions).length, 245);
 assert.ok(slides.every(slide => slide.questions.length <= (slide.type === 'multi' ? 1 : 3)));
 assert.ok(slides.every(slide => slide.questions.every(row => row[3] === slide.type && row[0].startsWith(`${slide.category}-`))));
+for (const row of FAMILIES.filter(item => item[3] === 'slider')) {
+  const stops = row[5].map((anchor, index) => anchor[0] ?? index);
+  assert.equal(new Set(stops).size, stops.length, `${row[0]} has distinct slider stops`);
+  stops.forEach((stop, index) => assert.equal(rubricPoints(row, stop), row[5][index][2], `${row[0]} stop ${index + 1} matches the rubric`));
+}
 
 const maximum = Object.fromEntries(FAMILIES.map(row => [row[0], { status: 'score', value: row[3] === 'yn' ? 1 : row[5].at(-1)[0] ?? row[5].length - 1 }]));
 const minimum = Object.fromEntries(FAMILIES.map(row => [row[0], { status: 'score', value: 0 }]));

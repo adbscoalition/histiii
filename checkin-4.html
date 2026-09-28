@@ -4,26 +4,36 @@
   <meta charset="utf-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; form-action 'none'; object-src 'none'; base-uri 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; img-src 'self'; font-src 'self'; script-src 'self'; style-src 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#090b11">
-  <meta name="description" content="Choose one of four recipients for the HISTI four-group check-in.">
+  <meta name="theme-color" content="#090907">
+  <meta name="description" content="Choose one of four recipients for the HISTI Full check-in.">
   <link rel="icon" type="image/png" href="/histi-icon-48.png">
-  <link rel="stylesheet" href="/styles-histi4.css">
-  <title>Choose a recipient | HISTI Four Groups</title>
+  <link rel="stylesheet" href="/styles-histi-v3.css?v=levels-cautions-1">
+  <link rel="stylesheet" href="/styles-histi4.css?v=full-2">
+  <title>HISTI Full | Choose a recipient</title>
 </head>
 <body>
-  <header class="h4-header"><a href="/checkin-page">← Check-ins</a><a class="h4-brand" href="/">HISTI<span> FOUR GROUPS</span></a><span>Private · on device</span></header>
-  <main class="h4-main h4-chooser">
-    <p class="h4-eyebrow">HISTI · Four-group suite</p>
-    <h1>Who are you thinking of?</h1>
-    <p class="h4-lead">The same 245 questions are answered separately for each recipient. Choose one to begin; you can take the others later. You only choose levels—never enter the actual private information.</p>
-    <div class="h4-group-grid" aria-label="Four recipient links">
-      <a href="/checkin-4-g1"><span>01 · G1</span><strong>Stranger / regular person</strong><small>Someone you do not personally know.</small><b>Start this check-in →</b></a>
-      <a href="/checkin-4-g2"><span>02 · G2</span><strong>Acquaintance</strong><small>Someone you know casually.</small><b>Start this check-in →</b></a>
-      <a href="/checkin-4-g3"><span>03 · G3</span><strong>Friend</strong><small>Someone you personally consider a friend.</small><b>Start this check-in →</b></a>
-      <a href="/checkin-4-g4"><span>04 · G4</span><strong>Spouse / partner</strong><small>A current or hypothetical committed partner.</small><b>Start this check-in →</b></a>
-    </div>
-    <p class="h4-footnote">Scores are reflections of the answers given, not a measure of anyone’s character or safety.</p>
-  </main>
-  <footer class="h4-footer"><a href="/privacy">Privacy</a><a href="/terms">Terms</a></footer>
+  <div class="app-shell">
+    <header class="topbar"><div class="topbar-inner">
+      <div class="topbar-left"><a class="home-button" href="/checkin-page">Check-ins</a></div>
+      <a class="brand-home-link" href="/" aria-label="HISTI home"><img class="brand-logo" src="/histi-logo.webp?v=facelift-1" alt="HISTI"></a>
+      <div class="topbar-right"><span class="privacy-live-badge"><span class="privacy-live-dot" aria-hidden="true"></span><span>LOCAL ONLY</span></span></div>
+    </div></header>
+    <div class="progress-track" aria-hidden="true"><span></span></div>
+    <main class="screen landing-screen">
+      <section class="start-card" aria-labelledby="group-title">
+        <p class="eyebrow">Human Information-Sharing Transparency Index · Full assessment</p>
+        <h1 id="group-title">Who are you thinking of?</h1>
+        <p class="start-lede">The same questions are answered separately for each person. Choose one place to begin. You can return for the others later.</p>
+        <div class="h4-choice-grid" aria-label="Four recipients">
+          <a class="h4-choice" href="/checkin-4-g1"><span>01 · G1</span><strong>Stranger / regular person</strong><small>Someone you do not personally know.</small><b>Start check-in <span aria-hidden="true">→</span></b></a>
+          <a class="h4-choice" href="/checkin-4-g2"><span>02 · G2</span><strong>Acquaintance</strong><small>Someone you know casually.</small><b>Start check-in <span aria-hidden="true">→</span></b></a>
+          <a class="h4-choice" href="/checkin-4-g3"><span>03 · G3</span><strong>Friend</strong><small>Someone you personally consider a friend.</small><b>Start check-in <span aria-hidden="true">→</span></b></a>
+          <a class="h4-choice" href="/checkin-4-g4"><span>04 · G4</span><strong>Spouse / partner</strong><small>A current or hypothetical committed partner.</small><b>Start check-in <span aria-hidden="true">→</span></b></a>
+        </div>
+        <p class="start-disclaimer"><strong>HISTI is a reflection tool.</strong> Choose levels only; never enter real private details. The score is not fully accurate to true privacy and openness values.</p>
+      </section>
+    </main>
+    <footer class="bottom-utility"><div class="bottom-utility-inner"><div class="footer-links"><a href="/checkin-page">Check-ins</a><a href="/privacy">Privacy policy</a><a href="/terms">Terms</a></div><span class="device-note"><span class="device-dot" aria-hidden="true"></span>Saved only on this device</span></div></footer>
+  </div>
 </body>
 </html>
