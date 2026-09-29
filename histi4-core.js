@@ -93,8 +93,8 @@ export function calculate(answers, families = FAMILIES) {
     if (!bucket) continue;
     bucket.total++;
     const answer = answers[row[0]];
-    if (answer?.status !== 'score') continue;
-    const points = rubricPoints(row, answer.value);
+    if (answer?.status !== 'score' && answer?.status !== 'pna') continue;
+    const points = answer.status === 'pna' ? 1 : rubricPoints(row, answer.value);
     if (points === null) continue;
     bucket.earned += points;
     bucket.available += row[4];

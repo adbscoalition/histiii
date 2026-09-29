@@ -1,5 +1,5 @@
 import { FAMILIES, CATEGORY_META, RECIPIENTS } from './histi4-data.js';
-import { makeSlides, remapLegacySlideIndex, calculate, rubricPoints, displayScore } from './histi4-core.js';
+import { makeSlides, remapLegacySlideIndex, calculate, rubricPoints, displayScore } from './histi4-core.js?v=pna-1';
 
 const group = document.body.dataset.recipient;
 const recipient = RECIPIENTS[group];
@@ -21,7 +21,7 @@ const el = (tag, className, text) => {
   return node;
 };
 
-function freshState() { return { index: 0, answers: {}, started: false, completed: false, screen: 'intro', layoutVersion: 2 }; }
+function freshState() { return { index: 0, answers: {}, started: false, completed: false, debugGenerated: false, screen: 'intro', layoutVersion: 2 }; }
 function loadState() {
   try {
     const stored = JSON.parse(localStorage.getItem(storageKey) || 'null');
@@ -115,7 +115,7 @@ function questionCard(row, animate = false) {
   const answer = state.answers[code];
   const card = el('article', 'h4-question');
   if (animate) card.classList.add('h4-reveal');
-  card.classList.toggle('is-answered', answer?.status === 'score');
+  card.classList.toggle('is-answered', answer?.status === 'score' || answer?.status === 'pna');
   const top = el('div', 'h4-question-top');
   top.append(el('p', 'h4-question-context', `Sharing with ${sharingWith}`), el('h2', '', prompt));
   card.append(top);
@@ -340,6 +340,7 @@ function questionCard(row, animate = false) {
     button.addEventListener('click', () => {
       clearChoice();
       setAnswer(code, status);
+      card.classList.toggle('is-answered', status === 'pna');
       statuses.querySelectorAll('button').forEach(option => option.setAttribute('aria-pressed', String(option === button)));
     });
     statuses.append(button);
@@ -394,7 +395,7 @@ function renderResults(completed = false) {
   $('result-score').textContent = displayScore(result.score);
   $('result-marker').hidden = result.score === null;
   $('result-marker').parentElement.style.setProperty('--score-position', `${result.score === null ? 50 : (result.score + 100) / 2}%`);
-  $('result-coverage').textContent = `${completed ? 'Completed' : 'Partial'} result · ${result.answered} of ${result.total} questions scored. Unanswered, unknown, prefer-not-to-answer, and not-applicable responses are excluded from the score. Partial scores can change as you answer more.`;
+  $('result-coverage').textContent = `${completed ? 'Completed' : 'Partial'} result · ${result.answered} of ${result.total} questions scored. “Prefer not to answer” counts as 1 point for that question. Unanswered, “I don’t know,” and “Not applicable” are excluded. Partial scores can change as you answer more.`;
   const fragment = document.createDocumentFragment();
   Object.keys(CATEGORY_META).forEach(key => fragment.append(resultCategory(key, result)));
   $('category-results').replaceChildren(fragment);
@@ -405,8 +406,117 @@ function reset() {
   if (!window.confirm(`Reset the ${recipient.label} check-in? This removes its saved answers and result from this device.`)) return;
   state = freshState();
   try { localStorage.removeItem(storageKey); } catch {}
+  syncDebugWatermark();
   show('intro');
 }
+
+const debugWatermarks = [document.querySelector('.question-top'), document.querySelector('.result-hero')].map(parent => {
+  const badge = el('p', 'h4-debug-watermark', 'DEBUG · GENERATED TEST DATA');
+  badge.hidden = true;
+  parent.prepend(badge);
+  return badge;
+});
+function syncDebugWatermark() {
+  debugWatermarks.forEach(badge => { badge.hidden = !state.debugGenerated; });
+}
+function makeDebugButton(label, action) {
+  const button = el('button', '', label);
+  button.type = 'button';
+  button.addEventListener('click', action);
+  return button;
+}
+function setupDebug() {
+  const dialog = el('dialog', 'h4-debug-dialog');
+  dialog.setAttribute('aria-labelledby', 'h4-debug-title');
+  const head = el('div', 'h4-debug-head');
+  const title = el('h2', '', 'Debug'); title.id = 'h4-debug-title';
+  head.append(title, makeDebugButton('Close', () => dialog.close()));
+  const note = el('p', 'h4-debug-note', 'Local-only test tools. Generated answers are marked and never overwrite answers you already chose.');
+  const summary = el('p', 'h4-debug-summary');
+  const categorySummary = el('div', 'h4-debug-categories');
+  const jump = el('div', 'h4-debug-jump');
+  const label = el('label', '', 'Jump to card');
+  label.htmlFor = 'h4-debug-card';
+  const input = el('input'); input.id = 'h4-debug-card'; input.type = 'number'; input.min = '1'; input.max = String(slides.length); input.step = '1';
+  const feedback = el('p', 'h4-debug-feedback'); feedback.setAttribute('role', 'status');
+  const goToCard = index => {
+    state.started = true;
+    state.completed = false;
+    state.index = index;
+    dialog.close();
+    renderSlide();
+  };
+  const jumpButton = makeDebugButton('Jump', () => {
+    const card = Number(input.value);
+    if (!Number.isInteger(card) || card < 1 || card > slides.length) {
+      feedback.textContent = `Enter a card from 1 to ${slides.length}.`;
+      input.focus();
+      return;
+    }
+    goToCard(card - 1);
+  });
+  input.addEventListener('keydown', event => { if (event.key === 'Enter') jumpButton.click(); });
+  jump.append(label, input, jumpButton);
+  const sections = el('div', 'h4-debug-sections');
+  sections.append(el('strong', '', 'First card in category'));
+  for (const key of Object.keys(CATEGORY_META)) {
+    const index = slides.findIndex(slide => slide.category === key);
+    sections.append(makeDebugButton(key, () => goToCard(index)));
+  }
+  const fillButton = makeDebugButton('Random-fill unanswered earlier cards → last card', () => {
+    let filled = 0;
+    for (const slide of slides.slice(0, -1)) {
+      for (const row of slide.questions) {
+        if (state.answers[row[0]]) continue;
+        const stopIndex = Math.floor(Math.random() * row[5].length);
+        const value = row[3] === 'yn' ? Math.round(Math.random())
+          : row[3] === 'multi' ? row[5].map((_, index) => index).filter(() => Math.random() < 0.5)
+            : (row[5][stopIndex][0] ?? stopIndex);
+        state.answers[row[0]] = { status: 'score', value };
+        filled++;
+      }
+    }
+    if (filled) state.debugGenerated = true;
+    syncDebugWatermark();
+    goToCard(slides.length - 1);
+  });
+  fillButton.className = 'h4-debug-fill';
+  const details = el('details', 'h4-debug-details');
+  details.append(el('summary', '', 'Answer-by-answer scoring'));
+  const rows = el('ol', 'h4-debug-rows');
+  details.append(rows);
+  const renderRows = () => {
+    const fragment = document.createDocumentFragment();
+    for (const row of FAMILIES) {
+      const answer = state.answers[row[0]];
+      if (!answer) continue;
+      const points = answer.status === 'pna' ? 1 : answer.status === 'score' ? rubricPoints(row, answer.value) : null;
+      const item = el('li');
+      item.append(el('span', '', `${row[0]} · ${row[1]}`), el('strong', '', points === null ? 'Excluded' : `${points} / ${row[4]}`));
+      fragment.append(item);
+    }
+    rows.replaceChildren(fragment);
+    if (!rows.childElementCount) rows.append(el('li', '', 'No answers yet.'));
+  };
+  details.addEventListener('toggle', () => { if (details.open) renderRows(); });
+  const refresh = () => {
+    const result = calculate(state.answers);
+    summary.textContent = `Overall ${displayScore(result.score)} · ${result.answered} of ${result.total} questions scored`;
+    const fragment = document.createDocumentFragment();
+    for (const [key, bucket] of Object.entries(result.categories)) {
+      fragment.append(el('span', '', `${key}: ${bucket.earned} / ${bucket.available} · ${displayScore(bucket.score)}`));
+    }
+    categorySummary.replaceChildren(fragment);
+    if (details.open) renderRows();
+  };
+  dialog.append(head, note, summary, categorySummary, jump, feedback, sections, fillButton, details);
+  document.body.append(dialog);
+  const trigger = makeDebugButton('Debug', () => { input.value = String(state.index + 1); feedback.textContent = ''; refresh(); dialog.showModal(); });
+  trigger.className = 'h4-debug-trigger';
+  document.querySelector('.footer-links').append(trigger);
+}
+setupDebug();
+syncDebugWatermark();
 
 $('intro-recipient').textContent = recipient.label.toLowerCase();
 $('intro-description').textContent = recipient.description;

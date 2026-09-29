@@ -50,7 +50,16 @@ for (const [key, meta] of Object.entries(CATEGORY_META)) {
   assert.equal(maxResult.categories[key].score, 100);
 }
 const noScore = calculate({ [FAMILIES[0][0]]: { status: 'pna' }, [FAMILIES[1][0]]: { status: 'unknown' }, [FAMILIES[2][0]]: { status: 'na' } });
-assert.equal(noScore.score, null);
-assert.equal(noScore.answered, 0);
+assert.equal(noScore.categories.A1.earned, 1);
+assert.equal(noScore.categories.A1.available, FAMILIES[0][4]);
+assert.equal(noScore.answered, 1);
+assert.equal(noScore.score, Math.round((1 / FAMILIES[0][4]) * 200 - 100));
+const excluded = calculate({ [FAMILIES[0][0]]: { status: 'unknown' }, [FAMILIES[1][0]]: { status: 'na' } });
+assert.equal(excluded.score, null);
+assert.equal(excluded.answered, 0);
+const mixed = calculate({ [FAMILIES[0][0]]: { status: 'pna' }, [FAMILIES[1][0]]: { status: 'score', value: 100 }, [FAMILIES[2][0]]: { status: 'unknown' } });
+assert.equal(mixed.categories.A1.earned, 1 + FAMILIES[1][4]);
+assert.equal(mixed.categories.A1.available, FAMILIES[0][4] + FAMILIES[1][4]);
+assert.equal(mixed.answered, 2);
 assert.equal(rubricPoints(FAMILIES[0], 100), FAMILIES[0][4]);
 console.log(`PASS: four recipient routes, 245 families, ${slides.length} slides per route, and P100–O100 scoring.`);
