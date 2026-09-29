@@ -56,7 +56,7 @@ function setAnswer(code, status, value = null) {
   $('answered-label').textContent = `${result.answered} of ${FAMILIES.length} scored`;
   $('partial-btn').hidden = result.answered === 0;
 }
-function questionCard(row, slideNumber, animate = false) {
+function questionCard(row, animate = false) {
   const [code, topic, prompt, type, max, anchors] = row;
   const answer = state.answers[code];
   const card = el('article', 'h4-question');
@@ -79,7 +79,7 @@ function questionCard(row, slideNumber, animate = false) {
     const track = el('div', 'h4-segment-control');
     track.style.setProperty('--segments', String(anchors.length));
     track.setAttribute('role', 'group');
-    track.setAttribute('aria-label', `Question ${slideNumber}: ${prompt} Choose one discrete level.`);
+    track.setAttribute('aria-label', `${prompt} Choose one discrete level. Use arrow keys to move between levels.`);
     const segments = anchors.map((anchor, index) => {
       const button = el('button', 'h4-segment', String(index + 1));
       button.type = 'button';
@@ -92,16 +92,30 @@ function questionCard(row, slideNumber, animate = false) {
       track.append(button);
       return button;
     });
+    track.addEventListener('keydown', event => {
+      const current = segments.indexOf(document.activeElement);
+      if (current < 0) return;
+      let next;
+      if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = Math.min(current + 1, segments.length - 1);
+      else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') next = Math.max(current - 1, 0);
+      else if (event.key === 'Home') next = 0;
+      else if (event.key === 'End') next = segments.length - 1;
+      else return;
+      event.preventDefault();
+      segments[next].click();
+      segments[next].focus();
+    });
     const update = index => {
       const active = index !== null && index >= 0;
       caption.textContent = active ? `Level ${index + 1} of ${anchors.length}` : 'Choose a level';
-      description.textContent = active ? anchors[index][1] : 'Select a numbered segment';
+      description.textContent = active ? anchors[index][1] : 'Tap a stop or use the arrow keys';
       readout.classList.toggle('is-unanswered', !active);
       card.classList.toggle('is-answered', active);
       segments.forEach((segment, n) => {
-        segment.classList.toggle('is-active', active && n <= index);
+        segment.classList.toggle('is-passed', active && n < index);
         segment.classList.toggle('is-current', active && n === index);
         segment.setAttribute('aria-pressed', String(active && n === index));
+        segment.tabIndex = n === (active ? index : 0) ? 0 : -1;
       });
     };
     update(selectedIndex !== null && selectedIndex >= 0 ? selectedIndex : null);
@@ -184,7 +198,7 @@ function renderSlide(scroll = true) {
   $('caution').hidden = !warning;
   if (warning) $('caution').textContent = slide.category === 'D' ? 'Very sensitive: never enter a real password, PIN, ID number, account number, code, key, or document content. Choose a level only.' : 'Sensitive information: choose a level only. Do not enter real location, financial, medical, or other private details.';
   const fragment = document.createDocumentFragment();
-  slide.questions.forEach((row, index) => fragment.append(questionCard(row, index + 1, scroll)));
+  slide.questions.forEach(row => fragment.append(questionCard(row, scroll)));
   $('question-list').replaceChildren(fragment);
   $('back-btn').disabled = state.index === 0;
   $('next-btn').textContent = state.index === slides.length - 1 ? 'See result' : 'Next';
