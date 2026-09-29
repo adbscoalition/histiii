@@ -8,7 +8,7 @@
   <meta name="description" content="HISTI Full check-in for Acquaintance.">
   <link rel="icon" type="image/png" href="/histi-icon-48.png">
   <link rel="stylesheet" href="/styles-histi-v3.css?v=levels-cautions-1">
-  <link rel="stylesheet" href="/styles-histi4.css?v=full-8">
+  <link rel="stylesheet" href="/styles-histi4.css?v=full-9">
   <title>Acquaintance | HISTI Full</title>
 </head>
 <body data-recipient="G2">
@@ -40,7 +40,7 @@
         <div class="question-top">
           <div class="question-meta"><span id="progress-label"></span><span id="answered-label"></span></div>
           <p id="category-label" class="eyebrow h4-category-label"></p>
-          <h1 id="slide-title"></h1>
+          <h1 id="slide-title" tabindex="-1"></h1>
           <p id="slide-help" class="muted"></p>
           <div id="caution" class="risk-note" hidden role="note"></div>
         </div>
@@ -55,7 +55,7 @@
 
     <main id="results-screen" class="screen results-screen" hidden>
       <section class="result-card" aria-labelledby="result-heading">
-        <div class="result-hero"><p class="eyebrow">Your disclosure preference</p><h1 id="result-heading" class="result-title"></h1>
+        <div class="result-hero"><p class="eyebrow">Your disclosure preference</p><h1 id="result-heading" class="result-title" tabindex="-1"></h1>
           <div class="result-spectrum" aria-label="HISTI spectrum from P100 private through N0 neutral to O100 open"><div class="spectrum-labels" aria-hidden="true"><span>Private</span><span>Open</span></div><div class="spectrum-track"><span class="spectrum-center" aria-hidden="true"></span><span id="result-marker" class="spectrum-marker" aria-hidden="true"></span></div><div class="spectrum-values" aria-hidden="true"><span>P100</span><span>N0</span><span>O100</span></div></div>
           <div class="result-score-line"><span>HISTI</span><strong id="result-score" class="score"></strong></div><p id="result-coverage" class="result-note muted"></p>
         </div>
@@ -66,9 +66,12 @@
       </section>
     </main>
 
+    <section id="page-transition" class="h4-transition" hidden role="status" aria-label="Changing check-in page" tabindex="-1">
+      <div class="h4-transition-inner"><img class="h4-transition-logo" src="/histi-logo.webp?v=facelift-1" alt="" aria-hidden="true"><p id="transition-kicker" class="h4-transition-kicker"></p><h2 id="transition-title"></h2><p id="transition-detail" class="h4-transition-detail"></p><span class="h4-transition-line" aria-hidden="true"></span></div>
+    </section>
     <footer class="bottom-utility"><div class="bottom-utility-inner"><div class="footer-links"><a href="/checkin-page">Check-ins</a><a href="/privacy">Privacy policy</a><a href="/terms">Terms</a></div><span class="device-note"><span class="device-dot" aria-hidden="true"></span>Saved only on this device</span></div></footer>
   </div>
-  <script type="module" src="/app-histi4.js?v=full-9"></script>
+  <script type="module" src="/app-histi4.js?v=full-10"></script>
   <script type="module" src="/histi4-privacy.js?v=2"></script>
 </body>
 </html>

@@ -47,6 +47,53 @@ function show(screen, scroll = true) {
   if (scroll) window.scrollTo(0, 0);
   save();
 }
+let transitionBusy = false;
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const wait = ms => new Promise(resolve => window.setTimeout(resolve, ms));
+async function transitionPage(kicker, title, detail, render, focusId) {
+  if (transitionBusy) return;
+  if (reducedMotion.matches) {
+    render();
+    window.scrollTo(0, 0);
+    $(focusId)?.focus({ preventScroll: true });
+    return;
+  }
+  transitionBusy = true;
+  const overlay = $('page-transition');
+  const screens = [$('intro-screen'), $('assessment-screen'), $('results-screen')];
+  $('transition-kicker').textContent = kicker;
+  $('transition-title').textContent = title;
+  $('transition-detail').textContent = detail;
+  overlay.hidden = false;
+  screens.forEach(screen => { screen.inert = true; });
+  void overlay.offsetWidth;
+  overlay.classList.add('is-visible');
+  overlay.focus({ preventScroll: true });
+  let rendered = false;
+  try {
+    await wait(230);
+    render();
+    window.scrollTo(0, 0);
+    rendered = true;
+    await wait(150);
+    overlay.classList.remove('is-visible');
+    await wait(230);
+  } finally {
+    overlay.classList.remove('is-visible');
+    overlay.hidden = true;
+    screens.forEach(screen => { screen.inert = false; });
+    transitionBusy = false;
+    if (rendered) $(focusId)?.focus({ preventScroll: true });
+  }
+}
+function transitionSlide(index) {
+  const slide = slides[index];
+  const category = CATEGORY_META[slide.category];
+  return transitionPage(`Slide ${index + 1} of ${slides.length}`, category.label, `${recipient.label} · ${slide.type === 'yn' ? 'Quick yes or no choices' : 'Choose the closest levels'}`, () => {
+    state.index = index;
+    renderSlide(false);
+  }, 'slide-title');
+}
 function setAnswer(code, status, value = null) {
   const previous = state.answers[code];
   if (status === null && !previous) return;
@@ -85,6 +132,9 @@ function questionCard(row, animate = false) {
     track.style.setProperty('--segments', String(anchors.length));
     track.setAttribute('role', 'group');
     track.setAttribute('aria-label', `${prompt} Choose one discrete level. Drag, tap, or use arrow keys to move between levels.`);
+    const thumb = el('span', 'h4-slider-thumb');
+    thumb.setAttribute('aria-hidden', 'true');
+    track.append(thumb);
     let currentIndex = null;
     let dragState = null;
     let skipPointerClick = false;
@@ -120,6 +170,11 @@ function questionCard(row, animate = false) {
       readout.classList.toggle('is-unanswered', !active);
       clearLevel.hidden = !active;
       card.classList.toggle('is-answered', active);
+      track.classList.toggle('has-selection', active);
+      if (active) {
+        thumb.style.left = `calc(${index * 100 / anchors.length}% + 2px)`;
+        thumb.style.width = `calc(${100 / anchors.length}% - 4px)`;
+      }
       segments.forEach((segment, n) => {
         segment.classList.toggle('is-passed', active && n < index);
         segment.classList.toggle('is-current', active && n === index);
@@ -146,6 +201,7 @@ function questionCard(row, animate = false) {
         })
       };
       track.setPointerCapture(event.pointerId);
+      track.classList.add('is-dragging');
       const next = nearestStop(event.clientX);
       update(next);
       segments[next].focus({ preventScroll: true });
@@ -162,6 +218,7 @@ function questionCard(row, animate = false) {
       choose(currentIndex);
       segments[currentIndex].focus({ preventScroll: true });
       dragState = null;
+      track.classList.remove('is-dragging');
       if (track.hasPointerCapture(event.pointerId)) track.releasePointerCapture(event.pointerId);
     });
     track.addEventListener('pointercancel', event => {
@@ -169,12 +226,14 @@ function questionCard(row, animate = false) {
       update(dragState.originalIndex);
       dragState = null;
       skipPointerClick = false;
+      track.classList.remove('is-dragging');
     });
     track.addEventListener('lostpointercapture', event => {
       if (event.pointerId !== dragState?.pointerId) return;
       update(dragState.originalIndex);
       dragState = null;
       skipPointerClick = false;
+      track.classList.remove('is-dragging');
     });
     update(selectedIndex !== null && selectedIndex >= 0 ? selectedIndex : null);
     clearLevel.addEventListener('click', () => { update(null); setAnswer(code, null); clearStatus(); });
@@ -307,11 +366,14 @@ for (const [key, info] of Object.entries(RECIPIENTS)) {
   const link = el('a', '', info.label); link.href = `/checkin-4-${key.toLowerCase()}`; groupLinks.append(link);
 }
 $('intro-group-links').append(groupLinks);
-$('start-btn').addEventListener('click', () => { state.started = true; renderSlide(); });
-$('back-btn').addEventListener('click', () => { if (state.index > 0) { state.index--; renderSlide(); } });
-$('next-btn').addEventListener('click', () => { if (state.index === slides.length - 1) renderResults(true); else { state.index++; renderSlide(); } });
-$('partial-btn').addEventListener('click', () => renderResults(false));
-$('resume-btn').addEventListener('click', () => { state.completed = false; renderSlide(); });
+$('start-btn').addEventListener('click', () => { state.started = true; save(); void transitionSlide(state.index); });
+$('back-btn').addEventListener('click', () => { if (state.index > 0) void transitionSlide(state.index - 1); });
+$('next-btn').addEventListener('click', () => {
+  if (state.index === slides.length - 1) void transitionPage('Check-in complete', 'Your result is ready.', `${recipient.label} · HISTI Full`, () => renderResults(true), 'result-heading');
+  else void transitionSlide(state.index + 1);
+});
+$('partial-btn').addEventListener('click', () => { void transitionPage('Current results', 'Your snapshot is ready.', `${recipient.label} · You can return to your questions`, () => renderResults(false), 'result-heading'); });
+$('resume-btn').addEventListener('click', () => { state.completed = false; void transitionSlide(state.index); });
 $('reset-btn').addEventListener('click', reset);
 $('result-reset-btn').addEventListener('click', reset);
 if (state.completed) renderResults(true);
