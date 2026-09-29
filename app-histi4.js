@@ -49,8 +49,10 @@ function show(screen, scroll = true) {
 }
 function setAnswer(code, status, value = null) {
   const previous = state.answers[code];
+  if (status === null && !previous) return;
   if (previous?.status === status && JSON.stringify(previous.value) === JSON.stringify(value)) return;
-  state.answers[code] = { status, value };
+  if (status === null) delete state.answers[code];
+  else state.answers[code] = { status, value };
   save();
   const result = calculate(state.answers);
   $('answered-label').textContent = `${result.answered} of ${FAMILIES.length} scored`;
@@ -75,7 +77,10 @@ function questionCard(row, animate = false) {
     const readout = el('div', 'h4-level-value');
     const caption = el('span');
     const description = el('strong');
-    readout.append(caption, description);
+    const clearLevel = el('button', 'h4-clear-level', 'Clear');
+    clearLevel.type = 'button';
+    clearLevel.setAttribute('aria-label', `Clear selected level for: ${prompt}`);
+    readout.append(caption, description, clearLevel);
     const track = el('div', 'h4-segment-control');
     track.style.setProperty('--segments', String(anchors.length));
     track.setAttribute('role', 'group');
@@ -110,6 +115,7 @@ function questionCard(row, animate = false) {
       caption.textContent = active ? `Level ${index + 1} of ${anchors.length}` : 'Choose a level';
       description.textContent = active ? anchors[index][1] : 'Tap a stop or use the arrow keys';
       readout.classList.toggle('is-unanswered', !active);
+      clearLevel.hidden = !active;
       card.classList.toggle('is-answered', active);
       segments.forEach((segment, n) => {
         segment.classList.toggle('is-passed', active && n < index);
@@ -119,6 +125,7 @@ function questionCard(row, animate = false) {
       });
     };
     update(selectedIndex !== null && selectedIndex >= 0 ? selectedIndex : null);
+    clearLevel.addEventListener('click', () => { update(null); setAnswer(code, null); clearStatus(); });
     clearChoice = () => update(null);
     const ends = el('div', 'h4-endpoints');
     ends.append(el('span', '', anchors[0][1]), el('span', '', anchors.at(-1)[1]));
