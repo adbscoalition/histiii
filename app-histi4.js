@@ -84,15 +84,17 @@ function questionCard(row, animate = false) {
     const track = el('div', 'h4-segment-control');
     track.style.setProperty('--segments', String(anchors.length));
     track.setAttribute('role', 'group');
-    track.setAttribute('aria-label', `${prompt} Choose one discrete level. Use arrow keys to move between levels.`);
+    track.setAttribute('aria-label', `${prompt} Choose one discrete level. Drag, tap, or use arrow keys to move between levels.`);
+    let currentIndex = null;
+    let dragState = null;
+    let skipPointerClick = false;
     const segments = anchors.map((anchor, index) => {
       const button = el('button', 'h4-segment', String(index + 1));
       button.type = 'button';
       button.setAttribute('aria-label', `Level ${index + 1}: ${anchor[1]}`);
-      button.addEventListener('click', () => {
-        update(index);
-        setAnswer(code, 'score', numericAnchors[index]);
-        clearStatus();
+      button.addEventListener('click', event => {
+        if (event.detail && skipPointerClick) { skipPointerClick = false; return; }
+        choose(index);
       });
       track.append(button);
       return button;
@@ -111,9 +113,10 @@ function questionCard(row, animate = false) {
       segments[next].focus();
     });
     const update = index => {
+      currentIndex = index;
       const active = index !== null && index >= 0;
       caption.textContent = active ? `Level ${index + 1} of ${anchors.length}` : 'Choose a level';
-      description.textContent = active ? anchors[index][1] : 'Tap a stop or use the arrow keys';
+      description.textContent = active ? anchors[index][1] : 'Drag or tap a stop';
       readout.classList.toggle('is-unanswered', !active);
       clearLevel.hidden = !active;
       card.classList.toggle('is-answered', active);
@@ -124,6 +127,55 @@ function questionCard(row, animate = false) {
         segment.tabIndex = n === (active ? index : 0) ? 0 : -1;
       });
     };
+    const choose = index => {
+      update(index);
+      setAnswer(code, 'score', numericAnchors[index]);
+      clearStatus();
+    };
+    const nearestStop = x => dragState.centers.reduce((best, center, index) =>
+      Math.abs(center - x) < Math.abs(dragState.centers[best] - x) ? index : best, 0);
+    track.addEventListener('pointerdown', event => {
+      if (!event.isPrimary || event.button !== 0) return;
+      skipPointerClick = false;
+      dragState = {
+        pointerId: event.pointerId,
+        originalIndex: currentIndex,
+        centers: segments.map(segment => {
+          const rect = segment.getBoundingClientRect();
+          return rect.left + rect.width / 2;
+        })
+      };
+      track.setPointerCapture(event.pointerId);
+      const next = nearestStop(event.clientX);
+      update(next);
+      segments[next].focus({ preventScroll: true });
+      event.preventDefault();
+    });
+    track.addEventListener('pointermove', event => {
+      if (event.pointerId !== dragState?.pointerId) return;
+      const next = nearestStop(event.clientX);
+      if (next !== currentIndex) update(next);
+    });
+    track.addEventListener('pointerup', event => {
+      if (event.pointerId !== dragState?.pointerId) return;
+      skipPointerClick = true;
+      choose(currentIndex);
+      segments[currentIndex].focus({ preventScroll: true });
+      dragState = null;
+      if (track.hasPointerCapture(event.pointerId)) track.releasePointerCapture(event.pointerId);
+    });
+    track.addEventListener('pointercancel', event => {
+      if (event.pointerId !== dragState?.pointerId) return;
+      update(dragState.originalIndex);
+      dragState = null;
+      skipPointerClick = false;
+    });
+    track.addEventListener('lostpointercapture', event => {
+      if (event.pointerId !== dragState?.pointerId) return;
+      update(dragState.originalIndex);
+      dragState = null;
+      skipPointerClick = false;
+    });
     update(selectedIndex !== null && selectedIndex >= 0 ? selectedIndex : null);
     clearLevel.addEventListener('click', () => { update(null); setAnswer(code, null); clearStatus(); });
     clearChoice = () => update(null);
