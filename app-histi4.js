@@ -335,6 +335,7 @@ function questionCard(row, animate = false) {
   const statuses = el('div', 'h4-status');
   for (const [status, label] of [['unknown', "I don't know"], ['pna', 'Prefer not to answer'], ['na', 'Not applicable']]) {
     const button = el('button', '', label); button.type = 'button';
+    button.setAttribute('aria-label', label);
     button.setAttribute('aria-pressed', String(answer?.status === status));
     button.addEventListener('click', () => {
       clearChoice();
