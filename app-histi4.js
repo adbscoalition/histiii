@@ -4,6 +4,12 @@ import { makeSlides, remapLegacySlideIndex, calculate, rubricPoints, displayScor
 const group = document.body.dataset.recipient;
 const recipient = RECIPIENTS[group];
 if (!recipient) throw new Error('Unknown HISTI recipient group');
+const sharingWith = {
+  G1: 'a stranger or regular person',
+  G2: 'an acquaintance',
+  G3: 'a friend',
+  G4: 'a spouse or partner'
+}[group];
 const slides = makeSlides();
 const familyByCode = new Map(FAMILIES.map(row => [row[0], row]));
 const storageKey = `histi.four-groups.${group}.v1`;
@@ -102,18 +108,17 @@ function setAnswer(code, status, value = null) {
   else state.answers[code] = { status, value };
   save();
   const result = calculate(state.answers);
-  $('answered-label').textContent = `${result.answered} of ${FAMILIES.length} scored`;
   $('partial-btn').hidden = result.answered === 0;
 }
 function questionCard(row, animate = false) {
-  const [code, topic, prompt, type, max, anchors] = row;
+  const [code, , prompt, type, , anchors] = row;
   const answer = state.answers[code];
   const card = el('article', 'h4-question');
   if (animate) card.classList.add('h4-reveal');
   card.classList.toggle('is-answered', answer?.status === 'score');
   const top = el('div', 'h4-question-top');
-  top.append(el('h2', '', prompt));
-  card.append(top, el('p', 'h4-topic', topic));
+  top.append(el('p', 'h4-question-context', `Sharing with ${sharingWith}`), el('h2', '', prompt));
+  card.append(top);
   const control = el('div', 'h4-control');
   let clearChoice = () => {};
   const clearStatus = () => card.querySelectorAll('.h4-status button').forEach(button => button.setAttribute('aria-pressed', 'false'));
@@ -172,7 +177,7 @@ function questionCard(row, animate = false) {
     const update = index => {
       currentIndex = index;
       const active = index !== null && index >= 0;
-      caption.textContent = active ? `Level ${index + 1} of ${anchors.length}` : 'Choose a level';
+      caption.textContent = active ? 'Your choice' : 'Choose a level';
       description.textContent = active ? anchors[index][1] : 'Drag or tap a stop';
       readout.classList.toggle('is-unanswered', !active);
       clearLevel.hidden = !active;
@@ -217,6 +222,8 @@ function questionCard(row, animate = false) {
       dragState = {
         pointerId: event.pointerId,
         originalIndex: currentIndex,
+        lastX: event.clientX,
+        moved: false,
         trackLeft: trackRect.left,
         trackWidth: trackRect.width,
         centers: segments.map(segment => {
@@ -224,46 +231,59 @@ function questionCard(row, animate = false) {
           return rect.left + rect.width / 2;
         })
       };
-      track.setPointerCapture(event.pointerId);
+      try { track.setPointerCapture(event.pointerId); } catch { /* Window listeners still complete the drag. */ }
       track.classList.add('is-dragging');
       const next = previewDrag(event.clientX);
       segments[next].focus({ preventScroll: true });
+      window.addEventListener('pointermove', onDragMove);
+      window.addEventListener('pointerup', onDragEnd);
+      window.addEventListener('pointercancel', onDragCancel);
+      window.addEventListener('blur', onDragBlur);
       event.preventDefault();
     });
-    track.addEventListener('pointermove', event => {
+    const onDragMove = event => {
       if (event.pointerId !== dragState?.pointerId) return;
+      dragState.lastX = event.clientX;
+      dragState.moved = true;
       pendingDragX = event.clientX;
       if (!dragFrame) dragFrame = window.requestAnimationFrame(() => {
         dragFrame = 0;
         if (dragState) previewDrag(pendingDragX);
       });
-    });
-    track.addEventListener('pointerup', event => {
-      if (event.pointerId !== dragState?.pointerId) return;
-      cancelDragFrame();
-      skipPointerClick = true;
-      const next = nearestStop(event.clientX);
-      track.classList.remove('is-dragging');
-      choose(next);
-      segments[next].focus({ preventScroll: true });
-      dragState = null;
-      if (track.hasPointerCapture(event.pointerId)) track.releasePointerCapture(event.pointerId);
-    });
-    track.addEventListener('pointercancel', event => {
-      if (event.pointerId !== dragState?.pointerId) return;
+    };
+    const finishDrag = (x, commit) => {
+      if (!dragState) return;
+      const { pointerId, originalIndex, moved } = dragState;
       cancelDragFrame();
       track.classList.remove('is-dragging');
-      update(dragState.originalIndex);
+      const next = nearestStop(x);
+      if (commit || moved) {
+        skipPointerClick = true;
+        choose(next);
+        segments[next].focus({ preventScroll: true });
+      } else {
+        update(originalIndex);
+        skipPointerClick = false;
+      }
       dragState = null;
-      skipPointerClick = false;
-    });
+      window.removeEventListener('pointermove', onDragMove);
+      window.removeEventListener('pointerup', onDragEnd);
+      window.removeEventListener('pointercancel', onDragCancel);
+      window.removeEventListener('blur', onDragBlur);
+      if (track.hasPointerCapture(pointerId)) track.releasePointerCapture(pointerId);
+    };
+    const onDragEnd = event => {
+      if (event.pointerId !== dragState?.pointerId) return;
+      finishDrag(event.clientX, true);
+    };
+    const onDragCancel = event => {
+      if (event.pointerId !== dragState?.pointerId) return;
+      finishDrag(dragState.lastX, false);
+    };
+    const onDragBlur = () => finishDrag(dragState?.lastX, false);
     track.addEventListener('lostpointercapture', event => {
       if (event.pointerId !== dragState?.pointerId) return;
-      cancelDragFrame();
-      track.classList.remove('is-dragging');
-      update(dragState.originalIndex);
-      dragState = null;
-      skipPointerClick = false;
+      finishDrag(dragState.lastX, false);
     });
     update(selectedIndex !== null && selectedIndex >= 0 ? selectedIndex : null);
     clearLevel.addEventListener('click', () => { update(null); setAnswer(code, null); clearStatus(); });
@@ -332,13 +352,13 @@ function renderSlide(scroll = true) {
   show('assessment', scroll);
   const meta = CATEGORY_META[slide.category];
   const result = calculate(state.answers);
-  $('progress-label').textContent = `Slide ${state.index + 1} of ${slides.length}`;
-  $('answered-label').textContent = `${result.answered} of ${FAMILIES.length} scored`;
+  $('progress-label').textContent = `${state.index + 1} / ${slides.length}`;
+  $('progress-label').setAttribute('aria-label', `Card ${state.index + 1} of ${slides.length}`);
   const pct = Math.round(((state.index + 1) / slides.length) * 100);
   $('progress-fill').style.width = `${pct}%`;
-  $('category-label').textContent = `${slide.category} · ${meta.label} · ${recipient.label}`;
-  $('slide-title').textContent = slide.type === 'yn' ? 'A few quick choices.' : slide.type === 'multi' ? 'Select all that apply.' : 'Choose the closest levels.';
-  $('slide-help').textContent = `Answering for ${recipient.label.toLowerCase()}. You can leave any question unanswered or use the options below it.`;
+  $('category-label').textContent = `Sharing with ${sharingWith}`;
+  $('slide-title').textContent = meta.label;
+  $('slide-help').textContent = slide.type === 'yn' ? 'Choose yes or no for each question. It’s okay to leave one blank.' : slide.type === 'multi' ? 'Select everything that fits. It’s okay to leave one blank.' : 'Choose what feels closest. It’s okay to leave a question blank.';
   const header = document.querySelector('.question-top');
   header.classList.remove('h4-header-reveal');
   if (scroll) { void header.offsetWidth; header.classList.add('h4-header-reveal'); }
