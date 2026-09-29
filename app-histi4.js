@@ -4,6 +4,7 @@ import { makeSlides, remapLegacySlideIndex, calculate, rubricPoints, displayScor
 const group = document.body.dataset.recipient;
 const recipient = RECIPIENTS[group];
 if (!recipient) throw new Error('Unknown HISTI recipient group');
+const debugMode = new URLSearchParams(window.location.search).get('debug') === '1';
 const sharingWith = {
   G1: 'a stranger or regular person',
   G2: 'an acquaintance',
@@ -515,7 +516,7 @@ function setupDebug() {
   trigger.className = 'h4-debug-trigger';
   document.querySelector('.footer-links').append(trigger);
 }
-setupDebug();
+if (debugMode) setupDebug();
 syncDebugWatermark();
 
 $('intro-recipient').textContent = recipient.label.toLowerCase();
@@ -524,7 +525,7 @@ $('slide-count').textContent = `${slides.length} cards.`;
 const groupLinks = document.createDocumentFragment();
 for (const [key, info] of Object.entries(RECIPIENTS)) {
   if (key === group) continue;
-  const link = el('a', '', info.label); link.href = `/checkin-4-${key.toLowerCase()}`; groupLinks.append(link);
+  const link = el('a', '', info.label); link.href = `/checkin-4-${key.toLowerCase()}${debugMode ? '?debug=1' : ''}`; groupLinks.append(link);
 }
 $('intro-group-links').append(groupLinks);
 $('start-btn').addEventListener('click', () => { state.started = true; save(); void transitionSlide(state.index); });

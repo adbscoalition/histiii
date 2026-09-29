@@ -79,7 +79,8 @@ html,body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
 .h4-reset-row{display:flex;justify-content:flex-end;margin-top:15px}
 .h4-reset-row button{padding:7px 0;border:0;background:none;color:#c7a59b;font-size:12px;font-weight:750;text-decoration:underline;text-underline-offset:3px}
 .h4-reset-row button:hover{color:#fff}
-.footer-links .h4-debug-trigger{color:#f2cb75}
+.footer-links .h4-debug-trigger{color:#77736a;font-size:10px;font-weight:600;opacity:.7}
+.footer-links .h4-debug-trigger:hover{color:#b4ab99;opacity:1}
 .h4-debug-watermark{width:max-content;max-width:100%;margin:0 0 12px;padding:6px 9px;border:1px solid rgba(255,161,110,.55);border-radius:7px;background:#2a1a13;color:#ffbe97;font-size:11px;font-weight:900;letter-spacing:.08em}
 .h4-debug-dialog{width:min(640px,calc(100% - 24px));max-height:calc(100svh - 24px);margin:auto;padding:24px;border:1px solid rgba(245,195,77,.5);border-radius:18px;background:#171611;color:#eee9dd;box-shadow:0 28px 100px rgba(0,0,0,.68);overflow:auto;overscroll-behavior:contain}
 .h4-debug-dialog::backdrop{background:rgba(0,0,0,.78)}
@@ -131,6 +132,7 @@ html,body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
 @keyframes h4-rise{from{opacity:.68;transform:translateY(20px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes h4-choose{from{transform:scale(.91)}to{transform:scale(1)}}
 @media(max-width:680px){:root{--h4-topbar-height:62px;--h4-footer-height:76px}.bottom-utility-inner{min-height:76px;padding:7px 0;flex-direction:column;justify-content:center;gap:2px}.footer-links{width:auto;justify-content:center;flex-wrap:nowrap;gap:4px 13px}.footer-links a,.footer-links .h4-debug-trigger{padding:3px 0;font-size:11px}.device-note{margin:0;font-size:10px}.h4-choice-grid{grid-template-columns:1fr;gap:9px}.h4-choice{min-height:140px}.h4-question{padding:18px 15px}.h4-yn{gap:8px}.h4-multi{grid-template-columns:1fr}.h4-status button{flex:1 1 calc(50% - 8px)}}
+@media(max-width:680px){.footer-links .h4-debug-trigger{font-size:10px}}
 @media(max-width:380px){.h4-level-value{flex-wrap:wrap;gap:6px 12px}.h4-level-value strong{order:3;flex-basis:100%}.h4-status button{flex:1 1 100%}.h4-switch a{width:100%}.topbar-right .privacy-live-badge{padding-inline:7px}}
 @media(max-width:480px){.h4-proof-dialog{padding:19px}.h4-proof-grid{grid-template-columns:1fr}.h4-proof-actions{align-items:stretch;flex-direction:column}.h4-proof-run{width:100%}}
 @media(prefers-reduced-motion:reduce){.h4-choice,.h4-question,.h4-yn button,.h4-multi button,.h4-status button,.h4-segment,.h4-slider-fill,.h4-slider-thumb,.h4-transition,.h4-transition-inner,.h4-transition-line::after,.progress-track span{transition:none}.h4-choice,.h4-reveal,.h4-header-reveal,.h4-yn button[aria-pressed=true],.h4-multi button[aria-pressed=true],.h4-status button[aria-pressed=true],.start-card,.result-card{animation:none}}
