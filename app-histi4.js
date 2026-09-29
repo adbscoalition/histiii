@@ -132,6 +132,9 @@ function questionCard(row, animate = false) {
     track.style.setProperty('--segments', String(anchors.length));
     track.setAttribute('role', 'group');
     track.setAttribute('aria-label', `${prompt} Choose one discrete level. Drag, tap, or use arrow keys to move between levels.`);
+    control.addEventListener('pointerdown', () => window.getSelection()?.removeAllRanges());
+    control.addEventListener('selectstart', event => event.preventDefault());
+    control.addEventListener('dragstart', event => event.preventDefault());
     const fill = el('span', 'h4-slider-fill');
     fill.setAttribute('aria-hidden', 'true');
     const thumb = el('span', 'h4-slider-thumb');
@@ -139,6 +142,8 @@ function questionCard(row, animate = false) {
     track.append(fill, thumb);
     let currentIndex = null;
     let dragState = null;
+    let dragFrame = 0;
+    let pendingDragX = 0;
     let skipPointerClick = false;
     const segments = anchors.map((anchor, index) => {
       const button = el('button', 'h4-segment', String(index + 1));
@@ -167,9 +172,9 @@ function questionCard(row, animate = false) {
     const update = index => {
       currentIndex = index;
       const active = index !== null && index >= 0;
-      caption.textContent = active ? `Level ${index + 1} of ${anchors.length}` : '';
-      description.textContent = active ? anchors[index][1] : '';
-      readout.hidden = !active;
+      caption.textContent = active ? `Level ${index + 1} of ${anchors.length}` : 'Choose a level';
+      description.textContent = active ? anchors[index][1] : 'Drag or tap a stop';
+      readout.classList.toggle('is-unanswered', !active);
       clearLevel.hidden = !active;
       card.classList.toggle('is-answered', active);
       track.classList.toggle('has-selection', active);
@@ -192,12 +197,28 @@ function questionCard(row, animate = false) {
     };
     const nearestStop = x => dragState.centers.reduce((best, center, index) =>
       Math.abs(center - x) < Math.abs(dragState.centers[best] - x) ? index : best, 0);
+    const previewDrag = x => {
+      const next = nearestStop(x);
+      if (next !== currentIndex) update(next);
+      const localX = Math.max(2, Math.min(dragState.trackWidth - 2, x - dragState.trackLeft));
+      const segmentWidth = dragState.trackWidth / segments.length;
+      thumb.style.left = `${Math.max(2, Math.min(dragState.trackWidth - segmentWidth + 2, localX - segmentWidth / 2 + 2))}px`;
+      fill.style.width = `${localX - 2}px`;
+      return next;
+    };
+    const cancelDragFrame = () => {
+      if (dragFrame) window.cancelAnimationFrame(dragFrame);
+      dragFrame = 0;
+    };
     track.addEventListener('pointerdown', event => {
       if (!event.isPrimary || event.button !== 0) return;
       skipPointerClick = false;
+      const trackRect = track.getBoundingClientRect();
       dragState = {
         pointerId: event.pointerId,
         originalIndex: currentIndex,
+        trackLeft: trackRect.left,
+        trackWidth: trackRect.width,
         centers: segments.map(segment => {
           const rect = segment.getBoundingClientRect();
           return rect.left + rect.width / 2;
@@ -205,45 +226,51 @@ function questionCard(row, animate = false) {
       };
       track.setPointerCapture(event.pointerId);
       track.classList.add('is-dragging');
-      const next = nearestStop(event.clientX);
-      update(next);
+      const next = previewDrag(event.clientX);
       segments[next].focus({ preventScroll: true });
       event.preventDefault();
     });
     track.addEventListener('pointermove', event => {
       if (event.pointerId !== dragState?.pointerId) return;
-      const next = nearestStop(event.clientX);
-      if (next !== currentIndex) update(next);
+      pendingDragX = event.clientX;
+      if (!dragFrame) dragFrame = window.requestAnimationFrame(() => {
+        dragFrame = 0;
+        if (dragState) previewDrag(pendingDragX);
+      });
     });
     track.addEventListener('pointerup', event => {
       if (event.pointerId !== dragState?.pointerId) return;
+      cancelDragFrame();
       skipPointerClick = true;
-      choose(currentIndex);
-      segments[currentIndex].focus({ preventScroll: true });
-      dragState = null;
+      const next = nearestStop(event.clientX);
       track.classList.remove('is-dragging');
+      choose(next);
+      segments[next].focus({ preventScroll: true });
+      dragState = null;
       if (track.hasPointerCapture(event.pointerId)) track.releasePointerCapture(event.pointerId);
     });
     track.addEventListener('pointercancel', event => {
       if (event.pointerId !== dragState?.pointerId) return;
+      cancelDragFrame();
+      track.classList.remove('is-dragging');
       update(dragState.originalIndex);
       dragState = null;
       skipPointerClick = false;
-      track.classList.remove('is-dragging');
     });
     track.addEventListener('lostpointercapture', event => {
       if (event.pointerId !== dragState?.pointerId) return;
+      cancelDragFrame();
+      track.classList.remove('is-dragging');
       update(dragState.originalIndex);
       dragState = null;
       skipPointerClick = false;
-      track.classList.remove('is-dragging');
     });
     update(selectedIndex !== null && selectedIndex >= 0 ? selectedIndex : null);
     clearLevel.addEventListener('click', () => { update(null); setAnswer(code, null); clearStatus(); });
     clearChoice = () => update(null);
     const ends = el('div', 'h4-endpoints');
     ends.append(el('span', '', anchors[0][1]), el('span', '', anchors.at(-1)[1]));
-    control.append(track, ends, readout);
+    control.append(readout, track, ends);
   } else if (type === 'yn') {
     const choices = el('div', 'h4-yn');
     const buttons = [];
