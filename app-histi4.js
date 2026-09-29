@@ -167,9 +167,9 @@ function questionCard(row, animate = false) {
     const update = index => {
       currentIndex = index;
       const active = index !== null && index >= 0;
-      caption.textContent = active ? `Level ${index + 1} of ${anchors.length}` : 'Choose a level';
-      description.textContent = active ? anchors[index][1] : 'Drag or tap a stop';
-      readout.classList.toggle('is-unanswered', !active);
+      caption.textContent = active ? `Level ${index + 1} of ${anchors.length}` : '';
+      description.textContent = active ? anchors[index][1] : '';
+      readout.hidden = !active;
       clearLevel.hidden = !active;
       card.classList.toggle('is-answered', active);
       track.classList.toggle('has-selection', active);
@@ -243,7 +243,7 @@ function questionCard(row, animate = false) {
     clearChoice = () => update(null);
     const ends = el('div', 'h4-endpoints');
     ends.append(el('span', '', anchors[0][1]), el('span', '', anchors.at(-1)[1]));
-    control.append(readout, track, ends);
+    control.append(track, ends, readout);
   } else if (type === 'yn') {
     const choices = el('div', 'h4-yn');
     const buttons = [];
