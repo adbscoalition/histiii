@@ -132,9 +132,11 @@ function questionCard(row, animate = false) {
     track.style.setProperty('--segments', String(anchors.length));
     track.setAttribute('role', 'group');
     track.setAttribute('aria-label', `${prompt} Choose one discrete level. Drag, tap, or use arrow keys to move between levels.`);
+    const fill = el('span', 'h4-slider-fill');
+    fill.setAttribute('aria-hidden', 'true');
     const thumb = el('span', 'h4-slider-thumb');
     thumb.setAttribute('aria-hidden', 'true');
-    track.append(thumb);
+    track.append(fill, thumb);
     let currentIndex = null;
     let dragState = null;
     let skipPointerClick = false;
@@ -172,6 +174,7 @@ function questionCard(row, animate = false) {
       card.classList.toggle('is-answered', active);
       track.classList.toggle('has-selection', active);
       if (active) {
+        fill.style.width = `calc(${(index + 0.5) * 100 / anchors.length}% - 2px)`;
         thumb.style.left = `calc(${index * 100 / anchors.length}% + 2px)`;
         thumb.style.width = `calc(${100 / anchors.length}% - 4px)`;
       }
