@@ -33,7 +33,7 @@ if (trigger) {
     for (const entry of performance.getEntriesByType('resource')) {
       try {
         const url = new URL(entry.name, location.href);
-        if (url.origin !== location.origin) hosts.add(url.host);
+        if ((url.protocol === 'http:' || url.protocol === 'https:') && url.origin !== location.origin && url.host) hosts.add(url.host);
       } catch {}
     }
     let records = null;
@@ -50,7 +50,7 @@ if (trigger) {
     const proof = snapshot();
     field('connections').textContent = proof.connections ? 'Blocked' : 'Not verified';
     field('forms').textContent = proof.forms ? 'Blocked' : 'Not verified';
-    field('hosts').textContent = String(proof.hosts.length);
+    field('hosts').textContent = proof.hosts.length ? `${proof.hosts.length}: ${proof.hosts.join(', ')}` : '0';
     field('cookies').textContent = String(proof.cookies);
     field('storage').textContent = proof.records === null ? 'Unavailable' : `${proof.records} local key${proof.records === 1 ? '' : 's'}`;
     const passed = proof.connections && proof.forms && proof.hosts.length === 0 && proof.cookies === 0 && proof.records !== null;
