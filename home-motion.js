@@ -3,7 +3,7 @@
   if (motionPreference.matches || !('IntersectionObserver' in window)) return;
 
   const revealTargets = document.querySelectorAll(
-    '.stats > div, .section-heading, .cards article, .before-list article, ' +
+    '.stats > div, .section-heading, .format-card, .cards article, .before-list article, ' +
     '.category-grid article, .proof, .disclaimer > *, .final > *'
   );
 

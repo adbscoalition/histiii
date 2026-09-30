@@ -62,7 +62,12 @@ if (trigger) {
     trigger.dataset.state = passed ? 'pass' : 'fail';
     trigger.querySelector('#privacy-live-label').textContent = passed ? 'LOCAL · checked' : 'CHECK PRIVACY';
   };
-  trigger.addEventListener('click', () => { panel.showModal(); run(); });
+  const openProof = () => { if (!panel.open) panel.showModal(); run(); };
+  trigger.addEventListener('click', openProof);
+  if (location.hash === '#privacy-proof') openProof();
+  window.addEventListener('hashchange', () => {
+    if (location.hash === '#privacy-proof') openProof();
+  });
   panel.querySelector('.h4-proof-close').addEventListener('click', () => panel.close());
   panel.querySelector('.h4-proof-run').addEventListener('click', run);
   panel.addEventListener('click', event => { if (event.target === panel) panel.close(); });
