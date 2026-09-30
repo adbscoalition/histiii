@@ -785,3 +785,139 @@ html,body,button,input,textarea,select,a{font-family:var(--font-sans)!important}
 
 /* HISTI-120 keeps its own blue identity. */
 .button.variant-120{color:#071321!important;background:linear-gradient(135deg,#8ed2ff,#53a9ed 68%,#347fd1)!important;border-color:#83cbff!important;display:flex;flex-wrap:wrap;gap:6px 12px}.button.variant-120 span{font-size:.8em;font-weight:600}
+
+/* Landing-page motion: a single entrance per element, with no running background loop. */
+:root{--home-motion-ease:cubic-bezier(.22,1,.36,1)}
+html{scroll-padding-top:88px}
+.site-header{
+  animation:homeHeaderIn 540ms var(--home-motion-ease) both
+}
+.site-header nav a{
+  position:relative;
+  transition:color 260ms ease!important
+}
+.site-header nav a::after{
+  content:"";
+  position:absolute;
+  right:0;
+  bottom:-7px;
+  left:0;
+  height:2px;
+  border-radius:2px;
+  background:#f2b747;
+  transform:scaleX(0);
+  transform-origin:left;
+  transition:transform 320ms var(--home-motion-ease)
+}
+.site-header nav a:hover::after,
+.site-header nav a:focus-visible::after{transform:scaleX(1)}
+
+.hero-copy,
+.preview{animation:none}
+.hero-badge,
+.hero .eyebrow,
+.hero h1,
+.hero .lede,
+.hero .actions,
+.hero .trust{
+  animation:homeRise 650ms var(--home-motion-ease) both
+}
+.hero-badge{animation-delay:60ms}
+.hero .eyebrow{animation-delay:115ms}
+.hero h1{animation-delay:160ms}
+.hero .lede{animation-delay:235ms}
+.hero .actions{animation-delay:305ms}
+.hero .trust{animation-delay:365ms}
+.hero h1 em{
+  background:linear-gradient(110deg,#ffca70 10%,#f0a627 55%,#ffd184 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent
+}
+.preview{
+  animation:homePreviewIn 800ms 185ms var(--home-motion-ease) both
+}
+.preview .score-row,
+.preview .spectrum,
+.preview .spectrum-labels,
+.preview .preview-note{
+  animation:homeRise 620ms var(--home-motion-ease) both
+}
+.preview .score-row{animation-delay:310ms}
+.preview .spectrum{animation-delay:390ms}
+.preview .spectrum-labels{animation-delay:430ms}
+.preview .preview-note{animation-delay:470ms}
+.preview .spectrum i{
+  animation:homeMarkerSettle 850ms 590ms var(--home-motion-ease) both
+}
+
+.button{
+  transition:transform 320ms var(--home-motion-ease),box-shadow 320ms ease,
+    border-color 320ms ease,background-color 320ms ease!important
+}
+.button:hover{transform:translateY(-3px)}
+.button:active{transform:translateY(0) scale(.98)}
+.cards article,
+.category-grid article,
+.before-list article,
+.proof{
+  transition:transform 360ms var(--home-motion-ease),opacity 620ms var(--home-motion-ease),
+    border-color 360ms ease,background-color 360ms ease!important
+}
+.cards article:hover,
+.category-grid article:hover{transform:translateY(-3px)}
+.category-grid article:hover{background:#14110b!important}
+.before-list article:hover > span{box-shadow:0 0 0 5px rgba(240,177,59,.1)}
+.before-list article > span{transition:box-shadow 320ms ease}
+
+.home-reveal{
+  transition:opacity 680ms var(--home-motion-ease),transform 680ms var(--home-motion-ease)!important;
+  transition-delay:var(--home-reveal-delay,0ms)!important
+}
+.home-reveal.home-reveal-pending{
+  opacity:0;
+  transform:translate3d(0,20px,0)
+}
+.home-reveal:not(.home-reveal-pending){opacity:1}
+
+@keyframes homeHeaderIn{
+  from{opacity:0;transform:translate3d(0,-10px,0)}
+  to{opacity:1;transform:translate3d(0,0,0)}
+}
+@keyframes homeRise{
+  from{opacity:0;transform:translate3d(0,18px,0)}
+  to{opacity:1;transform:translate3d(0,0,0)}
+}
+@keyframes homePreviewIn{
+  from{opacity:0;transform:translate3d(22px,14px,0)}
+  to{opacity:1;transform:translate3d(0,0,0)}
+}
+@keyframes homeMarkerSettle{
+  from{left:50%}
+  to{left:8%}
+}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto!important}
+  .site-header,.hero-badge,.hero .eyebrow,.hero h1,.hero .lede,
+  .hero .actions,.hero .trust,.preview,.preview .score-row,
+  .preview .spectrum,.preview .spectrum-labels,.preview .preview-note,
+  .preview .spectrum i{animation:none!important}
+  .home-reveal,.home-reveal.home-reveal-pending{
+    opacity:1!important;
+    transform:none!important;
+    transition:none!important
+  }
+  .button,.site-header nav a,.site-header nav a::after,.cards article,
+  .category-grid article,.before-list article,.before-list article > span,.proof{
+    transition:none!important
+  }
+}
+@media print{
+  .home-reveal.home-reveal-pending{opacity:1!important;transform:none!important}
+}
+@media(max-width:980px){
+  .hero{grid-template-columns:minmax(0,1fr)!important}
+  .hero-copy{width:100%}
+  .preview{width:min(100%,620px)!important;justify-self:start}
+}
