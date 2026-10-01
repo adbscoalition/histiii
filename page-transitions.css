@@ -11,7 +11,7 @@ html.histi-url-motion::before {
 }
 html.histi-url-motion::after {
   z-index: 10000;
-  background: radial-gradient(ellipse at 50% 45%, #ffe4ed, #fffaf5 65%);
+  background: linear-gradient(135deg, #ffe1bb, #fff8ef 60%, #d3d9ff);
 }
 html.histi-url-motion::before {
   z-index: 10001;
@@ -19,7 +19,7 @@ html.histi-url-motion::before {
   filter: brightness(.18);
 }
 html.histi-url-blue::after {
-  background: radial-gradient(ellipse at 50% 45%, #dfeeff, #fffaf5 65%);
+  background: linear-gradient(135deg, #bce6fb, #fff8ef 60%, #d3d9ff);
 }
 html.histi-url-covered::after,
 html.histi-url-covered::before {

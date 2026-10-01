@@ -12,7 +12,8 @@ test('every page has one static safety notice and the shared visual system', () 
     const html = read(file);
     assert.equal((html.match(/class="histi-safety-notice"/g) || []).length, 1, file);
     assert.match(html, /Never enter passwords, codes, or personal information\./, file);
-    assert.ok(html.indexOf('/site-experience.css?v=bright-1') < html.indexOf('/site-typography.css'), file);
+    const sharedStyle = html.indexOf('/site-experience.css?v=palette-2');
+    assert.ok(sharedStyle > 0 && sharedStyle < html.indexOf('/site-typography.css'), file);
     assert.match(html, /page-transitions\.js\?v=suite-1/, file);
     assert.match(html, /class="site-header topbar histi-header"/, file);
   }
@@ -60,7 +61,7 @@ test('existing reflection questions remain on all Full recipient pages', () => {
     assert.match(html, /app-histi4\.js\?v=section-notice-1/);
     assert.match(html, /suite-privacy-reminder/);
   }
-  assert.match(read('site-experience.css'), /body\.histi-120 \{ --suite-accent:#accde5/);
+  assert.match(read('site-experience.css'), /body\.histi-120 \{ --suite-accent:var\(--palette-blue\)/);
 });
 
 test('optional recipient labels discourage actual identifying information', () => {

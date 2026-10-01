@@ -9,13 +9,14 @@ const read = file => readFileSync(new URL(file, root), 'utf8');
 test('every page uses the bright suite with exactly three decorative accents', () => {
   for (const file of readdirSync(root).filter(name => name.endsWith('.html'))) {
     const html = read(file);
-    assert.match(html, /theme-color" content="#fffaf5"/, file);
+    assert.match(html, /theme-color" content="#fff8ef"/, file);
     assert.equal((html.match(/class="suite-color-field"/g) || []).length, 1, file);
     assert.match(html, /class="suite-color-field" aria-hidden="true"><span><\/span><span><\/span><span><\/span><\/div>/, file);
     assert.match(html, /site-color-motion\.js\?v=bright-1" defer/, file);
   }
   assert.match(read('site-experience.css'), /color-scheme: light/);
-  assert.match(read('site-experience.css'), /--suite-bg: #fffaf5/);
+  assert.match(read('site-experience.css'), /--suite-bg: var\(--palette-paper\)/);
+  assert.match(read('site-experience.css'), /--palette-paper: #fff8ef/);
   assert.match(read('site-experience.css'), /\.card-name \{[^}]+color:var\(--suite-ink\)/);
 });
 
