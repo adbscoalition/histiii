@@ -10,7 +10,8 @@
   --suite-accent: #f2ce78;
   --suite-accent-soft: #2c2b1b;
   --suite-ease: cubic-bezier(.22,1,.36,1);
-  --safety-notice-height: 64px;
+  --safety-notice-size: 64px;
+  --safety-notice-height: 0px;
   --suite-chrome-top: calc(var(--site-header-height,76px) + var(--safety-notice-height) + env(safe-area-inset-top));
   --h4-chrome-top: calc(var(--suite-chrome-top) + 4px);
   --bg: var(--suite-bg);
@@ -30,8 +31,10 @@ html, body { height:auto!important; min-height:100%; overflow-x:clip!important; 
 html.policy-document, body.policy-page { background:var(--suite-bg)!important; color:var(--suite-ink)!important; }
 body::before, .ambient { display:none!important; }
 
-/* Static HTML notice: visible even if JavaScript never runs. */
-.histi-safety-notice { position:fixed; z-index:71; top:calc(var(--site-header-height,76px) + env(safe-area-inset-top)); inset-inline:0; height:var(--safety-notice-height); margin:0; background:#192215; border-bottom:1px solid #465839; color:#dbe8ce; }
+/* Only reserve notice space for visible Basic, Sensitive, or Very Sensitive cards. */
+html:has(#assessment-screen:not([hidden]) .assessment-card:is([data-category="B"],[data-category="C"],[data-category="D"])) { --safety-notice-height:var(--safety-notice-size); }
+.histi-safety-notice { display:none; position:fixed; z-index:71; top:calc(var(--site-header-height,76px) + env(safe-area-inset-top)); inset-inline:0; height:var(--safety-notice-height); margin:0; background:#192215; border-bottom:1px solid #465839; color:#dbe8ce; }
+html:has(#assessment-screen:not([hidden]) .assessment-card:is([data-category="B"],[data-category="C"],[data-category="D"])) .histi-safety-notice { display:block; }
 .histi-safety-inner { width:min(calc(100% - 64px),1200px); height:100%; margin:auto; display:flex; align-items:center; gap:14px; }
 .histi-safety-icon { flex:none; display:grid; place-items:center; width:28px; height:28px; border:1px solid #7b9465; border-radius:50%; color:#c9dcb5; font-size:15px; }
 .histi-safety-copy { min-width:0; flex:1; }
@@ -167,7 +170,7 @@ html.histi-page-enter .app-card { animation:suite-enter 700ms 70ms var(--suite-e
 html.histi-page-enter .app-card:nth-child(2) { animation-delay:110ms; }html.histi-page-enter .app-card:nth-child(3) { animation-delay:150ms; }
 @keyframes suite-enter { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
 @media(max-width:680px) {
-  :root { --safety-notice-height:90px; }
+  :root { --safety-notice-size:90px; }
   .histi-safety-inner { width:calc(100% - 32px); gap:10px; }.histi-safety-icon { width:23px; height:23px; }
   .histi-safety-copy strong { font-size:12px; }.histi-safety-copy p { font-size:11px; }
   .histi-safety-notice a { font-size:11px; }
@@ -180,7 +183,7 @@ html.histi-page-enter .app-card:nth-child(2) { animation-delay:110ms; }html.hist
   .suite-privacy-reminder { padding:16px; }.suite-privacy-reminder p { font-size:12px; }
   .policy-main { width:calc(100% - 28px); padding-top:25px; }.policy-hero { padding:25px 22px; }.policy-summary { font-size:15px; }
 }
-@media(max-width:360px) { :root { --safety-notice-height:104px; }.histi-safety-inner { gap:8px; }.histi-safety-icon { display:none; } }
+@media(max-width:360px) { :root { --safety-notice-size:104px; }.histi-safety-inner { gap:8px; }.histi-safety-icon { display:none; } }
 @media(prefers-reduced-motion:reduce) { html.histi-page-enter :is(.start-card,.assessment-card,.result-card,.selector-heading,.policy-hero,.app-card) { animation:none!important; }.app-card.available { transition:none; } }
 body.reduce-motion :is(.start-card,.assessment-card,.result-card,.selector-heading,.policy-hero,.app-card) { animation:none!important; }
 @media print { .histi-safety-notice,.histi-header { position:static!important; }.app-shell,.policy-shell,body { padding-top:0!important; } }

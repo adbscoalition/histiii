@@ -353,6 +353,7 @@ function renderSlide(scroll = true) {
   const slide = slides[state.index];
   if (!slide) return;
   show('assessment', scroll);
+  document.querySelector('.assessment-card').dataset.category = slide.category;
   const meta = CATEGORY_META[slide.category];
   const result = calculate(state.answers);
   $('progress-label').textContent = `${state.index + 1} / ${slides.length}`;

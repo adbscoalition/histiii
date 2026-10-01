@@ -258,6 +258,8 @@ function sliderChoice(q,a){
 function renderQuestion(scroll=true){
   const q=questions[state.index]; if(!q) return;
   show('assessment',scroll);
+  // The older v3 set places Basic before its routines/events section.
+  document.querySelector('.assessment-card').dataset.category=q.number>=236?'D':q.number>=201?'C':q.number>=6&&q.number<=105?'B':'A';
   const a=currentAnswer(q);
   els.progress.style.width=`${((state.index+1)/questions.length)*100}%`;
   els.qmeta.textContent=`${q.section} · ${state.index+1} of ${questions.length}`;
