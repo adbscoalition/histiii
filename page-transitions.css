@@ -1,0 +1,46 @@
+/* One short fade for document navigation. No background animation or render loop. */
+html.histi-url-motion::after,
+html.histi-url-motion::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 380ms cubic-bezier(.22,.72,.24,1), visibility 0s 380ms;
+}
+html.histi-url-motion::after {
+  z-index: 60;
+  background: radial-gradient(ellipse at 50% 45%, #19160f, #090907 65%);
+}
+html.histi-url-motion::before {
+  z-index: 61;
+  background: url('/histi-logo.webp?v=facelift-1') center / 118px auto no-repeat;
+}
+html.histi-url-blue::after {
+  background: radial-gradient(ellipse at 50% 45%, #101b2b, #090907 65%);
+}
+html.histi-url-covered::after,
+html.histi-url-covered::before {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+html.histi-url-leaving::after,
+html.histi-url-leaving::before { transition-duration: 280ms, 0s; }
+html.histi-url-leaving::after { pointer-events: auto; }
+html.histi-url-motion :is(.site-header, .selector-header, .topbar, .progress-track, .bottom-utility) {
+  z-index: 70;
+}
+html.histi-url-motion .selector-header,
+html.histi-url-motion body > footer {
+  position: relative;
+  z-index: 70;
+}
+html.histi-url-leaving :is(.site-header, .selector-header, .topbar, .bottom-utility, body > footer) {
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  html.histi-url-motion::before,
+  html.histi-url-motion::after { display: none; transition: none; }
+}
