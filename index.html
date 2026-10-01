@@ -6,226 +6,144 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="application-name" content="HISTI">
   <meta name="robots" content="index,follow">
-  <meta name="title" content="HISTI | Information-Sharing Reflection Tool">
+  <meta name="theme-color" content="#0b0c0a">
+  <meta name="description" content="A private reflection on what you share, and with whom. Choose HISTI Full or HISTI-120. Your answers and scoring stay in your browser.">
   <meta property="og:site_name" content="HISTI">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="HISTI | Information-Sharing Reflection Tool">
-  <meta property="og:description" content="Choose HISTI Full or HISTI-120 to reflect on what you share with someone. Answers and scoring stay in your browser.">
-  <meta property="og:url" content="https://www.histi.org/">
+  <meta property="og:title" content="HISTI | Your sharing. Your boundaries.">
+  <meta property="og:description" content="Explore your sharing habits with a private, on-device check-in. Choose HISTI Full or the shorter HISTI-120.">
+  <meta property="og:url" content="https://histi.ocharlotted.com/">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="HISTI | Information-Sharing Reflection Tool">
-  <meta name="twitter:description" content="Choose HISTI Full or HISTI-120 to reflect on what you share with someone. Answers and scoring stay in your browser.">
-  <link rel="canonical" href="https://www.histi.org/">
+  <meta name="twitter:title" content="HISTI | Your sharing. Your boundaries.">
+  <meta name="twitter:description" content="A private reflection on what you share, and with whom.">
+  <link rel="canonical" href="https://histi.ocharlotted.com/">
   <link rel="icon" type="image/png" sizes="48x48" href="/histi-icon-48.png">
-  <link rel="shortcut icon" href="/histi-icon-48.png">
-  <meta name="theme-color" content="#080806">
-  <meta name="description" content="HISTI Full has 245 questions for each of four recipient types. HISTI-120 offers a shorter check-in. Answers and scoring stay in your browser.">
-  <title>HISTI | Home</title>
   <link rel="manifest" href="/site.webmanifest">
-  <link rel="stylesheet" href="/styles-home-public-sans-v2.css?v=content-1">
-  <script src="/home-motion.js?v=content-1" defer></script>
-  <link rel="stylesheet" href="/page-transitions.css?v=1">
-  <script src="/page-transitions.js?v=1"></script>
+  <title>HISTI | Your sharing. Your boundaries.</title>
+  <link rel="stylesheet" href="/styles-home.css?v=1">
+  <link rel="stylesheet" href="/site-header.css?v=1">
+  <link rel="stylesheet" href="/page-transitions.css?v=2">
+  <script src="/page-transitions.js?v=2"></script>
+  <script src="/home-motion.js?v=revamp-1" defer></script>
 </head>
-<body>
-  <header class="site-header">
-    <a class="brand" href="/" aria-label="HISTI home"><img src="/histi-logo.webp?v=facelift-1" alt="HISTI"></a>
-    <nav aria-label="Main navigation">
-      <a href="#formats">Check-ins</a>
-      <a href="#before">Before you begin</a>
-      <a href="#privacy">Privacy</a>
-      <a href="#rights">Rights</a>
-    </nav>
-    <a class="button small" href="/checkin-page">Choose a check-in</a>
-  </header>
+<body class="histi-home">
+  <header class="site-header topbar histi-header">
+      <div class="histi-header-inner">
+        <a class="histi-brand brand-home-link" href="/" aria-label="HISTI home"><img class="brand-logo" src="/histi-logo.webp?v=facelift-1" alt="HISTI" width="90" height="48"></a>
+        <nav class="histi-nav" aria-label="Main navigation">
+          <a href="/#formats">Check-ins</a><a href="/#about">How it works</a><a href="/#privacy">Privacy</a><a href="/#rights">Your control</a>
+        </nav>
+        <div class="histi-header-actions">
+          <button id="privacy-live-btn" class="histi-proof privacy-live-badge" type="button" aria-label="Open privacy proof"><span class="privacy-live-dot" aria-hidden="true"></span><span id="privacy-live-label">Privacy proof</span></button>
+          <a class="histi-start" href="/checkin-page" aria-label="Choose a check-in"><span class="histi-start-label">Choose a check-in</span><span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </header>
 
   <main>
-    <section class="hero wrap">
+    <section class="home-hero home-wrap" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <div class="hero-badge"><span></span> Private by design · answers stay on this device</div>
-        <p class="eyebrow">Human Information-Sharing Transparency Index</p>
-        <h1>Know what you share.<br><em>Keep control.</em></h1>
-        <p class="lede">Reflect on what you did—or would—share with someone. Choose HISTI Full, with four recipient options, or the shorter HISTI-120 check-in. Your answers are scored in this browser.</p>
-        <div class="actions">
-          <a class="button" href="/checkin-page">Choose a check-in <span aria-hidden="true">→</span></a>
-          <a class="button ghost" href="#formats">Compare check-ins</a>
+        <p class="home-eyebrow"><span class="quiet-dot" aria-hidden="true"></span> A private moment of reflection</p>
+        <h1 id="hero-title">Your sharing.<br>Your people.<br><em>Your boundaries.</em></h1>
+        <p class="hero-lede">Some things you tell everyone. Some things you keep close. Get to know the difference—and how it changes with the person.</p>
+        <div class="home-actions">
+          <a class="home-button-primary" href="/checkin-page">Find your check-in <span aria-hidden="true">↗</span></a>
+          <a class="home-text-link" href="#about">How it works <span aria-hidden="true">↓</span></a>
         </div>
-        <div class="trust">
-          <span>245 questions in Full, per recipient</span>
-          <span>120 questions in HISTI-120</span>
-          <span>No account or cookies required</span>
-          <span>Main check-ins: ages 13+</span>
-        </div>
+        <div class="hero-note"><span aria-hidden="true">✓</span><p>No account needed.<br><strong>Your answers stay in your browser.</strong></p></div>
       </div>
 
-      <aside class="preview" aria-label="Example HISTI result">
-        <p>Example result · not your score</p>
-        <div class="score-row"><span>HISTI</span><strong>P84</strong></div>
-        <div class="spectrum"><i></i></div>
-        <div class="spectrum-labels"><span>P100 · Private</span><span>N0</span><span>O100 · Open</span></div>
-        <div class="preview-note"><strong>Not a verdict.</strong> The score is not fully accurate to true privacy and openness values.</div>
+      <aside class="home-result" aria-label="Example HISTI result, not your score">
+        <div class="result-example-label"><span class="quiet-dot" aria-hidden="true"></span> Example result <span>For illustration only</span></div>
+        <div class="result-example-body">
+          <p class="home-eyebrow">Sharing with a friend</p>
+          <h2>Moderately<br><em>private.</em></h2>
+          <div class="example-score"><span>HISTI</span><strong>P40</strong></div>
+          <div class="example-spectrum" aria-label="Example: P40 on a scale from P100 private to O100 open"><i></i><b></b></div>
+          <div class="example-scale"><span>P100 · Private</span><span>N0</span><span>O100 · Open</span></div>
+          <div class="example-areas">
+            <div><span>A1</span><p>Daily activities</p><strong>O10</strong></div>
+            <div><span>A2</span><p>Major life events</p><strong>P20</strong></div>
+            <div><span>B</span><p>Basic information</p><strong>P60</strong></div>
+            <div><span>C</span><p>Sensitive information</p><strong>P70</strong></div>
+            <div><span>D</span><p>Very sensitive information</p><strong>P100</strong></div>
+          </div>
+        </div>
+        <p class="example-disclaimer">The score is not fully accurate to true privacy and openness values.</p>
       </aside>
+      <div class="hero-baseline"><span>HUMAN INFORMATION-SHARING TRANSPARENCY INDEX</span><a href="#formats">Explore the check-ins <span aria-hidden="true">↓</span></a></div>
     </section>
 
-    <section class="stats" aria-label="HISTI at a glance">
-      <div><strong>2</strong><span>check-ins available</span></div>
-      <div><strong>4</strong><span>Full recipient types</span></div>
-      <div><strong>5</strong><span>Full result areas</span></div>
-      <div><strong>Local</strong><span>answers and scoring</span></div>
-    </section>
-
-    <section id="formats" class="wrap section formats" aria-labelledby="formats-title">
-      <div class="section-heading">
-        <p class="eyebrow">Choose your pace</p>
-        <h2 id="formats-title">The full picture or a shorter check-in.</h2>
-        <p>Both versions ask for descriptions, not actual private details. Choose the format that fits the time you have.</p>
-      </div>
-      <div class="format-grid">
-        <a class="format-card format-full" href="/checkin-4">
-          <span class="format-kicker">01 · Full assessment</span>
-          <h3>HISTI Full</h3>
-          <p>Choose a stranger, acquaintance, friend, or spouse/partner. Each option uses the same 245 questions and gets an independent result.</p>
-          <span class="format-meta">29 cards · 55–70 minutes per recipient</span>
-          <span class="format-action">Choose a recipient <span aria-hidden="true">→</span></span>
+    <section id="formats" class="home-wrap home-section" aria-labelledby="formats-title">
+      <div class="home-section-heading"><p class="home-eyebrow">Make space for yourself</p><h2 id="formats-title">Two ways to check in.<br><em>Go at your pace.</em></h2><p>Choose the time you have. Both versions ask for descriptions of sharing, so the real details stay yours.</p></div>
+      <div class="home-format-grid">
+        <a class="home-format full-format" href="/checkin-4">
+          <div class="format-top"><span>THE FULL PICTURE</span><span class="format-arrow" aria-hidden="true">↗</span></div>
+          <h3>HISTI <em>Full</em></h3>
+          <p>Explore sharing with a stranger, acquaintance, friend, or spouse/partner. Each recipient gets a separate result.</p>
+          <div class="format-facts"><strong>245 <span>questions per recipient</span></strong><span>55–70 minutes<br>29 cards</span></div>
+          <span class="format-link">Choose a recipient <span aria-hidden="true">→</span></span>
         </a>
-        <a class="format-card format-short" href="/checkin-120">
-          <span class="format-kicker">02 · Shorter assessment</span>
-          <h3>HISTI-120</h3>
-          <p>Focus on one person or audience across 120 standalone questions, shown one at a time.</p>
-          <span class="format-meta">120 questions · 20–30 minutes</span>
-          <span class="format-action">Start HISTI-120 <span aria-hidden="true">→</span></span>
+        <a class="home-format short-format" href="/checkin-120">
+          <div class="format-top"><span>A SHORTER REFLECTION</span><span class="format-arrow" aria-hidden="true">↗</span></div>
+          <h3>HISTI<em>-120</em></h3>
+          <p>Keep one person or audience in mind. Move through a focused set of questions, one at a time.</p>
+          <div class="format-facts"><strong>120 <span>questions</span></strong><span>20–30 minutes<br>One person or audience</span></div>
+          <span class="format-link">Start HISTI-120 <span aria-hidden="true">→</span></span>
         </a>
       </div>
+      <p class="format-footnote">Main check-ins are for ages 13+. More versions are on the way.</p>
     </section>
 
-    <section id="about" class="wrap section">
-      <div class="section-heading">
-        <p class="eyebrow">How it works</p>
-        <h2>A clearer picture of your sharing boundaries.</h2>
-        <p>Choose the descriptions closest to what you did or would share. Your result runs from P100 through N0 to O100, with separate information-area scores.</p>
-      </div>
-      <div class="cards three">
-        <article><b>01</b><h3>Keep one recipient in mind</h3><p>Full offers four relationship types. HISTI-120 lets you choose one person or audience for its shorter check-in.</p></article>
-        <article><b>02</b><h3>Reflect, don’t disclose</h3><p>Select levels or descriptions. Never enter a real password, address, account number, medical detail, or other private value.</p></article>
-        <article><b>03</b><h3>See your pattern</h3><p>Your browser calculates the result and area scores. A partial result can change as you answer more.</p></article>
-      </div>
-    </section>
-
-    <section id="before" class="before-band">
-      <div class="wrap before-grid">
-        <div class="section-heading">
-          <p class="eyebrow">Before you begin</p>
-          <h2>Six things to know before you begin.</h2>
-          <p>You stay in control from the first question to the result.</p>
-        </div>
-
-        <div class="before-list">
-          <article>
-            <span>1</span>
-            <div><h3>Choose Full or HISTI-120.</h3><p>Full has 245 questions and 29 cards per recipient. HISTI-120 has 120 questions shown individually.</p></div>
-          </article>
-          <article>
-            <span>2</span>
-            <div><h3>Think of the same person throughout.</h3><p>In Full, choose one of four recipient types and answer that check-in with that relationship in mind. HISTI-120 focuses on one person or audience.</p></div>
-          </article>
-          <article>
-            <span>3</span>
-            <div><h3>Never enter the real private information.</h3><p>Do not type or paste passwords, codes, addresses, account details, government IDs, exact locations, or medical details. Choose descriptions only.</p></div>
-          </article>
-          <article>
-            <span>4</span>
-            <div><h3>Answer only what you want.</h3><p>You can leave questions blank or use “I don’t know,” “Prefer not to answer,” or “Not applicable.” You can go back, stop, or reset.</p></div>
-          </article>
-          <article>
-            <span>5</span>
-            <div><h3>Sensitive topics are signposted.</h3><p>Full shows cautions on sensitive and very sensitive cards. HISTI-120 also offers section-skip choices at its sensitive boundaries.</p></div>
-          </article>
-          <article>
-            <span>6</span>
-            <div><h3>The main check-ins are for ages 13+.</h3><p>HISTI does not ask for your date of birth. The children’s versions are not available yet.</p></div>
-          </article>
-        </div>
-
-        <div class="before-actions">
-          <a class="button" href="/checkin-page">I understand — choose a check-in <span aria-hidden="true">→</span></a>
-          <a class="text-link" href="/privacy">Read the full privacy policy</a>
+    <section id="about" class="home-about">
+      <div class="home-wrap home-section">
+        <div class="home-section-heading"><p class="home-eyebrow">How it works</p><h2>Sharing is personal.<br><em>So is the context.</em></h2><p>What you tell a friend may be different from what you tell someone you just met. HISTI helps you see those boundaries.</p></div>
+        <div class="home-steps">
+          <article><span class="step-number">01</span><h3>Think of someone.</h3><p>Choose a recipient and keep that relationship in mind as you answer.</p><div class="people-tags"><span>Stranger</span><span>Acquaintance</span><span>Friend</span><span>Partner</span></div></article>
+          <article><span class="step-number">02</span><h3>Choose what feels closest.</h3><p>Reflect on what you did—or would—share. Select a level or description; keep the actual information private.</p><div class="sample-level" aria-hidden="true"><span>1</span><span>2</span><span class="sample-selected">3</span><span>4</span><span>5</span></div></article>
+          <article><span class="step-number">03</span><h3>See your sharing pattern.</h3><p>Your result runs from P100 through N0 to O100, with separate information-area scores. An incomplete result can change as you answer more.</p><div class="step-scale" aria-hidden="true"><span>P100</span><span>N0</span><span>O100</span></div></article>
         </div>
       </div>
     </section>
 
-    <section class="categories">
-      <div class="wrap section">
-        <div class="section-heading narrow">
-          <p class="eyebrow">Five Full result areas</p>
-          <h2>From daily activities to very sensitive information.</h2>
-        </div>
-        <div class="category-grid">
-          <article><span>A1</span><div><h3>Daily activities</h3><p>Hobbies, preferences, routines, and everyday interests.</p></div></article>
-          <article><span>A2</span><div><h3>Major life events</h3><p>Changes and milestones you might—or might not—share.</p></div></article>
-          <article><span>B</span><div><h3>Basic information</h3><p>Details about your identity, background, or contactability.</p></div></article>
-          <article><span>C</span><div><h3>Sensitive information</h3><p>Personal information that may deserve more care, context, or boundaries.</p></div></article>
-          <article><span>D</span><div><h3>Very sensitive information</h3><p>Credentials, identifiers, financial or security details, and similarly high-sensitivity information.</p></div></article>
-        </div>
+    <section class="home-wrap home-section home-areas" aria-labelledby="areas-title">
+      <div class="home-section-heading"><p class="home-eyebrow">Five Full result areas</p><h2 id="areas-title">Everyday to<br><em>deeply personal.</em></h2></div>
+      <div class="home-area-list">
+        <article><span>A1</span><div><h3>Daily activities</h3><p>Hobbies, preferences, routines, and everyday interests.</p></div></article>
+        <article><span>A2</span><div><h3>Major life events</h3><p>Changes and milestones you might choose to share.</p></div></article>
+        <article><span>B</span><div><h3>Basic information</h3><p>Your identity, background, and contactability.</p></div></article>
+        <article><span>C</span><div><h3>Sensitive information</h3><p>Personal topics that may call for more care or context.</p></div></article>
+        <article><span>D</span><div><h3>Very sensitive information</h3><p>High-sensitivity details such as credentials or identifiers. Select descriptions only.</p></div></article>
       </div>
     </section>
 
-    <section id="privacy" class="wrap section privacy-grid">
-      <div class="section-heading">
-        <p class="eyebrow">Privacy you can verify</p>
-        <h2>Your answers are processed locally.</h2>
-        <p>The current check-ins use a browser policy with <code>connect-src 'none'</code> and <code>form-action 'none'</code>. Answers and progress remain in browser storage; the website host still receives ordinary requests for page files.</p>
-        <div class="actions">
-          <a class="button" href="/checkin-4#privacy-proof">Open Full privacy proof <span aria-hidden="true">→</span></a>
-          <a class="button ghost" href="/privacy">Read privacy policy</a>
-          <a class="text-link" href="https://github.com/adbscoalition/histiii" rel="noopener noreferrer">Inspect source →</a>
-        </div>
-      </div>
-      <aside class="proof">
-        <span class="status">Browser-enforced privacy</span>
-        <code>connect-src 'none'</code>
-        <ul>
-          <li>No check-in answer submission endpoint</li>
-          <li>No cookies or ad trackers</li>
-          <li>Self-hosted Public Sans; no third-party font service</li>
-          <li>Progress stored in localStorage — not cookies</li>
-          <li>HISTI-120 sharing is optional</li>
-        </ul>
-      </aside>
-    </section>
-
-    <section id="rights" class="rights">
-      <div class="wrap section">
-        <div class="section-heading narrow">
-          <p class="eyebrow">Know your rights</p>
-        <h2>You control every answer.</h2>
-        </div>
-        <div class="cards four">
-          <article><b>01</b><h3>Keep real details private.</h3><p>Choose descriptions only. No check-in asks for the actual sensitive value.</p></article>
-          <article><b>02</b><h3>Pass on a question.</h3><p>Leave it blank or use the available uncertainty, refusal, or not-applicable controls.</p></article>
-          <article><b>03</b><h3>Skip where offered.</h3><p>HISTI-120 can skip eligible sensitive sections. In Full, you can leave individual questions unanswered.</p></article>
-          <article><b>04</b><h3>Review, stop, or reset.</h3><p>Progress stays local. Sharing a HISTI-120 result is your choice.</p></article>
-        </div>
+    <section id="privacy" class="home-privacy">
+      <div class="home-wrap home-section privacy-layout">
+        <div class="home-section-heading"><p class="home-eyebrow"><span class="quiet-dot" aria-hidden="true"></span> Private by design</p><h2>The reflection is yours.<br><em>The answers stay yours.</em></h2><p>Your browser saves your progress and calculates your result. The check-ins block answer-submission connections. The host still receives ordinary requests for website files.</p><div class="home-actions"><a class="home-button-primary" href="/checkin-4#privacy-proof" data-privacy-proof>See the privacy proof <span aria-hidden="true">↗</span></a><a class="home-text-link" href="/privacy">Read the policy</a></div></div>
+        <div class="privacy-summary"><div><strong>On device</strong><span>Answers, progress, and scoring</span></div><div><strong>No account</strong><span>No signup to begin</span></div><div><strong>Check it yourself</strong><span>Live page checks and open source</span></div><a class="home-text-link" href="https://github.com/adbscoalition/histiii" rel="noopener noreferrer">Inspect the source <span aria-hidden="true">↗</span></a></div>
       </div>
     </section>
 
-    <section class="wrap disclaimer">
-      <div><p class="eyebrow">What HISTI is — and is not</p><h2>A reflection tool, not a verdict.</h2></div>
-      <p>The score is not fully accurate to true privacy and openness values. HISTI does not diagnose anything, decide whether sharing was safe, provide legal advice, or score your worth.</p>
+    <section id="rights" class="home-wrap home-section home-control">
+      <div class="home-section-heading"><p class="home-eyebrow">Your check-in. Your choice.</p><h2>Keep control.<br><em>At every step.</em></h2><p>Go back, leave a question blank, use the available response options, stop, or reset. Sharing a HISTI-120 result is always your choice.</p></div>
+      <div id="before" class="home-before">
+        <p class="home-eyebrow">Before you begin</p>
+        <details><summary><span>01</span>Choose a format that fits your time.<b aria-hidden="true">+</b></summary><p>Full has 245 questions and 29 cards per recipient. HISTI-120 has 120 questions shown individually.</p></details>
+        <details><summary><span>02</span>Keep the same person in mind.<b aria-hidden="true">+</b></summary><p>Full offers four recipient types. HISTI-120 lets you choose one person or audience for the shorter check-in.</p></details>
+        <details><summary><span>03</span>Keep real private details private.<b aria-hidden="true">+</b></summary><p>Never type or paste passwords, codes, addresses, account numbers, government IDs, exact locations, or medical details. Select descriptions only.</p></details>
+        <details><summary><span>04</span>It’s okay to pass on a question.<b aria-hidden="true">+</b></summary><p>Leave it blank or choose “I don’t know,” “Prefer not to answer,” or “Not applicable.” You can review your answers or reset the check-in.</p></details>
+        <details><summary><span>05</span>Sensitive topics are signposted.<b aria-hidden="true">+</b></summary><p>Full shows cautions on sensitive and very sensitive cards. HISTI-120 also offers section-skip choices at its sensitive boundaries.</p></details>
+        <details><summary><span>06</span>The main check-ins are for ages 13+.<b aria-hidden="true">+</b></summary><p>HISTI does not ask for your date of birth. Children’s versions are not available yet.</p></details>
+      </div>
     </section>
 
-    <section class="wrap final">
-      <img src="/histi-logo.webp?v=facelift-1" alt="">
-      <p class="eyebrow">Ready when you are</p>
-      <h2>See what your sharing pattern looks like.</h2>
-      <p>Choose Full for four separate relationship views, or HISTI-120 for a shorter session.</p>
-      <a class="button" href="/checkin-page">Choose a private check-in <span aria-hidden="true">→</span></a>
+    <section class="home-wrap home-final">
+      <p class="home-eyebrow">A little space to understand yourself</p><h2>Ready when<br><em>you are.</em></h2><a class="home-button-primary" href="/checkin-page">Choose your check-in <span aria-hidden="true">↗</span></a>
+      <p class="home-final-note">The score is not fully accurate to true privacy and openness values. HISTI is a reflection tool; it does not diagnose anything, decide whether sharing was safe, provide legal advice, or score your worth.</p>
     </section>
   </main>
 
-  <footer>
-    <div><img src="/histi-logo.webp?v=facelift-1" alt="HISTI"><span>Human Information-Sharing Transparency Index</span></div>
-    <nav><a href="/checkin-page">Check-ins</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="https://github.com/adbscoalition/histiii" rel="noopener noreferrer">Source</a></nav>
-    <p>Keep real private information to yourself.</p>
-  </footer>
+  <footer class="home-footer home-wrap"><div><img src="/histi-logo.webp?v=facelift-1" alt="HISTI" width="76" height="41"><span>Human Information-Sharing<br>Transparency Index</span></div><nav aria-label="Footer"><a href="/checkin-page">Check-ins</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="https://github.com/adbscoalition/histiii" rel="noopener noreferrer">Source</a></nav><p>Keep close what matters.</p></footer>
+  <script type="module" src="/histi4-privacy.js?v=4"></script>
 </body>
 </html>

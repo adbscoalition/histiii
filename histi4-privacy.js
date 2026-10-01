@@ -9,7 +9,7 @@ if (trigger) {
         <button class="h4-proof-close" type="button" aria-label="Close privacy proof">Close</button>
       </div>
       <h2 id="h4-proof-title">Your answers stay in this browser.</h2>
-      <p id="h4-proof-intro" class="h4-proof-intro">The Full check-in saves answers and progress locally. Run the page checks below to inspect the browser policy and resources currently visible to this page.</p>
+      <p id="h4-proof-intro" class="h4-proof-intro">HISTI check-ins save answers and progress locally. Run the page checks below to inspect the browser policy and resources currently visible to this page.</p>
       <div class="h4-proof-policy" role="note"><strong>Browser-enforced connection policy</strong><code>connect-src 'none'</code><span>This page's Content Security Policy blocks fetch, XHR, WebSocket, EventSource, and sendBeacon connections.</span></div>
       <div class="h4-proof-grid" aria-label="Live privacy checks">
         <article><strong data-proof="connections">Checking…</strong><span>Connection APIs</span></article>
@@ -60,10 +60,13 @@ if (trigger) {
       ? 'Current checks pass: connections and forms are blocked, no third-party runtime host or page-visible cookie was observed, and HISTI storage is local.'
       : 'One or more checks need attention. Inspect the values above and the browser Network panel before relying on a local-only claim.';
     trigger.dataset.state = passed ? 'pass' : 'fail';
-    trigger.querySelector('#privacy-live-label').textContent = passed ? 'LOCAL · checked' : 'CHECK PRIVACY';
+    trigger.querySelector('#privacy-live-label').textContent = 'Privacy proof';
   };
   const openProof = () => { if (!panel.open) panel.showModal(); run(); };
   trigger.addEventListener('click', openProof);
+  document.querySelectorAll('[data-privacy-proof]').forEach(link => {
+    link.addEventListener('click', event => { event.preventDefault(); openProof(); });
+  });
   if (location.hash === '#privacy-proof') openProof();
   window.addEventListener('hashchange', () => {
     if (location.hash === '#privacy-proof') openProof();

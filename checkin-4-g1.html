@@ -10,16 +10,24 @@
   <link rel="stylesheet" href="/styles-histi-v3.css?v=levels-cautions-1">
   <link rel="stylesheet" href="/styles-histi4.css?v=full-15">
   <title>Stranger / regular person | HISTI Full</title>
-  <link rel="stylesheet" href="/page-transitions.css?v=1">
-  <script src="/page-transitions.js?v=1"></script>
+  <link rel="stylesheet" href="/page-transitions.css?v=2">
+  <script src="/page-transitions.js?v=2"></script>
+  <link rel="stylesheet" href="/site-header.css?v=1">
 </head>
 <body data-recipient="G1">
   <div class="app-shell">
-    <header class="topbar"><div class="topbar-inner">
-      <div class="topbar-left"><a class="home-button" href="/checkin-4">All recipients</a></div>
-      <a class="brand-home-link" href="/" aria-label="HISTI home"><img class="brand-logo" src="/histi-logo.webp?v=facelift-1" alt="HISTI"></a>
-      <div class="topbar-right"><button id="privacy-live-btn" class="privacy-live-badge" type="button" aria-label="Open privacy proof"><span class="privacy-live-dot" aria-hidden="true"></span><span id="privacy-live-label">PRIVACY PROOF</span></button></div>
-    </div></header>
+    <header class="site-header topbar histi-header">
+      <div class="histi-header-inner">
+        <a class="histi-brand brand-home-link" href="/" aria-label="HISTI home"><img class="brand-logo" src="/histi-logo.webp?v=facelift-1" alt="HISTI" width="90" height="48"></a>
+        <nav class="histi-nav" aria-label="Main navigation">
+          <a href="/#formats">Check-ins</a><a href="/#about">How it works</a><a href="/#privacy">Privacy</a><a href="/#rights">Your control</a>
+        </nav>
+        <div class="histi-header-actions">
+          <button id="privacy-live-btn" class="histi-proof privacy-live-badge" type="button" aria-label="Open privacy proof"><span class="privacy-live-dot" aria-hidden="true"></span><span id="privacy-live-label">Privacy proof</span></button>
+          <a class="histi-start" href="/checkin-page" aria-label="Choose a check-in"><span class="histi-start-label">Choose a check-in</span><span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </header>
     <div class="progress-track" aria-hidden="true"><span id="progress-fill"></span></div>
 
     <main id="intro-screen" class="screen landing-screen">
@@ -74,6 +82,6 @@
     <footer class="bottom-utility"><div class="bottom-utility-inner"><div class="footer-links"><a href="/checkin-page">Check-ins</a><a href="/privacy">Privacy policy</a><a href="/terms">Terms</a></div><span class="device-note"><span class="device-dot" aria-hidden="true"></span>Saved only on this device</span></div></footer>
   </div>
     <script type="module" src="/app-histi4.js?v=full-17"></script>
-  <script type="module" src="/histi4-privacy.js?v=3"></script>
+  <script type="module" src="/histi4-privacy.js?v=4"></script>
 </body>
 </html>

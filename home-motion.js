@@ -3,8 +3,8 @@
   if (motionPreference.matches || !('IntersectionObserver' in window)) return;
 
   const revealTargets = document.querySelectorAll(
-    '.stats > div, .section-heading, .format-card, .cards article, .before-list article, ' +
-    '.category-grid article, .proof, .disclaimer > *, .final > *'
+    '.home-section-heading, .home-format, .home-steps article, .home-area-list article, ' +
+    '.privacy-summary, .home-before, .home-final'
   );
 
   const observer = new IntersectionObserver(entries => {

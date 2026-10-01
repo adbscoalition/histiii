@@ -62,6 +62,8 @@
     cancelAnimationFrame(firstFrame);
     cancelAnimationFrame(secondFrame);
     destination = url.href;
+    // Native modal dialogs sit above every document layer; close them for the full-screen veil.
+    document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close());
     root.classList.add('histi-url-motion', 'histi-url-leaving', 'histi-url-covered');
     navigationTimer = setTimeout(navigate, 340);
   });

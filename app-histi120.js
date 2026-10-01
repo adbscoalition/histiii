@@ -552,7 +552,7 @@ function renderPrivacyProof(proof) {
 
   if (els.privacyLive) {
     els.privacyLive.dataset.state = proof.pass ? 'pass' : 'fail';
-    els.privacyLiveLabel.textContent = proof.pass ? 'LIVE · local-only verified' : 'Privacy check needs attention';
+    els.privacyLiveLabel.textContent = 'Privacy proof';
   }
 
   if (els.proofNetworkValue) {

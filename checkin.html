@@ -23,31 +23,25 @@
   <title>HISTI | Check In</title>
 <link rel="manifest" href="/site.webmanifest">
   <link rel="stylesheet" href="/styles-public-sans-v2.css?v=answer-layout-audit-6">
-  <link rel="stylesheet" href="/page-transitions.css?v=1">
-  <script src="/page-transitions.js?v=1"></script>
+  <link rel="stylesheet" href="/page-transitions.css?v=2">
+  <script src="/page-transitions.js?v=2"></script>
+  <link rel="stylesheet" href="/site-header.css?v=1">
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
   <div class="ambient ambient-b" aria-hidden="true"></div>
 
   <div id="app" class="app-shell">
-    <header class="topbar">
-      <div class="topbar-inner">
-        <div class="topbar-left">
-          <a class="home-button" href="/" aria-label="Back to HISTI home">Home</a>
-          <button id="accessibility-btn" class="accessibility-button" type="button" aria-expanded="false" aria-controls="accessibility-panel">Accessibility</button>
+    <header class="site-header topbar histi-header">
+      <div class="histi-header-inner">
+        <a class="histi-brand brand-home-link" href="/" aria-label="HISTI home"><img class="brand-logo" src="/histi-logo.webp?v=facelift-1" alt="HISTI" width="90" height="48"></a>
+        <nav class="histi-nav" aria-label="Main navigation">
+          <a href="/#formats">Check-ins</a><a href="/#about">How it works</a><a href="/#privacy">Privacy</a><a href="/#rights">Your control</a>
+        </nav>
+        <div class="histi-header-actions">
+          <button id="privacy-live-btn" class="histi-proof privacy-live-badge" type="button" aria-label="Open privacy proof"><span class="privacy-live-dot" aria-hidden="true"></span><span id="privacy-live-label">Privacy proof</span></button>
+          <a class="histi-start" href="/checkin-page" aria-label="Choose a check-in"><span class="histi-start-label">Choose a check-in</span><span aria-hidden="true">↗</span></a>
         </div>
-
-        <a class="brand-home-link" href="/" aria-label="Back to HISTI home">
-          <img class="brand-logo" src="/histi-logo.webp?v=facelift-1" alt="HISTI">
-        </a>
-
-        <div class="topbar-right">
-          <button id="privacy-live-btn" class="privacy-live-badge" type="button" aria-label="Open live privacy proof">
-            <span class="privacy-live-dot" aria-hidden="true"></span>
-            <span id="privacy-live-label">Checking privacy…</span>
-          </button>
-</div>
       </div>
     </header>
 
@@ -465,6 +459,7 @@
     <footer id="bottom-utility" class="bottom-utility">
       <div class="bottom-utility-inner">
         <div class="footer-links">
+          <button id="accessibility-btn" class="accessibility-button" type="button" aria-expanded="false" aria-controls="accessibility-panel">Accessibility</button>
           <button id="footer-disclosure-btn" type="button">Live privacy proof</button>
           <button id="footer-export-btn" type="button">Export my data</button>
           <a href="/privacy">Privacy policy</a>
@@ -476,7 +471,7 @@
     </footer>
   </div>
 
-  <script type="module" src="/app-public-sans.js?v=rubric-max-1"></script>
+  <script type="module" src="/app-public-sans.js?v=shared-header-1"></script>
   <script type="module" src="/histi-spectrum-scoring.js?v=1"></script>
 </body>
 </html>
