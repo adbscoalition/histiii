@@ -45,3 +45,11 @@ test('the landing headline uses Tiro without changing other display headings', (
   assert.match(css, /h1:not\(#hero-title\):not\(#question-title\)/);
   assert.match(css, /\.home-final h2, \.score \{\s+font-family: var\(--font-display\) !important;/);
 });
+
+test('headline phrases stay together and scale to the available column', () => {
+  const css = read('styles-home.css');
+  assert.match(css, /\.home-hero #hero-title\{[^}]+white-space:nowrap/);
+  assert.match(css, /\.home-hero \.hero-copy\{container-type:inline-size\}/);
+  assert.match(css, /\.home-hero #hero-title\{font-size:min\(74px,12cqw\)\}/);
+  assert.match(read('index.html'), /styles-home\.css\?v=hero-fit-1/);
+});
