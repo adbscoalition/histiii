@@ -1,3 +1,4 @@
+import { openPanel, closePanel, confirmReset } from './site-dialogs.js?v=motion-1';
 import questionData from './questions-data-private-v1.js';
 
 const STORAGE_PROGRESS = 'histi.progress.v3';
@@ -601,12 +602,12 @@ function openDisclosure() {
   els.sectionSkipDialog.hidden = true;
   els.dataExportDialog.hidden = true;
   els.accessibility.setAttribute('aria-expanded', 'false');
-  els.disclosurePanel.hidden = false;
+  openPanel(els.disclosurePanel);
   runPrivacyProof();
 }
 
 function closeDisclosure() {
-  els.disclosurePanel.hidden = true;
+  void closePanel(els.disclosurePanel);
 }
 
 function enterFromStart() {
@@ -1175,11 +1176,11 @@ function openSectionSkipDialog() {
   els.sectionSkipCategory.textContent = pending.to;
   for (const input of els.sectionSkipReasons.querySelectorAll('input[name="section-skip-reason"]')) input.checked = false;
   els.sectionSkipConfirm.disabled = true;
-  els.sectionSkipDialog.hidden = false;
+  openPanel(els.sectionSkipDialog);
 }
 
 function closeSectionSkipDialog() {
-  els.sectionSkipDialog.hidden = true;
+  return closePanel(els.sectionSkipDialog);
 }
 
 function clearCategoryAnswers(category) {
@@ -1188,7 +1189,7 @@ function clearCategoryAnswers(category) {
   }
 }
 
-function confirmSectionSkip() {
+async function confirmSectionSkip() {
   const pending = state.pendingBoundary;
   if (!pending || !['C', 'D'].includes(pending.to)) return;
   const reason = els.sectionSkipReasons.querySelector('input[name="section-skip-reason"]:checked')?.value;
@@ -1199,7 +1200,7 @@ function confirmSectionSkip() {
   state.boundarySeen[pending.key] = true;
   clearCategoryAnswers(category);
   state.pendingBoundary = null;
-  closeSectionSkipDialog();
+  await closeSectionSkipDialog();
 
   if (category === 'C') {
     openCategoryBoundary('C', 'D', { force: true });
@@ -1871,11 +1872,11 @@ function openDataExport() {
   els.sectionSkipDialog.hidden = true;
   els.dataExportRawWrap.hidden = true;
   els.dataExportStatus.textContent = '';
-  els.dataExportDialog.hidden = false;
+  openPanel(els.dataExportDialog);
 }
 
 function closeDataExport() {
-  els.dataExportDialog.hidden = true;
+  void closePanel(els.dataExportDialog);
 }
 
 function downloadDataExport() {
@@ -1912,8 +1913,8 @@ function viewDataExport() {
   els.dataExportStatus.textContent = 'Raw local export shown below.';
 }
 
-function resetAll(confirmFirst = true) {
-  if (confirmFirst && !window.confirm('Reset HISTI? All answers, progress, and saved results on this device will be cleared.')) return;
+async function resetAll(confirmFirst = true) {
+  if (confirmFirst && !await confirmReset('Reset HISTI? All answers, progress, and saved results on this device will be cleared.')) return;
   if (saveTimer !== null) clearTimeout(saveTimer);
   saveTimer = null;
   saveDirty = false;
@@ -1942,10 +1943,10 @@ els.app.addEventListener('click', event => {
   const panelClose = event.target.closest('[data-panel-close]');
   if (panelClose) {
     if (panelClose.dataset.panelClose === 'accessibility') {
-      els.accessibilityPanel.hidden = true;
+      void closePanel(els.accessibilityPanel);
       els.accessibility.setAttribute('aria-expanded', 'false');
     } else {
-      els.debugPanel.hidden = true;
+      void closePanel(els.debugPanel);
     }
     return;
   }
@@ -1960,7 +1961,7 @@ els.app.addEventListener('click', event => {
   if (debugOpen) {
     els.accessibilityPanel.hidden = true;
     els.accessibility.setAttribute('aria-expanded', 'false');
-    els.debugPanel.hidden = false;
+    openPanel(els.debugPanel);
     return;
   }
 
@@ -1995,7 +1996,7 @@ els.app.addEventListener('click', event => {
   if (!id) return;
   if (id === 'accessibility-btn') {
     const willOpen = els.accessibilityPanel.hidden;
-    els.accessibilityPanel.hidden = !willOpen;
+    if (willOpen) openPanel(els.accessibilityPanel); else void closePanel(els.accessibilityPanel);
     els.accessibility.setAttribute('aria-expanded', String(willOpen));
     els.debugPanel.hidden = true;
   }
@@ -2095,8 +2096,8 @@ document.addEventListener('keydown', event => {
     closeSectionSkipDialog();
     return;
   }
-  els.accessibilityPanel.hidden = true;
-  els.debugPanel.hidden = true;
-  els.disclosurePanel.hidden = true;
+  void closePanel(els.accessibilityPanel);
+  void closePanel(els.debugPanel);
+  void closePanel(els.disclosurePanel);
   els.accessibility.setAttribute('aria-expanded', 'false');
 });

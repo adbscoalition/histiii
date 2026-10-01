@@ -1,3 +1,5 @@
+import { openDialog, closeDialog } from './site-dialogs.js?v=motion-1';
+
 const trigger = document.getElementById('privacy-live-btn');
 
 if (trigger) {
@@ -63,7 +65,7 @@ if (trigger) {
     trigger.dataset.state = passed ? 'pass' : 'fail';
     trigger.querySelector('#privacy-live-label').textContent = 'Privacy proof';
   };
-  const openProof = () => { if (!panel.open) panel.showModal(); run(); };
+  const openProof = () => { openDialog(panel); run(); };
   trigger.addEventListener('click', openProof);
   document.querySelectorAll('[data-privacy-proof]').forEach(link => {
     link.addEventListener('click', event => { event.preventDefault(); openProof(); });
@@ -72,8 +74,8 @@ if (trigger) {
   window.addEventListener('hashchange', () => {
     if (location.hash === '#privacy-proof') openProof();
   });
-  panel.querySelector('.h4-proof-close').addEventListener('click', () => panel.close());
+  panel.querySelector('.h4-proof-close').addEventListener('click', () => { void closeDialog(panel); });
   panel.querySelector('.h4-proof-run').addEventListener('click', run);
-  panel.addEventListener('click', event => { if (event.target === panel) panel.close(); });
+  panel.addEventListener('click', event => { if (event.target === panel) void closeDialog(panel); });
   panel.addEventListener('close', () => trigger.focus());
 }

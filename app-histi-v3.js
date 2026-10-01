@@ -1,4 +1,5 @@
 import setup from './questions-v3-01.js';
+import { openPanel, closePanel, confirmReset } from './site-dialogs.js?v=motion-1';
 import identity from './questions-v3-02.js';
 import relationships from './questions-v3-03.js';
 import work from './questions-v3-04.js';
@@ -58,8 +59,8 @@ let showingPartial=false;
 function save(){
   try{localStorage.setItem(STORAGE_PROGRESS,JSON.stringify({version:5,savedAt:Date.now(),state}));}catch{}
 }
-function reset(){
-  if(!confirm('Reset HISTI? This clears the answers and saved result on this device.')) return;
+async function reset(){
+  if(!await confirmReset('This clears the answers and saved result on this device.')) return;
   try{localStorage.removeItem(STORAGE_PROGRESS);localStorage.removeItem(STORAGE_RESULTS);}catch{}
   state=freshState(); showingPartial=false; show('intro');
 }
@@ -409,7 +410,7 @@ function exportData(){
 
 function openPrivacy(){
   if(!els.privacyPanel) return;
-  els.privacyPanel.hidden=false;
+  openPanel(els.privacyPanel);
   const result=$('privacy-proof-result'); if(result) result.textContent="PASS — this page's Content Security Policy blocks connection APIs, and HISTI 3.0 stores answer state locally in this browser.";
   const net=$('proof-network-value'); if(net) net.textContent='Blocked';
   const cookie=$('proof-cookie-value'); if(cookie) cookie.textContent=document.cookie?String(document.cookie.split(';').filter(Boolean).length):'0';
@@ -429,13 +430,13 @@ els.share?.addEventListener('click',shareSummary);
 els.status?.addEventListener('click',e=>{const b=e.target.closest('[data-status]');if(b)setStatus(b.dataset.status==='U'?'unknown':b.dataset.status==='NA'?'na':'pna');});
 els.boundaryBack?.addEventListener('click',()=>{state.pendingBoundary=null;renderQuestion();});
 els.boundaryContinue?.addEventListener('click',continueBoundary);
-els.boundarySkip?.addEventListener('click',()=>{const config=BOUNDARIES[state.pendingBoundary];if(!config?.skippable)return;els.skipCategory.textContent=config.to;for(const input of els.skipReasons.querySelectorAll('input[name="section-skip-reason"]'))input.checked=false;els.skipConfirm.disabled=true;els.skipDialog.hidden=false;});
+els.boundarySkip?.addEventListener('click',()=>{const config=BOUNDARIES[state.pendingBoundary];if(!config?.skippable)return;els.skipCategory.textContent=config.to;for(const input of els.skipReasons.querySelectorAll('input[name="section-skip-reason"]'))input.checked=false;els.skipConfirm.disabled=true;openPanel(els.skipDialog);});
 els.skipReasons?.addEventListener('change',()=>{els.skipConfirm.disabled=!els.skipReasons.querySelector('input[name="section-skip-reason"]:checked');});
-els.skipBack?.addEventListener('click',()=>{els.skipDialog.hidden=true;});
+els.skipBack?.addEventListener('click',()=>{void closePanel(els.skipDialog);});
 els.skipConfirm?.addEventListener('click',skipBoundarySection);
-els.privacy?.addEventListener('click',openPrivacy); els.footerPrivacy?.addEventListener('click',openPrivacy); els.privacyClose?.addEventListener('click',()=>{els.privacyPanel.hidden=true;});
+els.privacy?.addEventListener('click',openPrivacy); els.footerPrivacy?.addEventListener('click',openPrivacy); els.privacyClose?.addEventListener('click',()=>{void closePanel(els.privacyPanel);});
 els.footerExport?.addEventListener('click',exportData); els.footerReset?.addEventListener('click',reset);
-$('disclosure-done')?.addEventListener('click',()=>{els.privacyPanel.hidden=true;});
+$('disclosure-done')?.addEventListener('click',()=>{void closePanel(els.privacyPanel);});
 
 const values=document.querySelector('.spectrum-values'); if(values) values.innerHTML='<span>P100</span><span>N0</span><span>O100</span>';
 const subheading=document.querySelector('.subscore-heading h2');if(subheading)subheading.textContent='Topic spectra';

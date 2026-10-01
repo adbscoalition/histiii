@@ -1,4 +1,5 @@
 import { FAMILIES, CATEGORY_META, RECIPIENTS } from './histi4-data.js';
+import { openDialog, closeDialog, confirmReset } from './site-dialogs.js?v=motion-1';
 import { makeSlides, remapLegacySlideIndex, calculate, rubricPoints, displayScore } from './histi4-core.js?v=pna-1';
 
 const group = document.body.dataset.recipient;
@@ -404,8 +405,8 @@ function renderResults(completed = false) {
   $('resume-btn').textContent = completed ? 'Review questions' : 'Resume questions';
   document.title = `Result · ${recipient.label} | HISTI Full`;
 }
-function reset() {
-  if (!window.confirm(`Reset the ${recipient.label} check-in? This removes its saved answers and result from this device.`)) return;
+async function reset() {
+  if (!await confirmReset(`This removes the ${recipient.label.toLowerCase()} check-in’s saved answers and result from this device.`)) return;
   state = freshState();
   try { localStorage.removeItem(storageKey); } catch {}
   syncDebugWatermark();
@@ -432,7 +433,7 @@ function setupDebug() {
   dialog.setAttribute('aria-labelledby', 'h4-debug-title');
   const head = el('div', 'h4-debug-head');
   const title = el('h2', '', 'Debug'); title.id = 'h4-debug-title';
-  head.append(title, makeDebugButton('Close', () => dialog.close()));
+  head.append(title, makeDebugButton('Close', () => { void closeDialog(dialog); }));
   const note = el('p', 'h4-debug-note', 'Local-only test tools. Generated answers are marked and never overwrite answers you already chose.');
   const summary = el('p', 'h4-debug-summary');
   const categorySummary = el('div', 'h4-debug-categories');
@@ -441,11 +442,11 @@ function setupDebug() {
   label.htmlFor = 'h4-debug-card';
   const input = el('input'); input.id = 'h4-debug-card'; input.type = 'number'; input.min = '1'; input.max = String(slides.length); input.step = '1';
   const feedback = el('p', 'h4-debug-feedback'); feedback.setAttribute('role', 'status');
-  const goToCard = index => {
+  const goToCard = async index => {
+    await closeDialog(dialog);
     state.started = true;
     state.completed = false;
     state.index = index;
-    dialog.close();
     renderSlide();
   };
   const jumpButton = makeDebugButton('Jump', () => {
@@ -513,7 +514,7 @@ function setupDebug() {
   };
   dialog.append(head, note, summary, categorySummary, jump, feedback, sections, fillButton, details);
   document.body.append(dialog);
-  const trigger = makeDebugButton('Debug', () => { input.value = String(state.index + 1); feedback.textContent = ''; refresh(); dialog.showModal(); });
+  const trigger = makeDebugButton('Debug', () => { input.value = String(state.index + 1); feedback.textContent = ''; refresh(); openDialog(dialog); });
   trigger.className = 'h4-debug-trigger';
   document.querySelector('.footer-links').append(trigger);
 }

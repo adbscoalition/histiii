@@ -1,0 +1,92 @@
+/* Shared, bounded motion. Slider hit areas and pinned chrome never move. */
+:root {
+  --motion-ease: cubic-bezier(.2,.8,.2,1);
+  --motion-quick: 180ms;
+  --motion-arrive: 320ms;
+}
+
+.suite-popup {
+  animation: none !important;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: opacity var(--motion-arrive) ease, transform var(--motion-arrive) var(--motion-ease);
+}
+dialog.suite-popup::backdrop {
+  background: #253c5766;
+  opacity: 1;
+  transition: opacity var(--motion-arrive) ease;
+}
+.suite-popup.suite-popup-closing {
+  opacity: 0;
+  transform: translateY(8px) scale(.985);
+  transition-duration: var(--motion-quick);
+}
+dialog.suite-popup.suite-popup-closing::backdrop { opacity: 0; transition-duration: var(--motion-quick); }
+
+/* Full-screen legacy sheets fade; only their inner card lifts. */
+:is(.disclosure-sheet,.section-skip-dialog,.data-export-dialog).suite-popup { transform: none; }
+:is(.disclosure-sheet,.section-skip-dialog,.data-export-dialog).suite-popup > :first-child {
+  animation: none !important;
+  transform: translateY(0) scale(1);
+  transition: transform var(--motion-arrive) var(--motion-ease);
+}
+:is(.disclosure-sheet,.section-skip-dialog,.data-export-dialog).suite-popup-closing > :first-child { transform: translateY(8px) scale(.985); transition-duration: var(--motion-quick); }
+@starting-style {
+  dialog.suite-popup[open], .utility-panel.suite-popup:not([hidden]) { opacity: 0; transform: translateY(16px) scale(.97); }
+  dialog.suite-popup[open]::backdrop { opacity: 0; }
+  :is(.disclosure-sheet,.section-skip-dialog,.data-export-dialog).suite-popup:not([hidden]) { opacity: 0; }
+  :is(.disclosure-sheet,.section-skip-dialog,.data-export-dialog).suite-popup:not([hidden]) > :first-child { transform: translateY(16px) scale(.97); }
+}
+
+.suite-reset-dialog {
+  width: min(480px,calc(100% - 28px));
+  max-height: calc(100svh - 28px);
+  margin: auto;
+  padding: clamp(22px,5vw,32px);
+  border: 1px solid var(--palette-line);
+  border-radius: 26px;
+  background: var(--palette-card);
+  color: var(--palette-ink);
+  box-shadow: 0 24px 64px #253c5726;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.suite-reset-dialog > img { display: block; object-fit: contain; margin-bottom: 20px; }
+.suite-reset-dialog h2 { margin: 10px 0 14px; font-size: clamp(28px,5vw,36px); line-height: 1.2; }
+.suite-reset-dialog p:not(.eyebrow) { font-size: 16px; line-height: 1.6; }
+.suite-reset-note { padding: 14px 16px; border-radius: 14px; background: var(--palette-apricot-soft); }
+.suite-reset-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+.suite-reset-actions button { flex: 1 1 160px; min-height: 48px; border: 1px solid var(--palette-line); border-radius: 14px; padding: 12px 16px; color: var(--palette-ink); font: inherit; cursor: pointer; }
+.suite-reset-actions .secondary { background: var(--palette-blue-soft); }
+.suite-reset-actions .primary { background: var(--palette-sun); border-color: #a88121; }
+.suite-reset-actions button:focus-visible { outline: 2px solid var(--palette-blue-ink); outline-offset: 3px; }
+
+:is(button:not(.h4-segment),.primary,.secondary,.home-button-primary,.home-button-secondary,.h4-choice,.app-card.available,.card-link,.format-card,.histi-start) {
+  transition: transform var(--motion-quick) var(--motion-ease), background-color var(--motion-quick) ease, border-color var(--motion-quick) ease, color var(--motion-quick) ease, box-shadow var(--motion-quick) ease;
+}
+@media (hover:hover) and (pointer:fine) {
+  :is(button:not(.h4-segment),.primary,.secondary,.home-button-primary,.home-button-secondary,.histi-start):not(:disabled):hover { transform: translateY(-2px); }
+  :is(.h4-choice,.app-card.available,.format-card,.card-link):hover { transform: translateY(-4px); }
+}
+:is(button:not(.h4-segment),.primary,.secondary,.home-button-primary,.home-button-secondary,.histi-start):not(:disabled):active { transform: translateY(0) scale(.975); }
+:is(input,textarea,select) { transition: border-color var(--motion-quick) ease, background-color var(--motion-quick) ease, box-shadow var(--motion-quick) ease; }
+:is(.home-before) details[open] > :not(summary), .h4-debug-details[open] > :not(summary) { animation: suite-detail-arrive 240ms var(--motion-ease) backwards; }
+.h4-reveal:nth-child(2) { animation-delay: 25ms; }
+.h4-reveal:nth-child(3) { animation-delay: 50ms; }
+.h4-reveal:nth-child(4) { animation-delay: 75ms; }
+.h4-reveal:nth-child(5) { animation-delay: 100ms; }
+.h4-reveal:nth-child(6) { animation-delay: 125ms; }
+.h4-reveal:nth-child(7) { animation-delay: 150ms; }
+.h4-reveal:nth-child(8) { animation-delay: 175ms; }
+.h4-reveal:nth-child(n+9) { animation-delay: 200ms; }
+@keyframes suite-detail-arrive { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+body.reduce-motion :is(.suite-popup,.suite-popup > :first-child,button,.primary,.secondary,.home-button-primary,.home-button-secondary,.h4-choice,.app-card.available,.card-link,.format-card,.histi-start,input,textarea,select) { transition: none !important; }
+body.reduce-motion .suite-popup, body.reduce-motion .suite-popup > :first-child { transform: none !important; }
+body.reduce-motion dialog.suite-popup::backdrop { transition: none !important; }
+body.reduce-motion .home-before details[open] > :not(summary), body.reduce-motion .h4-debug-details[open] > :not(summary) { animation: none !important; }
+@media (prefers-reduced-motion:reduce) {
+  :is(.suite-popup,.suite-popup > :first-child,button,.primary,.secondary,.home-button-primary,.home-button-secondary,.h4-choice,.app-card.available,.card-link,.format-card,.histi-start,input,textarea,select), dialog.suite-popup::backdrop { transition: none !important; }
+  .suite-popup, .suite-popup > :first-child { transform: none !important; }
+  .home-before details[open] > :not(summary), .h4-debug-details[open] > :not(summary) { animation: none !important; }
+}
