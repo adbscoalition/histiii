@@ -8,7 +8,8 @@ const read = path => readFileSync(new URL(path, root), 'utf8');
 test('every page finishes its styles with the shared font hierarchy', () => {
   for (const file of readdirSync(root).filter(name => name.endsWith('.html'))) {
     const styles = [...read(file).matchAll(/<link[^>]+rel="stylesheet"[^>]+href="([^"]+)"/g)];
-    assert.equal(styles.at(-1)?.[1], '/site-typography.css?v=1', file);
+    const version = file === 'index.html' ? 'hero-tiro-1' : '1';
+    assert.equal(styles.at(-1)?.[1], `/site-typography.css?v=${version}`, file);
   }
 });
 
@@ -36,4 +37,11 @@ test('shared result images use the same font families without bolding Idiqlat', 
     assert.match(js, /600 16px "Instrument Sans"/);
     assert.doesNotMatch(js, /[5-9]\d{2} \d+px "Idiqlat"/);
   }
+});
+
+test('the landing headline uses Tiro without changing other display headings', () => {
+  const css = read('site-typography.css');
+  assert.match(css, /#hero-title, #question-title[^}]+font-family: var\(--font-heading\) !important;/);
+  assert.match(css, /h1:not\(#hero-title\):not\(#question-title\)/);
+  assert.match(css, /\.home-final h2, \.score \{\s+font-family: var\(--font-display\) !important;/);
 });

@@ -37,7 +37,7 @@ html, body, button, input, textarea, select, a, dialog, code, pre {
 
 /* Medium-sized headings, questions, and card titles use Tiro's real regular face. */
 h2, h3, h4, h5, h6,
-#question-title, #slide-title, #boundary-title, #handoff-message,
+#hero-title, #question-title, #slide-title, #boundary-title, #handoff-message,
 .card-name, .h4-choice strong, .privacy-summary strong,
 .example-score strong, .format-facts strong {
   font-family: var(--font-heading) !important;
@@ -47,7 +47,7 @@ h2, h3, h4, h5, h6,
 }
 
 /* The largest display text is plain Idiqlat: never bold, italic, or tightened. */
-h1:not(#question-title):not(#slide-title):not(#boundary-title):not(#handoff-message),
+h1:not(#hero-title):not(#question-title):not(#slide-title):not(#boundary-title):not(#handoff-message),
 .home-final h2, .score {
   font-family: var(--font-display) !important;
   font-weight: 400 !important;
