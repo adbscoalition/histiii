@@ -1,0 +1,75 @@
+/* Shared, self-hosted type hierarchy. No synthetic bold or italic faces. */
+@font-face {
+  font-family: "Idiqlat";
+  src: url('/fonts/idiqlat/regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Tiro Gurmukhi";
+  src: url('/fonts/tiro-gurmukhi/regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Instrument Sans";
+  src: url('/fonts/instrument-sans/variable.woff2') format('woff2');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-ui: "Instrument Sans", system-ui, sans-serif;
+  --font-heading: "Tiro Gurmukhi", Georgia, serif;
+  --font-display: "Idiqlat", Georgia, serif;
+  --font-sans: var(--font-ui) !important;
+  --font-mono: var(--font-ui) !important;
+  font-family: var(--font-ui) !important;
+  font-synthesis: none;
+}
+
+html, body, button, input, textarea, select, a, dialog, code, pre {
+  font-family: var(--font-ui) !important;
+}
+
+/* Medium-sized headings, questions, and card titles use Tiro's real regular face. */
+h2, h3, h4, h5, h6,
+#question-title, #slide-title, #boundary-title, #handoff-message,
+.card-name, .h4-choice strong, .privacy-summary strong,
+.example-score strong, .format-facts strong {
+  font-family: var(--font-heading) !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  letter-spacing: normal !important;
+}
+
+/* The largest display text is plain Idiqlat: never bold, italic, or tightened. */
+h1:not(#question-title):not(#slide-title):not(#boundary-title):not(#handoff-message),
+.home-final h2, .score {
+  font-family: var(--font-display) !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  font-variant: normal !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+
+:is(h1, h2, h3, h4, h5, h6, .card-name, .score) :is(em, strong, b, span, a) {
+  font-family: inherit !important;
+  font-weight: inherit !important;
+  font-style: normal !important;
+  letter-spacing: inherit !important;
+}
+
+/* Small labels nested in a heading or statistic remain UI text. */
+.home-area-list h3, .format-facts strong span {
+  font-family: var(--font-ui) !important;
+}
+
+.h4-question h2 {
+  font-size: clamp(19px, 2.2vw, 22px);
+  line-height: 1.45;
+}

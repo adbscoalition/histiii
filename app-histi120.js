@@ -1645,7 +1645,7 @@ function canvasToBlob(canvas) {
 }
 
 async function createResultImage(result) {
-  await Promise.race([document.fonts?.ready, wait(2000)]);
+  await Promise.race([Promise.all([document.fonts?.ready, document.fonts?.load('400 58px "Idiqlat"'), document.fonts?.load('400 25px "Tiro Gurmukhi"'), document.fonts?.load('600 16px "Instrument Sans"')]), wait(2000)]);
   const canvas = document.createElement('canvas');
   canvas.width = 1200;
   canvas.height = 1500;
@@ -1669,17 +1669,17 @@ async function createResultImage(result) {
   ctx.stroke();
 
   ctx.fillStyle = '#2f8ae9';
-  ctx.font = '800 21px "Public Sans", sans-serif';
+  ctx.font = '700 21px "Instrument Sans", sans-serif';
   ctx.fillText('YOUR DISCLOSURE PREFERENCE', 92, 116);
 
   ctx.fillStyle = '#f8f4e9';
-  ctx.font = '800 58px "Public Sans", sans-serif';
+  ctx.font = '400 58px "Idiqlat", serif';
   const titleLines = canvasLines(ctx, resultPreference(result.overall), 1010).slice(0, 3);
   titleLines.forEach((line, index) => ctx.fillText(line, 92, 190 + index * 68));
 
   const spectrumY = 230 + titleLines.length * 68;
   ctx.fillStyle = '#d9d2c2';
-  ctx.font = '700 23px "Public Sans", sans-serif';
+  ctx.font = '400 23px "Tiro Gurmukhi", serif';
   ctx.fillText('Private', 92, spectrumY);
   ctx.textAlign = 'right';
   ctx.fillText('Open', 1108, spectrumY);
@@ -1710,7 +1710,7 @@ async function createResultImage(result) {
   }
 
   ctx.fillStyle = '#8f897d';
-  ctx.font = '700 17px "Public Sans", sans-serif';
+  ctx.font = '700 17px "Instrument Sans", sans-serif';
   ctx.fillText('P100', trackX, trackY + 72);
   ctx.textAlign = 'center';
   ctx.fillText('0', trackX + trackWidth / 2, trackY + 72);
@@ -1720,19 +1720,19 @@ async function createResultImage(result) {
 
   const scoreY = trackY + 174;
   ctx.fillStyle = '#8f897d';
-  ctx.font = '800 21px "Public Sans", sans-serif';
+  ctx.font = '700 21px "Instrument Sans", sans-serif';
   ctx.fillText('HISTI-120', 92, scoreY);
   ctx.fillStyle = '#308ff2';
-  ctx.font = '800 92px "Public Sans", sans-serif';
+  ctx.font = '400 92px "Idiqlat", serif';
   ctx.fillText(result.overall === null ? 'Not calculated' : directionalScore(result.overall), 270, scoreY + 10);
 
   const subscoreY = scoreY + 104;
   ctx.fillStyle = '#f6f1e5';
-  ctx.font = '750 25px "Public Sans", sans-serif';
+  ctx.font = '400 25px "Tiro Gurmukhi", serif';
   ctx.fillText('Category subscores', 92, subscoreY);
   ctx.textAlign = 'right';
   ctx.fillStyle = '#827c71';
-  ctx.font = '600 16px "Public Sans", sans-serif';
+  ctx.font = '600 16px "Instrument Sans", sans-serif';
   ctx.fillText('P = private · O = open', 1108, subscoreY);
   ctx.textAlign = 'left';
 
@@ -1752,16 +1752,16 @@ async function createResultImage(result) {
     ctx.fillStyle = '#308dee';
     ctx.fill();
     ctx.fillStyle = '#0b1016';
-    ctx.font = '850 24px "Public Sans", sans-serif';
+    ctx.font = '700 24px "Instrument Sans", sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(cat, x + 42, y + 51);
     ctx.textAlign = 'left';
 
     ctx.fillStyle = '#8f8a80';
-    ctx.font = '600 15px "Public Sans", sans-serif';
+    ctx.font = '600 15px "Instrument Sans", sans-serif';
     ctx.fillText(CATEGORY_NAMES[cat], x + 82, y + 34);
     ctx.fillStyle = '#f5f1e8';
-    ctx.font = '800 31px "Public Sans", sans-serif';
+    ctx.font = '400 31px "Tiro Gurmukhi", serif';
     ctx.fillText(resultCat.ratio === null ? 'N/C' : directionalScore(resultCat.ratio * 100), x + 82, y + 67);
 
     const miniX = x + 18;
@@ -1797,14 +1797,14 @@ async function createResultImage(result) {
     ctx.drawImage(logo, 92, 1244, logoWidth, logoHeight);
   }
   ctx.fillStyle = '#f7f2e5';
-  ctx.font = '800 30px "Public Sans", sans-serif';
+  ctx.font = '400 30px "Tiro Gurmukhi", serif';
   ctx.fillText('HISTI-120', 92, 1366);
   ctx.fillStyle = '#d3cab5';
-  ctx.font = '650 24px "Public Sans", sans-serif';
+  ctx.font = '650 24px "Instrument Sans", sans-serif';
   const disclaimerLines = canvasLines(ctx, RESULT_DISCLAIMER, 720);
   disclaimerLines.forEach((line, index) => ctx.fillText(line, 360, 1278 + index * 34));
   ctx.fillStyle = '#7e786d';
-  ctx.font = '600 18px "Public Sans", sans-serif';
+  ctx.font = '600 18px "Instrument Sans", sans-serif';
   ctx.fillText('www.histi.org', 360, 1377);
 
   if (debugWatermarkActive()) {
@@ -1813,7 +1813,7 @@ async function createResultImage(result) {
     ctx.rotate(-Math.PI / 7);
     ctx.textAlign = 'center';
     ctx.fillStyle = 'rgba(48,143,242,.13)';
-    ctx.font = '900 76px "Public Sans", sans-serif';
+    ctx.font = '700 76px "Instrument Sans", sans-serif';
     for (let y = -520; y <= 520; y += 210) {
       ctx.fillText('DEBUG · GENERATED TEST DATA', 0, y);
     }
@@ -1823,7 +1823,7 @@ async function createResultImage(result) {
     ctx.fillRect(0, 0, canvas.width, 58);
     ctx.fillStyle = '#090d11';
     ctx.textAlign = 'center';
-    ctx.font = '900 22px "Public Sans", sans-serif';
+    ctx.font = '700 22px "Instrument Sans", sans-serif';
     ctx.fillText('DEBUG · GENERATED TEST DATA · NOT A REAL RESULT', canvas.width / 2, 38);
     ctx.textAlign = 'left';
   }
