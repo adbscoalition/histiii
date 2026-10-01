@@ -140,6 +140,7 @@ test('shared animation coverage is finite, accessible, and does not move slider 
   assert.doesNotMatch(css, /infinite|will-change|filter:/);
   assert.doesNotMatch(js, /setInterval|requestAnimationFrame|MutationObserver|prototype|innerHTML|localStorage/);
   assert.match(js, /CLOSE_FALLBACK_MS = 240/);
+  assert.match(read('app-histi4.js'), /Reveal the new card after the full-screen veil/);
   for (const file of ['app-histi4.js','app-public-sans.js','app-histi120.js','app-histi-v3.js']) {
     assert.match(read(file), /await confirmReset/);
     assert.doesNotMatch(read(file), /window\.confirm\(|\!confirm\(/);

@@ -91,6 +91,11 @@ async function transitionPage(kicker, title, detail, render, focusId) {
     overlay.hidden = true;
     screens.forEach(screen => { screen.inert = false; });
     transitionBusy = false;
+    // Reveal the new card after the full-screen veil, not underneath it.
+    if (rendered && focusId === 'slide-title') {
+      document.querySelector('.question-top').classList.add('h4-header-reveal');
+      document.querySelectorAll('#question-list .h4-question').forEach(card => card.classList.add('h4-reveal'));
+    }
     if (rendered) $(focusId)?.focus({ preventScroll: true });
   }
 }
