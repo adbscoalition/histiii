@@ -11,14 +11,14 @@ html.histi-url-motion::before {
 }
 html.histi-url-motion::after {
   z-index: 10000;
-  background: radial-gradient(ellipse at 50% 45%, #19160f, #090907 65%);
+  background: radial-gradient(ellipse at 50% 45%, #192215, #0b0c0a 65%);
 }
 html.histi-url-motion::before {
   z-index: 10001;
   background: url('/histi-logo.webp?v=facelift-1') center / 118px auto no-repeat;
 }
 html.histi-url-blue::after {
-  background: radial-gradient(ellipse at 50% 45%, #101b2b, #090907 65%);
+  background: radial-gradient(ellipse at 50% 45%, #18262e, #0b0c0a 65%);
 }
 html.histi-url-covered::after,
 html.histi-url-covered::before {

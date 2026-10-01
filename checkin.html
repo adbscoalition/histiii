@@ -18,17 +18,21 @@
   <link rel="canonical" href="https://www.histi.org/checkin">
   <link rel="icon" type="image/png" sizes="48x48" href="/histi-icon-48.png">
   <link rel="shortcut icon" href="/histi-icon-48.png">
-  <meta name="theme-color" content="#090907">
+  <meta name="theme-color" content="#0b0c0a">
   <meta name="description" content="HISTI Check-in — a private, on-device reflection on information sharing.">
   <title>HISTI | Check In</title>
 <link rel="manifest" href="/site.webmanifest">
   <link rel="stylesheet" href="/styles-public-sans-v2.css?v=answer-layout-audit-6">
-  <link rel="stylesheet" href="/page-transitions.css?v=2">
-  <script src="/page-transitions.js?v=2"></script>
+  <link rel="stylesheet" href="/page-transitions.css?v=suite-1">
+  <script src="/page-transitions.js?v=suite-1"></script>
   <link rel="stylesheet" href="/site-header.css?v=1">
+  <link rel="stylesheet" href="/site-experience.css?v=1">
   <link rel="stylesheet" href="/site-typography.css?v=1">
 </head>
 <body>
+  <aside class="histi-safety-notice" role="note" aria-label="Keep real information private">
+    <div class="histi-safety-inner"><span class="histi-safety-icon" aria-hidden="true">!</span><div class="histi-safety-copy"><strong>Never enter passwords, codes, or personal information.</strong><p>Choose levels only. No real names, IDs, or sensitive details.</p></div><a href="/privacy">Privacy</a></div>
+  </aside>
   <div class="ambient ambient-a" aria-hidden="true"></div>
   <div class="ambient ambient-b" aria-hidden="true"></div>
 
@@ -119,6 +123,7 @@
             <span>Share your result only if you choose.</span>
           </div>
         </div>
+        <div class="suite-privacy-reminder" role="note"><span>Private by design</span><p>Reflect on sharing without sharing the information itself. Your choices and progress stay in this browser. You can skip, stop, or reset.</p><a href="/privacy">How your privacy is protected →</a></div>
         <p class="start-disclaimer"><strong>HISTI is a reflection tool.</strong> It is not a diagnosis, legal opinion, safety certificate, or measure of your character.</p>
         <p class="age-note"><strong>Main check-in: ages 13+.</strong> This version is not intended for users under age 13. HISTI does not ask for your birth date. A children’s version is coming soon.</p>
 
@@ -138,7 +143,8 @@
       <div id="recipient-list" class="choice-grid"></div>
       <label class="field">
         <span>Optional private label <small>— stored only in this browser</small></span>
-        <input id="recipient-label" maxlength="80" autocomplete="off" placeholder="e.g. Alex">
+        <input id="recipient-label" maxlength="80" autocomplete="off" placeholder="e.g. my friend (no real names)" aria-describedby="recipient-label-privacy">
+        <small id="recipient-label-privacy" class="field-privacy">Use an anonymous label only. No real names, contact details, passwords, or IDs.</small>
       </label>
       <div class="actions">
         <button id="recipient-back" class="secondary" type="button">Back</button>

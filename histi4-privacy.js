@@ -10,6 +10,7 @@ if (trigger) {
       </div>
       <h2 id="h4-proof-title">Your answers stay in this browser.</h2>
       <p id="h4-proof-intro" class="h4-proof-intro">HISTI check-ins save answers and progress locally. Run the page checks below to inspect the browser policy and resources currently visible to this page.</p>
+      <p class="h4-proof-safety" role="note"><strong>Reflect on sharing. Don’t share the actual information here.</strong>Never enter passwords, one-time codes, real names, contact details, ID numbers, financial details, medical records, or other identifying information. The questions ask for levels and descriptions, not the information itself. On a shared device, reset your local check-in when you finish.</p>
       <div class="h4-proof-policy" role="note"><strong>Browser-enforced connection policy</strong><code>connect-src 'none'</code><span>This page's Content Security Policy blocks fetch, XHR, WebSocket, EventSource, and sendBeacon connections.</span></div>
       <div class="h4-proof-grid" aria-label="Live privacy checks">
         <article><strong data-proof="connections">Checking…</strong><span>Connection APIs</span></article>
