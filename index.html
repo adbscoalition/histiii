@@ -6,12 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="application-name" content="HISTI">
   <meta name="robots" content="index,follow">
-  <meta name="theme-color" content="#0b0c0a">
-  <meta name="description" content="A private reflection on what you share, and with whom. Choose HISTI Full or HISTI-120. Your answers and scoring stay in your browser.">
+  <meta name="theme-color" content="#fffaf5">
+  <meta name="description" content="A private reflection on what you share, and with whom. Explore HISTI Full. Your answers and scoring stay in your browser.">
   <meta property="og:site_name" content="HISTI">
   <meta property="og:type" content="website">
   <meta property="og:title" content="HISTI | Your sharing. Your boundaries.">
-  <meta property="og:description" content="Explore your sharing habits with a private, on-device check-in. Choose HISTI Full or the shorter HISTI-120.">
+  <meta property="og:description" content="Explore your sharing habits with HISTI Full, a private, on-device check-in.">
   <meta property="og:url" content="https://histi.ocharlotted.com/">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="HISTI | Your sharing. Your boundaries.">
@@ -20,15 +20,18 @@
   <link rel="icon" type="image/png" sizes="48x48" href="/histi-icon-48.png">
   <link rel="manifest" href="/site.webmanifest">
   <title>HISTI | Your sharing. Your boundaries.</title>
-  <link rel="stylesheet" href="/styles-home.css?v=hero-fit-1">
-  <link rel="stylesheet" href="/site-header.css?v=1">
-  <link rel="stylesheet" href="/page-transitions.css?v=suite-1">
+  <link rel="stylesheet" href="/styles-home.css?v=bright-1">
+  <link rel="stylesheet" href="/site-header.css?v=bright-1">
+  <link rel="stylesheet" href="/page-transitions.css?v=bright-1">
   <script src="/page-transitions.js?v=suite-1"></script>
   <script src="/home-motion.js?v=revamp-1" defer></script>
-  <link rel="stylesheet" href="/site-experience.css?v=section-notice-1">
+  <link rel="stylesheet" href="/site-color-motion.css?v=bright-1">
+  <script src="/site-color-motion.js?v=bright-1" defer></script>
+  <link rel="stylesheet" href="/site-experience.css?v=bright-1">
   <link rel="stylesheet" href="/site-typography.css?v=hero-tiro-1">
 </head>
 <body class="histi-home">
+  <div class="suite-color-field" aria-hidden="true"><span></span><span></span><span></span></div>
   <aside class="histi-safety-notice" role="note" aria-label="Keep real information private">
     <div class="histi-safety-inner"><span class="histi-safety-icon" aria-hidden="true">!</span><div class="histi-safety-copy"><strong>Never enter passwords, codes, or personal information.</strong><p>Choose levels only. No real names, IDs, or sensitive details.</p></div><a href="/privacy">Privacy</a></div>
   </aside>
@@ -80,7 +83,7 @@
     </section>
 
     <section id="formats" class="home-wrap home-section" aria-labelledby="formats-title">
-      <div class="home-section-heading"><p class="home-eyebrow">Make space for yourself</p><h2 id="formats-title">Two ways to check in.<br><em>Go at your pace.</em></h2><p>Choose the time you have. Both versions ask for descriptions of sharing, so the real details stay yours.</p></div>
+      <div class="home-section-heading"><p class="home-eyebrow">Make space for yourself</p><h2 id="formats-title">Your check-in.<br><em>Your pace.</em></h2><p>Start with HISTI Full. Choose descriptions of sharing, so the real details stay yours.</p></div>
       <div class="home-format-grid">
         <a class="home-format full-format" href="/checkin-4">
           <div class="format-top"><span>THE FULL PICTURE</span><span class="format-arrow" aria-hidden="true">↗</span></div>
@@ -89,13 +92,13 @@
           <div class="format-facts"><strong>245 <span>questions per recipient</span></strong><span>55–70 minutes<br>29 cards</span></div>
           <span class="format-link">Choose a recipient <span aria-hidden="true">→</span></span>
         </a>
-        <a class="home-format short-format" href="/checkin-120">
-          <div class="format-top"><span>A SHORTER REFLECTION</span><span class="format-arrow" aria-hidden="true">↗</span></div>
+        <article class="home-format short-format is-paused" aria-disabled="true">
+          <div class="format-top"><span>TEMPORARILY PAUSED</span><span class="paused-badge">On hold</span></div>
           <h3>HISTI<em>-120</em></h3>
-          <p>Keep one person or audience in mind. Move through a focused set of questions, one at a time.</p>
+          <p>The shorter check-in is temporarily unavailable. HISTI Full is still here when you’re ready.</p>
           <div class="format-facts"><strong>120 <span>questions</span></strong><span>20–30 minutes<br>One person or audience</span></div>
-          <span class="format-link">Start HISTI-120 <span aria-hidden="true">→</span></span>
-        </a>
+          <span class="format-link">We’ll bring it back later.</span>
+        </article>
       </div>
       <p class="format-footnote">Main check-ins are for ages 13+. More versions are on the way.</p>
     </section>
@@ -130,14 +133,14 @@
     </section>
 
     <section id="rights" class="home-wrap home-section home-control">
-      <div class="home-section-heading"><p class="home-eyebrow">Your check-in. Your choice.</p><h2>Keep control.<br><em>At every step.</em></h2><p>Go back, leave a question blank, use the available response options, stop, or reset. Sharing a HISTI-120 result is always your choice.</p></div>
+      <div class="home-section-heading"><p class="home-eyebrow">Your check-in. Your choice.</p><h2>Keep control.<br><em>At every step.</em></h2><p>Go back, leave a question blank, use the available response options, stop, or reset. Keep your reflection to yourself if you prefer.</p></div>
       <div id="before" class="home-before">
         <p class="home-eyebrow">Before you begin</p>
-        <details><summary><span>01</span>Choose a format that fits your time.<b aria-hidden="true">+</b></summary><p>Full has 245 questions and 29 cards per recipient. HISTI-120 has 120 questions shown individually.</p></details>
-        <details><summary><span>02</span>Keep the same person in mind.<b aria-hidden="true">+</b></summary><p>Full offers four recipient types. HISTI-120 lets you choose one person or audience for the shorter check-in.</p></details>
+        <details><summary><span>01</span>Make space for the check-in.<b aria-hidden="true">+</b></summary><p>Full has 245 questions and 29 cards per recipient. Take breaks whenever you need to; progress stays in your browser.</p></details>
+        <details><summary><span>02</span>Keep the same person in mind.<b aria-hidden="true">+</b></summary><p>Full offers four recipient types, each with a separate result. Choose one relationship for each check-in.</p></details>
         <details><summary><span>03</span>Keep real private details private.<b aria-hidden="true">+</b></summary><p>Never type or paste passwords, codes, addresses, account numbers, government IDs, exact locations, or medical details. Select descriptions only.</p></details>
         <details><summary><span>04</span>It’s okay to pass on a question.<b aria-hidden="true">+</b></summary><p>Leave it blank or choose “I don’t know,” “Prefer not to answer,” or “Not applicable.” You can review your answers or reset the check-in.</p></details>
-        <details><summary><span>05</span>Sensitive topics are signposted.<b aria-hidden="true">+</b></summary><p>Full shows cautions on sensitive and very sensitive cards. HISTI-120 also offers section-skip choices at its sensitive boundaries.</p></details>
+        <details><summary><span>05</span>Sensitive topics are signposted.<b aria-hidden="true">+</b></summary><p>Full shows cautions on sensitive and very sensitive cards, with a pinned safety reminder on Basic, Sensitive, and Very Sensitive cards.</p></details>
         <details><summary><span>06</span>The main check-ins are for ages 13+.<b aria-hidden="true">+</b></summary><p>HISTI does not ask for your date of birth. Children’s versions are not available yet.</p></details>
       </div>
     </section>

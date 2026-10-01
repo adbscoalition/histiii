@@ -12,7 +12,7 @@ test('every page has one static safety notice and the shared visual system', () 
     const html = read(file);
     assert.equal((html.match(/class="histi-safety-notice"/g) || []).length, 1, file);
     assert.match(html, /Never enter passwords, codes, or personal information\./, file);
-    assert.ok(html.indexOf('/site-experience.css?v=section-notice-1') < html.indexOf('/site-typography.css'), file);
+    assert.ok(html.indexOf('/site-experience.css?v=bright-1') < html.indexOf('/site-typography.css'), file);
     assert.match(html, /page-transitions\.js\?v=suite-1/, file);
     assert.match(html, /class="site-header topbar histi-header"/, file);
   }

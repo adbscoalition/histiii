@@ -51,5 +51,5 @@ test('headline phrases stay together and scale to the available column', () => {
   assert.match(css, /\.home-hero #hero-title\{[^}]+white-space:nowrap/);
   assert.match(css, /\.home-hero \.hero-copy\{container-type:inline-size\}/);
   assert.match(css, /\.home-hero #hero-title\{font-size:min\(74px,12cqw\)\}/);
-  assert.match(read('index.html'), /styles-home\.css\?v=hero-fit-1/);
+  assert.match(read('index.html'), /styles-home\.css\?v=bright-1/);
 });

@@ -1,5 +1,10 @@
 {
   "cleanUrls": true,
+  "redirects": [
+    { "source": "/checkin-120", "destination": "/checkin-page", "permanent": false },
+    { "source": "/checkin-120.html", "destination": "/checkin-page", "permanent": false },
+    { "source": "/checkin-120/:path*", "destination": "/checkin-page", "permanent": false }
+  ],
   "headers": [
     {
       "source": "/(.*)",

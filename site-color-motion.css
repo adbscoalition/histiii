@@ -1,0 +1,13 @@
+/* Three bounded, decorative layers. Only transforms animate; nothing is generated. */
+body { isolation:isolate; }
+.suite-color-field { position:fixed; inset:0; z-index:-1; pointer-events:none; overflow:hidden; contain:layout paint; }
+.suite-color-field span { position:absolute; width:220px; height:220px; border-radius:50%; background:radial-gradient(ellipse,#ffd46499 0%,#ffe4a855 45%,#ffe4a800 72%); animation:suite-color-drift 32s ease-in-out infinite alternate; }
+.suite-color-field span:nth-child(1) { left:-60px; top:18%; }
+.suite-color-field span:nth-child(2) { right:-45px; top:36%; width:250px; height:250px; background:radial-gradient(ellipse,#99caff88 0%,#cce5ff55 45%,#cce5ff00 72%); animation-duration:39s; animation-delay:-12s; }
+.suite-color-field span:nth-child(3) { right:24%; bottom:-70px; width:190px; height:190px; background:radial-gradient(ellipse,#f0a1c688 0%,#f6d0e555 45%,#f6d0e500 72%); animation-duration:45s; animation-delay:-22s; }
+@keyframes suite-color-drift { from { transform:translate3d(-12px,-14px,0) rotate(-6deg); } to { transform:translate3d(32px,24px,0) rotate(9deg); } }
+html.suite-motion-paused .suite-color-field span { animation-play-state:paused; }
+body.reduce-motion .suite-color-field span { animation:none; }
+@media(max-width:680px) { .suite-color-field span,.suite-color-field span:nth-child(2),.suite-color-field span:nth-child(3) { width:145px; height:145px; } }
+@media(prefers-reduced-motion:reduce) { .suite-color-field span { animation:none; } }
+@media print { .suite-color-field { display:none; } }
