@@ -92,3 +92,10 @@ test('new icons are self-hosted vectors with labelled controls and no generated 
   }
   assert.match(read('index.html'),/nav class="people-tags" aria-label="Try a relationship"/);
 });
+
+test('topic badges center the complete icon-and-label stack with equal breathing room', () => {
+  const css=read('visitor-play.css');
+  assert.match(css,/\.home-area-list \.visitor-topic-icon \{[^}]*align-items:center; justify-content:center; gap:4px; line-height:1;/);
+  assert.match(css,/\.home-area-list \.visitor-topic-icon \.visitor-icon \{ display:block; width:20px; height:20px;/);
+  assert.match(read('index.html'),/visitor-play\.css\?v=play-2/);
+});

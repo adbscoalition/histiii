@@ -42,7 +42,8 @@
 .people-tags a { display:inline-flex; align-items:center; gap:6px; min-height:44px; padding:7px 10px; border:1px solid var(--palette-line); border-radius:999px; background:var(--palette-card); color:var(--palette-ink); font-size:12px; text-decoration:none; transition:background-color 180ms ease; }
 .people-tags a:hover { background:var(--palette-blue-soft); }
 .people-tags .visitor-icon { width:16px; height:16px; }
-.home-area-list .visitor-topic-icon { display:flex; flex-direction:column; align-items:center; gap:6px; color:var(--palette-blue-ink); }
+.home-area-list .visitor-topic-icon { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; line-height:1; color:var(--palette-blue-ink); }
+.home-area-list .visitor-topic-icon .visitor-icon { display:block; width:20px; height:20px; }
 .visitor-topic-code { color:var(--palette-muted); font-size:10px; line-height:1; letter-spacing:normal; }
 .privacy-summary strong { display:flex; align-items:center; gap:12px; }
 .privacy-summary .visitor-icon { color:var(--palette-blue-ink); }
