@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-home-entry>
 <head>
   <meta charset="utf-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; form-action 'none'; object-src 'none'; base-uri 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; media-src 'none'; img-src 'self' data: blob:; font-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'">
@@ -20,10 +20,13 @@
   <link rel="icon" type="image/png" sizes="48x48" href="/histi-icon-48.png">
   <link rel="manifest" href="/site.webmanifest">
   <title>HISTI | Your sharing. Your boundaries.</title>
+  <link rel="preload" href="/fonts/idiqlat/regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/tiro-gurmukhi/regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/instrument-sans/variable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/styles-home.css?v=palette-2">
   <link rel="stylesheet" href="/site-header.css?v=palette-2">
   <link rel="stylesheet" href="/page-transitions.css?v=palette-2">
-  <script src="/page-transitions.js?v=suite-1"></script>
+  <script src="/page-transitions.js?v=suite-2"></script>
   <script src="/home-motion.js?v=revamp-1" defer></script>
   <link rel="stylesheet" href="/site-color-motion.css?v=pages-1">
   <script src="/site-color-motion.js?v=bright-1" defer></script>
@@ -32,52 +35,11 @@
   <link rel="stylesheet" href="/page-identities.css?v=pages-1">
   <link rel="stylesheet" href="/visitor-guide.css?v=welcome-1">
   <link rel="stylesheet" href="/visitor-play.css?v=play-3">
-  <link rel="stylesheet" href="/home-welcome.css?v=entry-1">
+  <link rel="stylesheet" href="/home-entry.css?v=entry-2">
   <link rel="stylesheet" href="/site-typography.css?v=hero-tiro-1">
 </head>
 <body class="histi-home" data-page="home">
   <div class="suite-color-field" aria-hidden="true"><span></span><span></span><span></span></div>
-  <dialog id="histi-welcome" class="histi-welcome" aria-labelledby="welcome-title" aria-describedby="welcome-description">
-    <header class="welcome-header"><img src="/histi-logo.webp?v=facelift-1" alt="HISTI" width="90" height="48"><span>A moment that's yours</span><button type="button" class="welcome-skip" data-welcome-dismiss>Skip welcome <span aria-hidden="true">↗</span></button></header>
-    <div class="welcome-scroll">
-      <div class="welcome-main">
-        <div class="welcome-copy">
-          <p class="welcome-eyebrow"><span aria-hidden="true"></span> A private moment of reflection</p>
-          <h1 id="welcome-title">Your space.<br><span>Your rules.</span></h1>
-          <p id="welcome-description">Sharing isn't one-size-fits-all. Take a little space to explore what feels right for you—and with whom.</p>
-          <div class="welcome-actions"><button type="button" class="welcome-enter-button" data-welcome-dismiss autofocus>Enter HISTI <span aria-hidden="true">↗</span></button><p>Explore the site first.<br>Start a check-in whenever you like.</p></div>
-        </div>
-        <div class="welcome-explore">
-          <div class="welcome-tabs" role="tablist" aria-label="Explore the welcome">
-            <button type="button" id="welcome-tab-people" role="tab" aria-selected="true" aria-controls="welcome-panel-people" tabindex="0" data-welcome-tab="people">Your people</button>
-            <button type="button" id="welcome-tab-pace" role="tab" aria-selected="false" aria-controls="welcome-panel-pace" tabindex="-1" data-welcome-tab="pace">Your pace</button>
-            <button type="button" id="welcome-tab-privacy" role="tab" aria-selected="false" aria-controls="welcome-panel-privacy" tabindex="-1" data-welcome-tab="privacy">Your privacy</button>
-          </div>
-          <section id="welcome-panel-people" class="welcome-panel welcome-people" role="tabpanel" aria-labelledby="welcome-tab-people" tabindex="0" data-welcome-panel="people">
-            <p class="welcome-panel-kicker">01 · A person in mind</p><h2>Your people.<br>Your context.</h2>
-            <div class="welcome-person-grid" aria-hidden="true">
-              <div><svg class="visitor-icon" viewBox="0 0 24 24"><use href="/visitor-icons.svg#stranger"></use></svg><span>Stranger</span></div>
-              <div><svg class="visitor-icon" viewBox="0 0 24 24"><use href="/visitor-icons.svg#acquaintance"></use></svg><span>Acquaintance</span></div>
-              <div><svg class="visitor-icon" viewBox="0 0 24 24"><use href="/visitor-icons.svg#friends"></use></svg><span>Friend</span></div>
-              <div><svg class="visitor-icon" viewBox="0 0 24 24"><use href="/visitor-icons.svg#partner"></use></svg><span>Partner</span></div>
-            </div>
-            <p class="welcome-panel-note">What you share can change with the person. Think of someone real or imagined—no names needed.</p>
-          </section>
-          <section id="welcome-panel-pace" class="welcome-panel welcome-pace" role="tabpanel" aria-labelledby="welcome-tab-pace" tabindex="0" data-welcome-panel="pace" hidden>
-            <p class="welcome-panel-kicker">02 · Room to be yourself</p><h2>No pressure.<br>No perfect answer.</h2>
-            <div class="welcome-level-picture" role="img" aria-label="Illustration of a five-level sharing scale"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
-            <p class="welcome-panel-note">Choose levels, not real details. Skip an item, go back, take a break, or reset. You set the pace.</p><span class="welcome-example-note">An illustration, not a question.</span>
-          </section>
-          <section id="welcome-panel-privacy" class="welcome-panel welcome-privacy" role="tabpanel" aria-labelledby="welcome-tab-privacy" tabindex="0" data-welcome-panel="privacy" hidden>
-            <p class="welcome-panel-kicker">03 · Private by design</p><h2>A reflection for you.<br>A result you control.</h2>
-            <div class="welcome-privacy-picture" aria-hidden="true"><span><svg class="visitor-icon" viewBox="0 0 24 24"><use href="/visitor-icons.svg#device"></use></svg></span><span><svg class="visitor-icon" viewBox="0 0 24 24"><use href="/visitor-icons.svg#shield"></use></svg></span><span><svg class="visitor-icon" viewBox="0 0 24 24"><use href="/visitor-icons.svg#lock"></use></svg></span></div>
-            <p class="welcome-panel-note">Answers and scoring stay in this browser. No account needed. You decide whether to share a result.</p><span class="welcome-example-note">The website still requests ordinary files from its host.</span>
-          </section>
-        </div>
-      </div>
-    </div>
-    <footer class="welcome-footer"><span><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="/visitor-icons.svg#lock"></use></svg>Choose levels. Keep real details private.</span><span>A reflection, not a diagnosis.</span></footer>
-  </dialog>
   <aside class="histi-safety-notice" role="note" aria-label="Keep real information private">
     <div class="histi-safety-inner"><span class="histi-safety-icon" aria-hidden="true">!</span><div class="histi-safety-copy"><strong>Never enter passwords, codes, or personal information.</strong><p>Choose levels only. No real names, IDs, or sensitive details.</p></div><a href="/privacy">Privacy</a></div>
   </aside>
@@ -98,7 +60,7 @@
     <section class="home-hero home-wrap" aria-labelledby="hero-title">
       <div class="hero-copy">
         <p class="home-eyebrow"><span class="quiet-dot" aria-hidden="true"></span> A private moment of reflection</p>
-        <h1 id="hero-title">Your sharing.<br><span class="hero-people">Your people.</span><br><em>Your boundaries.</em></h1>
+        <h1 id="hero-title"><span class="hero-entry-line">Your sharing.</span><br><span class="hero-people hero-entry-line">Your people.</span><br><em class="hero-entry-line">Your boundaries.</em></h1>
         <p class="hero-lede">HISTI is a private check-in about what you feel comfortable sharing—and with whom. Explore your boundaries by choosing levels, without writing down the real details.</p>
         <ul class="visitor-benefits" aria-label="Before you begin"><li><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#door"></use></svg>No account needed</li><li><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#lock"></use></svg>No private details to type</li><li><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#clock"></use></svg>Take it at your pace</li></ul>
         <div class="home-actions">
@@ -211,8 +173,7 @@
     </section>
   </main>
 
-  <footer class="home-footer home-wrap"><div><img src="/histi-logo.webp?v=facelift-1" alt="HISTI" width="76" height="41"><span>Human Information-Sharing<br>Transparency Index</span></div><nav aria-label="Footer"><button type="button" class="welcome-replay" data-welcome-open aria-haspopup="dialog" hidden>Welcome</button><a href="/checkin-page">Check-ins</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="https://github.com/adbscoalition/histiii" rel="noopener noreferrer">Source</a></nav><p>Keep close what matters.</p></footer>
-  <script type="module" src="/home-welcome.js?v=entry-1"></script>
+  <footer class="home-footer home-wrap"><div><img src="/histi-logo.webp?v=facelift-1" alt="HISTI" width="76" height="41"><span>Human Information-Sharing<br>Transparency Index</span></div><nav aria-label="Footer"><a href="/checkin-page">Check-ins</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="https://github.com/adbscoalition/histiii" rel="noopener noreferrer">Source</a></nav><p>Keep close what matters.</p></footer>
   <script type="module" src="/histi4-privacy.js?v=motion-1"></script>
   <script type="module" src="/visitor-play.js?v=play-1"></script>
   <script type="module" src="/home-disclosures.js?v=faq-1"></script>

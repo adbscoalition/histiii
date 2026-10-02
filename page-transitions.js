@@ -1,6 +1,8 @@
 (() => {
   const root = document.documentElement;
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const isHome = root.hasAttribute('data-home-entry');
+  if (isHome && window.location.hash) root.classList.add('histi-home-deep-link');
   let destination = null;
   let navigationTimer = 0;
   let recoveryTimer = 0;
@@ -26,7 +28,7 @@
     reveal();
     clearEntry();
     if (motion.matches) return;
-    root.classList.add('histi-url-motion', 'histi-url-covered');
+    if (!isHome) root.classList.add('histi-url-motion', 'histi-url-covered');
     // Let the destination paint behind the same veil before fading it away.
     firstFrame = requestAnimationFrame(() => {
       secondFrame = requestAnimationFrame(() => {
@@ -51,7 +53,7 @@
   }
 
   if (window.location.pathname.startsWith('/checkin-120')) root.classList.add('histi-url-blue');
-  if (!motion.matches) {
+  if (!motion.matches && !isHome) {
     root.classList.add('histi-url-motion', 'histi-url-covered');
     recoveryTimer = setTimeout(reveal, 1500);
   }
