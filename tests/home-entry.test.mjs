@@ -9,13 +9,14 @@ const fixture=({home=true,hash='',reduced=false}={})=>{
   const root={hasAttribute:name=>home&&name==='data-home-entry',classList:{add:(...values)=>values.forEach(v=>classes.add(v)),remove:(...values)=>values.forEach(v=>classes.delete(v))}};
   const motion={matches:reduced,addEventListener:(name,fn)=>{motionEvents[name]=fn;}};
   const location={pathname:home?'/':'/checkin-page',hash,href:`https://www.histi.org/${home?'':'checkin-page'}${hash}`,origin:'https://www.histi.org',assign(url){this.assigned=url;}};
-  const document={documentElement:root,readyState:'loading',hidden:false,querySelectorAll:()=>[],addEventListener:(name,fn)=>{documentEvents[name]=fn;}};
-  const window={location,matchMedia:()=>motion,addEventListener:(name,fn)=>{windowEvents[name]=fn;}};
+  const ghosts=[];
+  const document={documentElement:root,readyState:'loading',hidden:false,body:{append:node=>ghosts.push(node)},querySelectorAll:()=>[],addEventListener:(name,fn)=>{documentEvents[name]=fn;}};
+  const window={location,innerWidth:1280,innerHeight:800,getComputedStyle:()=>({getPropertyValue:()=>''}),matchMedia:()=>motion,addEventListener:(name,fn)=>{windowEvents[name]=fn;}};
   runInNewContext(read('page-transitions.js'),{document,window,URL,setTimeout:(fn,ms)=>{const key=++id;timers.set(key,{fn,ms});return key;},clearTimeout:key=>timers.delete(key),requestAnimationFrame:fn=>{const key=++id;frames.set(key,fn);return key;},cancelAnimationFrame:key=>frames.delete(key)});
   const flushFrames=()=>{while(frames.size){const [key,fn]=frames.entries().next().value;frames.delete(key);fn();}};
   const fireTimer=ms=>{const [key,task]=[...timers].find(([,task])=>task.ms===ms)||[];assert.ok(task,`Expected ${ms}ms timer`);timers.delete(key);task.fn();};
   const ready=()=>{documentEvents.DOMContentLoaded();flushFrames();};
-  return{classes,timers,frames,documentEvents,windowEvents,motionEvents,motion,document,location,ready,fireTimer};
+  return{classes,timers,frames,documentEvents,windowEvents,motionEvents,motion,document,location,ready,fireTimer,ghosts};
 };
 
 test('the homepage remains the destination, with no welcome page or required enter action',()=>{
@@ -76,4 +77,23 @@ test('repeated back/forward entry uses bounded timers and preserves the badge fi
   assert.doesNotMatch(read('page-transitions.js'),/setInterval|MutationObserver|createElement|innerHTML/);
   assert.equal((read('index.html').match(/class="visitor-step-code"/g)||[]).length,3);
   for(const page of ['checkin-page.html','checkin-4.html','checkin-4-g1.html','checkin-4-g2.html','checkin-4-g3.html','checkin-4-g4.html']) assert.doesNotMatch(read(page),/data-home-entry|home-entry\.css/);
+});
+
+test('test cards expand from their actual bounds, redirect once and release the clone',()=>{
+  for(let i=0;i<100;i++) {
+    const f=fixture(); f.ready(); let removed=0;
+    const ghost={style:{setProperty(){}},classList:{add(){}},removeAttribute(){},setAttribute(){},querySelectorAll:()=>[],remove(){removed++;}};
+    const link={href:'https://www.histi.org/checkin-4',hasAttribute:()=>false,target:'',matches:()=>true,getBoundingClientRect:()=>({left:250,top:100,width:380,height:260}),cloneNode:()=>ghost};
+    const click={button:0,target:{closest:()=>link},preventDefault(){}};
+    f.documentEvents.click(click); f.documentEvents.click(click);
+    assert.equal(f.ghosts.length,1); assert.equal(ghost.style.left,'250px'); assert.equal(ghost.style.width,'380px');
+    assert.equal(f.classes.has('histi-url-card'),true);
+    assert.equal([...f.timers.values()].filter(t=>t.ms===580).length,1);
+    f.fireTimer(580); assert.equal(f.location.assigned,link.href);
+    f.windowEvents.pagehide(); assert.equal(removed,1); assert.equal(f.timers.size,0); assert.equal(f.classes.has('histi-url-card'),false);
+  }
+  const css=read('page-transitions.css');
+  assert.match(css,/@keyframes histi-card-open/); assert.match(css,/transform:translate\(var\(--card-end-x\)/);
+  assert.doesNotMatch(css,/infinite|blur\(|will-change/);
+  assert.match(css,/filter:brightness\(\.18\)/); // Static contrast correction for the white logo, not an animated filter.
 });

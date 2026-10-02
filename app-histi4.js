@@ -1,4 +1,5 @@
 import { FAMILIES, CATEGORY_META, RECIPIENTS } from './histi4-data.js';
+import { resetTransition } from './reset-transition.js?v=1';
 import { openDialog, closeDialog, confirmReset } from './site-dialogs.js?v=motion-1';
 import { makeSlides, remapLegacySlideIndex, calculate, rubricPoints, displayScore } from './histi4-core.js?v=pna-1';
 
@@ -60,7 +61,7 @@ const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const wait = ms => new Promise(resolve => window.setTimeout(resolve, ms));
 async function transitionPage(kicker, title, detail, render, focusId) {
   if (transitionBusy) return;
-  if (reducedMotion.matches) {
+  if (reducedMotion.matches || document.hidden) {
     render();
     window.scrollTo(0, 0);
     $(focusId)?.focus({ preventScroll: true });
@@ -79,13 +80,13 @@ async function transitionPage(kicker, title, detail, render, focusId) {
   overlay.focus({ preventScroll: true });
   let rendered = false;
   try {
-    await wait(230);
+    await wait(320);
     render();
     window.scrollTo(0, 0);
     rendered = true;
-    await wait(150);
+    await wait(220);
     overlay.classList.remove('is-visible');
-    await wait(230);
+    await wait(320);
   } finally {
     overlay.classList.remove('is-visible');
     overlay.hidden = true;
@@ -411,11 +412,15 @@ function renderResults(completed = false) {
   document.title = `Result · ${recipient.label} | HISTI Full`;
 }
 async function reset() {
+  if (transitionBusy) return;
   if (!await confirmReset(`This removes the ${recipient.label.toLowerCase()} check-in’s saved answers and result from this device.`)) return;
-  state = freshState();
-  try { localStorage.removeItem(storageKey); } catch {}
-  syncDebugWatermark();
-  show('intro');
+  await resetTransition(() => {
+    state = freshState();
+    try { localStorage.removeItem(storageKey); } catch {}
+    syncDebugWatermark();
+    show('intro');
+    document.title = `${recipient.label} | HISTI Full`;
+  });
 }
 
 const debugWatermarks = [document.querySelector('.question-top'), document.querySelector('.result-hero')].map(parent => {

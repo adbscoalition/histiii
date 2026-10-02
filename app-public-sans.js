@@ -1,4 +1,5 @@
 import { openPanel, closePanel, confirmReset } from './site-dialogs.js?v=motion-1';
+import { resetTransition } from './reset-transition.js?v=1';
 import questionData from './questions-data-private-v1.js';
 
 const STORAGE_PROGRESS = 'histi.progress.v3';
@@ -1915,28 +1916,30 @@ function viewDataExport() {
 
 async function resetAll(confirmFirst = true) {
   if (confirmFirst && !await confirmReset('Reset HISTI? All answers, progress, and saved results on this device will be cleared.')) return;
-  if (saveTimer !== null) clearTimeout(saveTimer);
-  saveTimer = null;
-  saveDirty = false;
-  finishSequenceRunning = false;
-  cancelHandoffAnimation();
-  els.finishSequence.hidden = true;
-  els.finishBlackout.hidden = true;
-  try {
-    localStorage.removeItem(STORAGE_PROGRESS);
-    localStorage.removeItem(STORAGE_RESULTS);
-  } catch {}
-  state = freshState();
-  syncDebugWatermark();
-  els.accessibilityPanel.hidden = true;
-  els.debugPanel.hidden = true;
-  els.disclosurePanel.hidden = true;
-  els.sectionSkipDialog.hidden = true;
-  els.accessibility.setAttribute('aria-expanded', 'false');
-  applyAccessibility();
-  renderRecipientChoices();
-  showScreen('intro');
-  updateStartScreen();
+  await resetTransition(() => {
+    if (saveTimer !== null) clearTimeout(saveTimer);
+    saveTimer = null;
+    saveDirty = false;
+    finishSequenceRunning = false;
+    cancelHandoffAnimation();
+    els.finishSequence.hidden = true;
+    els.finishBlackout.hidden = true;
+    try {
+      localStorage.removeItem(STORAGE_PROGRESS);
+      localStorage.removeItem(STORAGE_RESULTS);
+    } catch {}
+    state = freshState();
+    syncDebugWatermark();
+    els.accessibilityPanel.hidden = true;
+    els.debugPanel.hidden = true;
+    els.disclosurePanel.hidden = true;
+    els.sectionSkipDialog.hidden = true;
+    els.accessibility.setAttribute('aria-expanded', 'false');
+    applyAccessibility();
+    renderRecipientChoices();
+    showScreen('intro');
+    updateStartScreen();
+  });
 }
 
 els.app.addEventListener('click', event => {

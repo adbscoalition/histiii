@@ -44,9 +44,9 @@ test('policy shortcuts point to real sections and back to the current check-in l
     const html = read(page);
     const nav = html.match(/<nav class="visitor-policy-nav"[\s\S]*?<\/nav>/)[0];
     const links = [...nav.matchAll(/href="#([^"]+)"/g)];
-    assert.equal(links.length, 5);
+    assert.equal(links.length, page === 'terms.html' ? 6 : 5);
     for (const [,id] of links) assert.ok(html.includes(`<section id="${id}" class="policy-section">`));
-    assert.match(html, /Effective September 14, 2026/);
+    assert.match(html, page === 'terms.html' ? /Effective October 2, 2026/ : /Effective September 14, 2026/);
     assert.doesNotMatch(html, /href="\/checkin"/);
   }
 });

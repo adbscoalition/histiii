@@ -1,0 +1,9 @@
+/* Content-only notices; no changes to the pinned question footer or animations. */
+footer .site-license-notice { margin:0; color:var(--palette-muted); font-size:13px; font-weight:400; line-height:1.8; }
+footer .site-license-notice>span { display:block; }
+footer .site-license-notice a { color:var(--palette-blue-ink); font-size:inherit; text-decoration:underline; text-underline-offset:3px; }
+footer .site-license-notice .site-license-details { display:inline-block; margin-top:4px; }
+.license-summary { margin:0 0 22px; padding:18px 22px; border:1px solid var(--palette-line); border-radius:18px; background:var(--palette-blue-soft); }
+.license-summary p { margin:0!important; }
+.license-summary p+p { margin-top:8px!important; }
+@media(max-width:680px) { .license-summary { padding:16px; } }

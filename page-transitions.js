@@ -9,6 +9,30 @@
   let firstFrame = 0;
   let secondFrame = 0;
   let entryTimer = 0;
+  let cardGhost = null;
+
+  function expandCard(link) {
+    if (!link.matches?.('.app-card[href]:not(.soon), .home-format[href], .h4-choice[href]')) return false;
+    const box = link.getBoundingClientRect();
+    if (box.width < 1 || box.height < 1) return false;
+    const style = window.getComputedStyle(link);
+    cardGhost = link.cloneNode(true);
+    cardGhost.removeAttribute('href');
+    cardGhost.removeAttribute('id');
+    cardGhost.setAttribute('aria-hidden', 'true');
+    cardGhost.setAttribute('tabindex', '-1');
+    cardGhost.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
+    cardGhost.classList.add('histi-card-morph');
+    Object.assign(cardGhost.style, { left:`${box.left}px`, top:`${box.top}px`, width:`${box.width}px`, height:`${box.height}px` });
+    for (const property of ['background', 'border', 'border-radius', 'color']) cardGhost.style.setProperty(property, style.getPropertyValue(property), 'important');
+    cardGhost.style.setProperty('--card-end-x', `${-box.left}px`);
+    cardGhost.style.setProperty('--card-end-y', `${-box.top}px`);
+    cardGhost.style.setProperty('--card-scale-x', window.innerWidth / box.width);
+    cardGhost.style.setProperty('--card-scale-y', window.innerHeight / box.height);
+    document.body.append(cardGhost);
+    root.classList.add('histi-url-card');
+    return true;
+  }
 
   function clearEntry() {
     clearTimeout(entryTimer);
@@ -21,7 +45,9 @@
     cancelAnimationFrame(firstFrame);
     cancelAnimationFrame(secondFrame);
     destination = null;
-    root.classList.remove('histi-url-covered', 'histi-url-leaving');
+    cardGhost?.remove();
+    cardGhost = null;
+    root.classList.remove('histi-url-covered', 'histi-url-leaving', 'histi-url-card');
   }
 
   function enter() {
@@ -77,8 +103,9 @@
     destination = url.href;
     // Native modal dialogs sit above every document layer; close them for the full-screen veil.
     document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close());
+    const cardOpening = expandCard(link);
     root.classList.add('histi-url-motion', 'histi-url-leaving', 'histi-url-covered');
-    navigationTimer = setTimeout(navigate, 340);
+    navigationTimer = setTimeout(navigate, cardOpening ? 580 : 340);
   });
 
   window.addEventListener('pagehide', () => { reveal(); clearEntry(); });

@@ -1,4 +1,5 @@
 import { openPanel, closePanel, confirmReset } from './site-dialogs.js?v=motion-1';
+import { resetTransition } from './reset-transition.js?v=1';
 import condensedData from './questions-histi120.js?v=standalone-2';
 
 // Independent storage and administration; original catalogue remains the scoring authority.
@@ -1991,29 +1992,31 @@ function viewDataExport() {
 
 async function resetAll(confirmFirst = true) {
   if (confirmFirst && !await confirmReset('Reset HISTI-120? Its answers, progress, and saved results will be cleared on this device. Regular HISTI data will not be changed.')) return;
-  if (saveTimer !== null) clearTimeout(saveTimer);
-  saveTimer = null;
-  saveDirty = false;
-  finishSequenceRunning = false;
-  cancelHandoffAnimation();
-  els.finishSequence.hidden = true;
-  els.finishBlackout.hidden = true;
-  try {
-    localStorage.removeItem(STORAGE_PROGRESS);
-    localStorage.removeItem(STORAGE_RESULTS);
-  } catch {}
-  state = freshState();
-  $('observation-period').value = state.observationPeriod;
-  syncDebugWatermark();
-  els.accessibilityPanel.hidden = true;
-  els.debugPanel.hidden = true;
-  els.disclosurePanel.hidden = true;
-  els.sectionSkipDialog.hidden = true;
-  els.accessibility.setAttribute('aria-expanded', 'false');
-  applyAccessibility();
-  renderRecipientChoices();
-  showScreen('intro');
-  updateStartScreen();
+  await resetTransition(() => {
+    if (saveTimer !== null) clearTimeout(saveTimer);
+    saveTimer = null;
+    saveDirty = false;
+    finishSequenceRunning = false;
+    cancelHandoffAnimation();
+    els.finishSequence.hidden = true;
+    els.finishBlackout.hidden = true;
+    try {
+      localStorage.removeItem(STORAGE_PROGRESS);
+      localStorage.removeItem(STORAGE_RESULTS);
+    } catch {}
+    state = freshState();
+    $('observation-period').value = state.observationPeriod;
+    syncDebugWatermark();
+    els.accessibilityPanel.hidden = true;
+    els.debugPanel.hidden = true;
+    els.disclosurePanel.hidden = true;
+    els.sectionSkipDialog.hidden = true;
+    els.accessibility.setAttribute('aria-expanded', 'false');
+    applyAccessibility();
+    renderRecipientChoices();
+    showScreen('intro');
+    updateStartScreen();
+  });
 }
 
 els.app.addEventListener('click', event => {

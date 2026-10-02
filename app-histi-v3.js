@@ -1,4 +1,5 @@
 import setup from './questions-v3-01.js';
+import { resetTransition } from './reset-transition.js?v=1';
 import { openPanel, closePanel, confirmReset } from './site-dialogs.js?v=motion-1';
 import identity from './questions-v3-02.js';
 import relationships from './questions-v3-03.js';
@@ -61,8 +62,10 @@ function save(){
 }
 async function reset(){
   if(!await confirmReset('This clears the answers and saved result on this device.')) return;
-  try{localStorage.removeItem(STORAGE_PROGRESS);localStorage.removeItem(STORAGE_RESULTS);}catch{}
-  state=freshState(); showingPartial=false; show('intro');
+  await resetTransition(() => {
+    try{localStorage.removeItem(STORAGE_PROGRESS);localStorage.removeItem(STORAGE_RESULTS);}catch{}
+    state=freshState(); showingPartial=false; show('intro');
+  });
 }
 
 function questionWeight(q){

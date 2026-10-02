@@ -14,7 +14,7 @@ test('every page has one static safety notice and the shared visual system', () 
     assert.match(html, /Never enter passwords, codes, or personal information\./, file);
     const sharedStyle = html.indexOf('/site-experience.css?v=');
     assert.ok(sharedStyle > 0 && sharedStyle < html.indexOf('/site-typography.css'), file);
-    assert.match(html, /page-transitions\.js\?v=suite-[12]/, file);
+    assert.match(html, /page-transitions\.js\?v=suite-3/, file);
     assert.match(html, /class="site-header topbar histi-header"/, file);
   }
 });
@@ -74,7 +74,7 @@ test('existing reflection questions remain on all Full recipient pages', () => {
     const html = read(`checkin-4-${group}.html`);
     assert.match(html, /<span>245 questions<\/span>/);
     assert.match(html, /id="question-list"/);
-    assert.match(html, /app-histi4\.js\?v=motion-1/);
+    assert.match(html, /app-histi4\.js\?v=motion-2/);
     assert.match(html, /suite-privacy-reminder/);
   }
   assert.match(read('site-experience.css'), /body\.histi-120 \{ --suite-accent:var\(--palette-blue\)/);
