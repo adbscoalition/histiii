@@ -1,9 +1,8 @@
 /* A finite brand vignette, not a loader. Two sheets part to reveal the real page. */
 html[data-home-entry] { scrollbar-gutter:stable; }
 html.histi-intro-active { overflow:hidden; }
-html.histi-intro-pending::before {
-  content:""; position:fixed; inset:0; z-index:9999; background:#000;
-  pointer-events:none; animation:intro-failsafe 0s 4500ms forwards;
+html.histi-intro-pending .histi-intro {
+  display:block!important; animation:intro-failsafe 0s 4500ms forwards;
 }
 .histi-intro { position:fixed; inset:0; z-index:9999; overflow:hidden; isolation:isolate; color:#25343d; }
 .intro-curtain { position:absolute; top:0; bottom:0; width:52%; }
@@ -73,7 +72,7 @@ html.histi-intro-active .suite-color-field span { animation-play-state:paused; }
   .intro-footnote { margin-top:16px; }
 }
 @media(prefers-reduced-motion:reduce) {
-  .histi-intro,html.histi-intro-pending::before { display:none!important; }
+  .histi-intro,html.histi-intro-pending .histi-intro { display:none!important; }
   html.histi-intro-active { overflow:visible; }
 }
-@media print { .histi-intro,html.histi-intro-pending::before { display:none!important; } }
+@media print { .histi-intro,html.histi-intro-pending .histi-intro { display:none!important; } }

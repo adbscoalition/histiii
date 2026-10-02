@@ -401,7 +401,7 @@ body:has(>main>.selector)>footer a { color:var(--palette-blue-ink); }
 #results-screen:not([hidden]) .category-card:nth-child(4) { animation-delay:990ms; }
 #results-screen:not([hidden]) .category-card:nth-child(5) { animation-delay:1070ms; }
 @keyframes histi-result-arrive { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
-@keyframes histi-score-reveal { from { opacity:0; transform:translateY(15px) scale(.94); } to { opacity:1; transform:none; } }
+@keyframes histi-score-reveal { 0% { opacity:0; transform:translateY(15px) scale(.92); } 65% { opacity:1; transform:translateY(-3px) scale(1.03); } 83% { transform:translateY(1px) scale(.995); } 100% { opacity:1; transform:none; } }
 body.reduce-motion #results-screen :is(.result-title,.result-score-line,.result-spectrum,.category-card) { animation:none!important; }
 @media(prefers-reduced-motion:reduce) { #results-screen :is(.result-title,.result-score-line,.result-spectrum,.category-card) { animation:none!important; } }
 
@@ -410,6 +410,10 @@ html.histi-page-enter body:not(.histi-home) :is(.start-card,.assessment-card,.re
 html.histi-page-enter .app-card { animation:suite-enter 700ms 70ms var(--suite-ease) both; }
 html.histi-page-enter .app-card:nth-child(2) { animation-delay:110ms; }html.histi-page-enter .app-card:nth-child(3) { animation-delay:150ms; }
 @keyframes suite-enter { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+/* A small spring for non-question surfaces; assessment hit areas retain the steady entrance. */
+html.histi-page-enter body:not(.histi-home):not(.histi-group-selector) :is(.start-card,.result-card,.selector-heading,.policy-hero),
+html.histi-page-enter .app-card { animation-name:suite-spring-enter!important; }
+@keyframes suite-spring-enter { 0% { opacity:0; transform:translateY(18px) scale(.975); } 65% { opacity:1; transform:translateY(-3px) scale(1.012); } 82% { transform:translateY(1px) scale(.998); } 100% { opacity:1; transform:none; } }
 /* Keep the recipient chooser in place. Clearing the shared entrance must not
    restart h4-rise, and nested card transforms must not compound that movement. */
 body.histi-group-selector :is(.start-card,.h4-choice) { animation:none; }

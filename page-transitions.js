@@ -2,6 +2,13 @@
   const root = document.documentElement;
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const isHome = root.hasAttribute('data-home-entry');
+  let homeReturn = false;
+  if (isHome) {
+    const navigation = window.performance?.getEntriesByType?.('navigation')?.[0];
+    homeReturn = navigation?.type === 'back_forward' || navigation?.type === 'reload';
+    try { homeReturn ||= new URL(document.referrer).origin === window.location.origin; } catch {}
+    if (homeReturn) root.classList.add('histi-home-return');
+  }
   if (isHome && window.location.hash) root.classList.add('histi-home-deep-link');
   let destination = null;
   let navigationTimer = 0;
@@ -16,19 +23,29 @@
     const box = link.getBoundingClientRect();
     if (box.width < 1 || box.height < 1) return false;
     const style = window.getComputedStyle(link);
-    cardGhost = link.cloneNode(true);
-    cardGhost.removeAttribute('href');
-    cardGhost.removeAttribute('id');
+    const sx = box.width / window.innerWidth, sy = box.height / window.innerHeight;
+    const radius = Math.max(0, parseFloat(style.getPropertyValue('border-top-left-radius')) || 24);
+    cardGhost = document.createElement('div');
+    cardGhost.className = 'histi-card-morph';
     cardGhost.setAttribute('aria-hidden', 'true');
-    cardGhost.setAttribute('tabindex', '-1');
-    cardGhost.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
-    cardGhost.classList.add('histi-card-morph');
-    Object.assign(cardGhost.style, { left:`${box.left}px`, top:`${box.top}px`, width:`${box.width}px`, height:`${box.height}px` });
-    for (const property of ['background', 'border', 'border-radius', 'color']) cardGhost.style.setProperty(property, style.getPropertyValue(property), 'important');
-    cardGhost.style.setProperty('--card-end-x', `${-box.left}px`);
-    cardGhost.style.setProperty('--card-end-y', `${-box.top}px`);
-    cardGhost.style.setProperty('--card-scale-x', window.innerWidth / box.width);
-    cardGhost.style.setProperty('--card-scale-y', window.innerHeight / box.height);
+    const surface = document.createElement('div');
+    surface.className = 'histi-card-surface';
+    surface.style.background = style.getPropertyValue('background');
+    for (const [name, value] of Object.entries({
+      '--card-x':`${box.left}px`, '--card-y':`${box.top}px`, '--card-sx':sx, '--card-sy':sy,
+      '--card-press-x':`${box.left + box.width * .015}px`, '--card-press-y':`${box.top + box.height * .015}px`,
+      '--card-press-sx':sx * .97, '--card-press-sy':sy * .97,
+      '--card-radius-x':`${radius / sx}px`, '--card-radius-y':`${radius / sy}px`
+    })) surface.style.setProperty(name, value);
+    // The card face stays at its real size. Only the empty surface stretches.
+    const face = link.cloneNode(true);
+    face.removeAttribute('href'); face.removeAttribute('id'); face.setAttribute('tabindex', '-1');
+    face.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
+    face.classList.remove('home-reveal', 'home-reveal-pending', 'h4-reveal');
+    face.classList.add('histi-card-face');
+    Object.assign(face.style, { left:`${box.left}px`, top:`${box.top}px`, width:`${box.width}px`, height:`${box.height}px` });
+    for (const property of ['background', 'border', 'border-radius', 'color']) face.style.setProperty(property, style.getPropertyValue(property), 'important');
+    cardGhost.append(surface, face);
     document.body.append(cardGhost);
     root.classList.add('histi-url-card');
     return true;
@@ -50,11 +67,15 @@
     root.classList.remove('histi-url-covered', 'histi-url-leaving', 'histi-url-card');
   }
 
-  function enter() {
+  function enter(restored = false) {
     reveal();
     clearEntry();
+    if (restored === true) {
+      if (isHome) root.classList.add('histi-home-return');
+      return;
+    }
     if (motion.matches) return;
-    if (!isHome) root.classList.add('histi-url-motion', 'histi-url-covered');
+    if (!isHome || homeReturn) root.classList.add('histi-url-covered');
     // Let the destination paint behind the same veil before fading it away.
     firstFrame = requestAnimationFrame(() => {
       secondFrame = requestAnimationFrame(() => {
@@ -79,9 +100,13 @@
   }
 
   if (window.location.pathname.startsWith('/checkin-120')) root.classList.add('histi-url-blue');
-  if (!motion.matches && !isHome) {
-    root.classList.add('histi-url-motion', 'histi-url-covered');
-    recoveryTimer = setTimeout(reveal, 1500);
+  if (!motion.matches) {
+    // Prime the invisible veil on the homepage too; creating it on click jumps straight to opaque.
+    root.classList.add('histi-url-motion');
+    if (!isHome || homeReturn) {
+      root.classList.add('histi-url-covered');
+      recoveryTimer = setTimeout(reveal, 1500);
+    }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enter, { once: true });
   else enter();
@@ -97,6 +122,7 @@
     if (motion.matches || document.hidden) return;
     event.preventDefault();
     if (destination) return;
+    clearEntry();
     clearTimeout(recoveryTimer);
     cancelAnimationFrame(firstFrame);
     cancelAnimationFrame(secondFrame);
@@ -105,11 +131,11 @@
     document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close());
     const cardOpening = expandCard(link);
     root.classList.add('histi-url-motion', 'histi-url-leaving', 'histi-url-covered');
-    navigationTimer = setTimeout(navigate, cardOpening ? 580 : 340);
+    navigationTimer = setTimeout(navigate, cardOpening ? 720 : 340);
   });
 
   window.addEventListener('pagehide', () => { reveal(); clearEntry(); });
-  window.addEventListener('pageshow', event => { if (event.persisted) enter(); });
+  window.addEventListener('pageshow', event => { if (event.persisted) enter(true); });
   motion.addEventListener('change', () => {
     if (!motion.matches) return;
     if (destination) navigate();

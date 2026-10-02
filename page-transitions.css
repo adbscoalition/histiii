@@ -16,18 +16,37 @@ html.histi-url-motion::before {
 }
 html.histi-url-covered::after,html.histi-url-covered::before { opacity:1; visibility:visible; transform:none; transition-delay:0s; }
 html.histi-url-leaving::after { pointer-events:auto; }
-html.histi-url-card.histi-url-covered::after { animation:histi-card-veil 580ms ease both; }
-html.histi-url-card.histi-url-covered::before { animation:histi-card-brand 580ms ease both; }
+html.histi-url-card.histi-url-covered::after { animation:histi-card-veil 680ms ease both; }
+html.histi-url-card.histi-url-covered::before { animation:histi-card-brand 680ms ease both; }
 .histi-card-morph {
-  position:fixed!important; z-index:9999!important; margin:0!important; max-width:none!important; min-height:0!important;
-  pointer-events:none!important; transform-origin:0 0!important; overflow:hidden!important;
-  transition:none!important; box-shadow:none!important; animation:histi-card-open 560ms cubic-bezier(.2,.78,.16,1) both!important;
+  position:fixed; inset:0; z-index:9999; pointer-events:none; overflow:hidden; contain:layout paint;
 }
-.histi-card-morph>* { animation:histi-card-content 240ms ease both!important; }
-@keyframes histi-card-open { from { transform:none; } to { transform:translate(var(--card-end-x),var(--card-end-y)) scale(var(--card-scale-x),var(--card-scale-y)); } }
-@keyframes histi-card-content { from { opacity:1; } to { opacity:0; } }
-@keyframes histi-card-veil { 0%,55% { opacity:0; } 100% { opacity:1; } }
-@keyframes histi-card-brand { 0%,80% { opacity:0; } 100% { opacity:1; } }
+.histi-card-morph::before { content:""; position:absolute; inset:0; background:#25343d1a; animation:histi-card-dim 680ms ease both; }
+.histi-card-surface {
+  position:absolute; inset:0; overflow:hidden; transform-origin:0 0; background:#fff8ef;
+  animation:histi-card-open 680ms cubic-bezier(.22,.85,.25,1) both;
+}
+.histi-card-surface::after {
+  content:""; position:absolute; inset:0;
+  background:radial-gradient(ellipse at 8% 90%,#bce6fb 0,transparent 50%),radial-gradient(ellipse at 92% 8%,#ffd3e1 0,transparent 52%),#fff8ef;
+  animation:histi-card-tint 680ms ease both;
+}
+.histi-card-face {
+  position:absolute!important; margin:0!important; max-width:none!important; min-height:0!important;
+  overflow:hidden!important; pointer-events:none!important; transform-origin:center!important;
+  transition:none!important; box-shadow:none!important; animation:histi-card-face 680ms ease both!important;
+}
+@keyframes histi-card-open {
+  0% { transform:translate(var(--card-x),var(--card-y)) scale(var(--card-sx),var(--card-sy)); border-radius:var(--card-radius-x) / var(--card-radius-y); }
+  9% { transform:translate(var(--card-press-x),var(--card-press-y)) scale(var(--card-press-sx),var(--card-press-sy)); border-radius:var(--card-radius-x) / var(--card-radius-y); }
+  78% { transform:translate(-3px,-2px) scale(1.005); border-radius:5px; }
+  100% { transform:none; border-radius:0; }
+}
+@keyframes histi-card-face { 0% { opacity:1; transform:none; } 9% { opacity:1; transform:scale(.97); } 28% { opacity:1; transform:translateY(-2px); } 53%,100% { opacity:0; transform:translateY(-14px); } }
+@keyframes histi-card-dim { 0% { opacity:0; } 25%,65% { opacity:1; } 100% { opacity:0; } }
+@keyframes histi-card-tint { 0%,25% { opacity:0; } 70%,100% { opacity:1; } }
+@keyframes histi-card-veil { 0%,75% { opacity:0; } 100% { opacity:1; } }
+@keyframes histi-card-brand { 0%,40% { opacity:0; transform:translateY(10px) scale(.94); } 78% { opacity:1; transform:translateY(-2px) scale(1.015); } 100% { opacity:1; transform:none; } }
 
 /* Full-screen fades for assessment handoffs and confirmed resets. */
 html body .h4-transition,.reset-transition {

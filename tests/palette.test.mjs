@@ -66,7 +66,7 @@ test('decorative pigments remain exactly three bounded transform layers', () => 
 
 test('score reveal is a finite native animation with reduced-motion opt-out', () => {
   assert.match(css, /#results-screen:not\(\[hidden\]\) \.result-score-line \{ animation:histi-score-reveal 850ms 500ms/);
-  assert.match(css, /@keyframes histi-score-reveal \{ from \{ opacity:0; transform:translateY/);
+  assert.match(css, /@keyframes histi-score-reveal \{ 0% \{ opacity:0; transform:translateY/);
   assert.match(css, /\.category-card:nth-child\(5\) \{ animation-delay:1070ms/);
   assert.match(css, /body\.reduce-motion #results-screen[^\n]+animation:none!important/);
   assert.match(css, /@media\(prefers-reduced-motion:reduce\) \{ #results-screen[^\n]+animation:none!important/);

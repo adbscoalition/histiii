@@ -2,7 +2,7 @@
 (() => {
   const root = document.documentElement;
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  if (!root.hasAttribute('data-home-entry') || motion.matches || window.location.hash || document.hidden) return;
+  if (!root.hasAttribute('data-home-entry') || root.classList.contains('histi-home-return') || motion.matches || window.location.hash || document.hidden) return;
 
   let cover = null;
   let skip = null;

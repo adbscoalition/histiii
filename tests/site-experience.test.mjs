@@ -14,7 +14,7 @@ test('every page has one static safety notice and the shared visual system', () 
     assert.match(html, /Never enter passwords, codes, or personal information\./, file);
     const sharedStyle = html.indexOf('/site-experience.css?v=');
     assert.ok(sharedStyle > 0 && sharedStyle < html.indexOf('/site-typography.css'), file);
-    assert.match(html, /page-transitions\.js\?v=suite-3/, file);
+    assert.match(html, /page-transitions\.js\?v=suite-4/, file);
     assert.match(html, /class="site-header topbar histi-header"/, file);
   }
 });
@@ -57,7 +57,7 @@ test('group selector fades once without restarting or moving the cards', () => {
   const html = read('checkin-4.html');
   const css = read('site-experience.css');
   assert.match(html, /<body class="histi-group-selector"[^>]*>/);
-  assert.match(html, /site-experience\.css\?v=group-entry-1/);
+  assert.match(html, /site-experience\.css\?v=spring-1/);
   for (const font of ['idiqlat/regular', 'tiro-gurmukhi/regular', 'instrument-sans/variable']) {
     assert.ok(html.includes(`rel="preload" href="/fonts/${font}.woff2" as="font" type="font/woff2" crossorigin`));
   }

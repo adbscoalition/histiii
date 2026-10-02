@@ -8,9 +8,9 @@ const eventTarget = () => {
   const events = new Map();
   return { events, addEventListener: (name, fn) => events.set(name, fn), removeEventListener: (name, fn) => { if (events.get(name) === fn) events.delete(name); } };
 };
-const fixture = ({ home = true, hash = '', reduced = false, hidden = false, missing = false } = {}) => {
+const fixture = ({ home = true, returning = false, hash = '', reduced = false, hidden = false, missing = false } = {}) => {
   const classes = new Set(), timers = new Map(); let id = 0, focusCalls = 0;
-  const root = { hasAttribute: name => home && name === 'data-home-entry', classList: { add: (...names) => names.forEach(n => classes.add(n)), remove: (...names) => names.forEach(n => classes.delete(n)) } };
+  const root = { hasAttribute: name => home && name === 'data-home-entry', classList: { contains: name => classes.has(name) || returning && name === 'histi-home-return', add: (...names) => names.forEach(n => classes.add(n)), remove: (...names) => names.forEach(n => classes.delete(n)) } };
   const skip = eventTarget();
   const cover = { hidden: true, querySelector: () => skip, contains: node => node === skip };
   const regions = [{ inert: false }, { inert: false }, { inert: true }];
@@ -47,6 +47,8 @@ test('intro is an optional finite vignette with the real logo and three sharing 
   assert.match(css, /intro-open-left 850ms/);
   assert.match(css, /intro-open-right 850ms 60ms/);
   assert.match(css, /intro-failsafe 0s 4500ms/);
+  assert.doesNotMatch(css,/::before|::after/); // No longer competes with the navigation veil.
+  assert.ok(html.indexOf('/page-transitions.js')<html.indexOf('/home-intro.js'));
   assert.match(css, /prefers-reduced-motion:reduce/);
   assert.doesNotMatch(css, /infinite|will-change|filter:|backdrop-filter/);
   assert.doesNotMatch(js, /requestAnimationFrame|setInterval|MutationObserver|createElement|innerHTML|sessionStorage|localStorage|fetch\(/);
@@ -76,7 +78,7 @@ test('Skip and Escape release every timer and temporary inert region immediately
 });
 
 test('deep links, reduced motion, background visits and other pages bypass the cover', () => {
-  for (const options of [{ hash: '#about' }, { reduced: true }, { hidden: true }, { home: false }]) fixture(options).assertFinished();
+  for (const options of [{ hash: '#about' }, { reduced: true }, { hidden: true }, { home: false }, { returning:true }]) fixture(options).assertFinished();
 });
 
 test('missing markup and initialization timeout fail open without trapping the homepage', () => {

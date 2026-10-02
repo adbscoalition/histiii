@@ -3,13 +3,14 @@
   --motion-ease: cubic-bezier(.2,.8,.2,1);
   --motion-quick: 180ms;
   --motion-arrive: 320ms;
+  --motion-spring: cubic-bezier(.2,1.35,.32,1);
 }
 
 .suite-popup {
   animation: none !important;
   opacity: 1;
   transform: translateY(0) scale(1);
-  transition: opacity var(--motion-arrive) ease, transform var(--motion-arrive) var(--motion-ease);
+  transition: opacity var(--motion-arrive) ease, transform 450ms var(--motion-spring);
 }
 dialog.suite-popup::backdrop {
   background: #253c5766;
@@ -28,7 +29,7 @@ dialog.suite-popup.suite-popup-closing::backdrop { opacity: 0; transition-durati
 :is(.disclosure-sheet,.section-skip-dialog,.data-export-dialog).suite-popup > :first-child {
   animation: none !important;
   transform: translateY(0) scale(1);
-  transition: transform var(--motion-arrive) var(--motion-ease);
+  transition: transform 450ms var(--motion-spring);
 }
 :is(.disclosure-sheet,.section-skip-dialog,.data-export-dialog).suite-popup-closing > :first-child { transform: translateY(8px) scale(.985); transition-duration: var(--motion-quick); }
 @starting-style {
@@ -67,6 +68,8 @@ dialog.suite-popup.suite-popup-closing::backdrop { opacity: 0; transition-durati
 @media (hover:hover) and (pointer:fine) {
   :is(button:not(.h4-segment),.primary,.secondary,.home-button-primary,.home-button-secondary,.histi-start):not(:disabled):hover { transform: translateY(-2px); }
   :is(.h4-choice,.app-card.available,.format-card,.card-link):hover { transform: translateY(-4px); }
+  :is(.h4-choice,.app-card.available,.home-format) { transition-timing-function:var(--motion-spring),ease,ease,ease,ease; transition-duration:320ms; }
+  :is(.h4-choice,.app-card.available,.home-format):hover svg { animation:suite-icon-bounce 550ms ease both; }
 }
 :is(button:not(.h4-segment),.primary,.secondary,.home-button-primary,.home-button-secondary,.histi-start):not(:disabled):active { transform: translateY(0) scale(.975); }
 :is(input,textarea,select) { transition: border-color var(--motion-quick) ease, background-color var(--motion-quick) ease, box-shadow var(--motion-quick) ease; }
@@ -80,13 +83,20 @@ dialog.suite-popup.suite-popup-closing::backdrop { opacity: 0; transition-durati
 .h4-reveal:nth-child(8) { animation-delay: 175ms; }
 .h4-reveal:nth-child(n+9) { animation-delay: 200ms; }
 @keyframes suite-detail-arrive { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes suite-icon-bounce { 0%,100% { transform:none; } 35% { transform:translateY(-4px) rotate(-4deg); } 65% { transform:translateY(1px) rotate(2deg); } }
+@media(prefers-reduced-motion:no-preference) {
+  html.histi-page-enter body.histi-group-selector .group-choice-icon svg { animation:suite-icon-arrive 720ms cubic-bezier(.22,.85,.25,1) backwards; }
+}
+@keyframes suite-icon-arrive { 0% { opacity:0; transform:scale(.8) rotate(-8deg); } 65% { opacity:1; transform:scale(1.12) rotate(3deg); } 82% { transform:scale(.98); } 100% { opacity:1; transform:none; } }
 
 body.reduce-motion :is(.suite-popup,.suite-popup > :first-child,button,.primary,.secondary,.home-button-primary,.home-button-secondary,.h4-choice,.app-card.available,.card-link,.format-card,.histi-start,input,textarea,select) { transition: none !important; }
 body.reduce-motion .suite-popup, body.reduce-motion .suite-popup > :first-child { transform: none !important; }
 body.reduce-motion dialog.suite-popup::backdrop { transition: none !important; }
 body.reduce-motion .home-before details[open] > :not(summary), body.reduce-motion .h4-debug-details[open] > :not(summary) { animation: none !important; }
+body.reduce-motion :is(.h4-choice,.app-card,.home-format) svg { animation:none!important; }
 @media (prefers-reduced-motion:reduce) {
   :is(.suite-popup,.suite-popup > :first-child,button,.primary,.secondary,.home-button-primary,.home-button-secondary,.h4-choice,.app-card.available,.card-link,.format-card,.histi-start,input,textarea,select), dialog.suite-popup::backdrop { transition: none !important; }
   .suite-popup, .suite-popup > :first-child { transform: none !important; }
   .home-before details[open] > :not(summary), .h4-debug-details[open] > :not(summary) { animation: none !important; }
+  :is(.h4-choice,.app-card,.home-format) svg { animation:none!important; }
 }

@@ -17,6 +17,7 @@ body.histi-home .home-result { animation:none; }
   html.histi-home-arriving:not(.histi-home-deep-link) body.histi-home .hero-note { animation:home-entry-rise 650ms 540ms var(--home-ease) backwards; }
   html.histi-home-arriving:not(.histi-home-deep-link) body.histi-home .home-result { animation:home-entry-card 900ms 260ms var(--home-ease) backwards; }
   html.histi-home-arriving:not(.histi-home-deep-link) body.histi-home .hero-baseline { animation:home-entry-fade 650ms 600ms ease-out backwards; }
+  html.histi-home-arriving:not(.histi-home-deep-link) body.histi-home :is(.hero-entry-line,.home-result) { animation-timing-function:var(--motion-spring); }
 }
 
 @keyframes home-entry-fade { from { opacity:0; } to { opacity:1; } }
