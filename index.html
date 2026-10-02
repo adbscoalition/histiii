@@ -31,6 +31,7 @@
   <link rel="stylesheet" href="/site-motion.css?v=controls-1">
   <link rel="stylesheet" href="/page-identities.css?v=pages-1">
   <link rel="stylesheet" href="/visitor-guide.css?v=welcome-1">
+  <link rel="stylesheet" href="/visitor-play.css?v=play-1">
   <link rel="stylesheet" href="/site-typography.css?v=hero-tiro-1">
 </head>
 <body class="histi-home" data-page="home">
@@ -57,29 +58,31 @@
         <p class="home-eyebrow"><span class="quiet-dot" aria-hidden="true"></span> A private moment of reflection</p>
         <h1 id="hero-title">Your sharing.<br><span class="hero-people">Your people.</span><br><em>Your boundaries.</em></h1>
         <p class="hero-lede">HISTI is a private check-in about what you feel comfortable sharing—and with whom. Explore your boundaries by choosing levels, without writing down the real details.</p>
-        <ul class="visitor-benefits" aria-label="Before you begin"><li>No account needed</li><li>No private details to type</li><li>Take it at your pace</li></ul>
+        <ul class="visitor-benefits" aria-label="Before you begin"><li><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#door"></use></svg>No account needed</li><li><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#lock"></use></svg>No private details to type</li><li><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#clock"></use></svg>Take it at your pace</li></ul>
         <div class="home-actions">
           <a class="home-button-primary" href="/checkin-page">Explore check-ins <span aria-hidden="true">↗</span></a>
           <a class="home-text-link" href="#about">How it works <span aria-hidden="true">↓</span></a>
         </div>
-        <div class="hero-note"><span aria-hidden="true">✓</span><p><strong>Your answers stay in your browser.</strong><br>You decide whether to share your result.</p></div>
+        <div class="hero-note"><span aria-hidden="true"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#device"></use></svg></span><p><strong>Your answers stay in your browser.</strong><br>You decide whether to share your result.</p></div>
       </div>
 
-      <aside class="home-result" aria-label="Example HISTI result, not your score">
-        <div class="result-example-label"><span class="quiet-dot" aria-hidden="true"></span> Example result <span>For illustration only</span></div>
+      <aside class="home-result" data-cosmetic-demo data-demo-color="blue" aria-label="Interactive example HISTI result, not your score">
+        <div class="result-example-label"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#spark"></use></svg> Example result <span>For illustration only</span></div>
         <div class="result-example-body">
           <p class="home-eyebrow">Sharing with a friend</p>
-          <h2>Moderately<br><em>private.</em></h2>
-          <div class="example-score"><span>HISTI</span><strong>P40</strong></div>
-          <div class="example-spectrum" aria-label="Example: P40 on a scale from P100 private to O100 open"><i></i><b></b></div>
+          <h2><span data-demo-adverb>Moderately</span><br><em data-demo-preference>private.</em></h2>
+          <div class="example-score"><span>HISTI</span><strong data-demo-score>P40</strong></div>
+          <label class="demo-instruction" for="cosmetic-spectrum">Try the scale <span>Drag or use arrow keys</span></label>
+          <div class="example-spectrum"><b aria-hidden="true"></b><input id="cosmetic-spectrum" class="demo-range" type="range" min="0" max="100" step="10" value="30" aria-valuetext="P40 · Moderately private." aria-describedby="cosmetic-demo-note"></div>
           <div class="example-scale"><span>P100 · Private</span><span>N0</span><span>O100 · Open</span></div>
           <div class="example-areas">
-            <div><span>A1</span><p>Daily activities</p><strong>O10</strong></div>
-            <div><span>A2</span><p>Major life events</p><strong>P20</strong></div>
-            <div><span>B</span><p>Basic information</p><strong>P60</strong></div>
-            <div><span>C</span><p>Sensitive information</p><strong>P70</strong></div>
-            <div><span>D</span><p>Very sensitive information</p><strong>P100</strong></div>
+            <div><span>A1</span><p>Daily activities</p><strong data-demo-topic>O10</strong></div>
+            <div><span>A2</span><p>Major life events</p><strong data-demo-topic>P20</strong></div>
+            <div><span>B</span><p>Basic information</p><strong data-demo-topic>P60</strong></div>
+            <div><span>C</span><p>Sensitive information</p><strong data-demo-topic>P70</strong></div>
+            <div><span>D</span><p>Very sensitive information</p><strong data-demo-topic>P100</strong></div>
           </div>
+          <div class="demo-customize"><span id="cosmetic-demo-note">Just a preview. Nothing here is saved.</span><div class="demo-colors" role="group" aria-label="Example card color"><button type="button" data-demo-color="blue" aria-label="Blue preview" aria-pressed="true"></button><button type="button" data-demo-color="rose" aria-label="Rose preview" aria-pressed="false"></button><button type="button" data-demo-color="iris" aria-label="Iris preview" aria-pressed="false"></button></div></div>
         </div>
         <p class="example-disclaimer">The score is not fully accurate to true privacy and openness values.</p>
       </aside>
@@ -111,9 +114,9 @@
       <div class="home-wrap home-section">
         <div class="home-section-heading"><p class="home-eyebrow">How it works</p><h2>Sharing is personal.<br><em>So is the context.</em></h2><p>What you tell a friend may be different from what you tell someone you just met. HISTI helps you see those boundaries.</p></div>
         <div class="home-steps">
-          <article><span class="step-number">01</span><h3>Think of someone.</h3><p>Choose one relationship and keep that person in mind. It can be someone you know or an imagined person. You don’t need to enter their name.</p><div class="people-tags"><span>Stranger</span><span>Acquaintance</span><span>Friend</span><span>Partner</span></div></article>
-          <article><span class="step-number">02</span><h3>Choose what feels closest.</h3><p>Reflect on what you did—or would—share. Select a level or description; keep the actual information private.</p><div class="sample-level" aria-hidden="true"><span>1</span><span>2</span><span class="sample-selected">3</span><span>4</span><span>5</span></div></article>
-          <article><span class="step-number">03</span><h3>See your sharing pattern.</h3><p>Your result shows where you lean: more private (P), somewhere in the middle (N0), or more open (O). Neither end is better. It’s a snapshot to reflect on, not a label.</p><div class="step-scale" aria-hidden="true"><span>P100</span><span>N0</span><span>O100</span></div></article>
+          <article><span class="step-number"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#friends"></use></svg>01</span><h3>Think of someone.</h3><p>Choose one relationship and keep that person in mind. It can be someone you know or an imagined person. You don’t need to enter their name.</p><nav class="people-tags" aria-label="Try a relationship"><a href="/checkin-4-g1"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#stranger"></use></svg>Stranger</a><a href="/checkin-4-g2"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#acquaintance"></use></svg>Acquaintance</a><a href="/checkin-4-g3"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#friends"></use></svg>Friend</a><a href="/checkin-4-g4"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#partner"></use></svg>Partner</a></nav></article>
+          <article><span class="step-number"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#levels"></use></svg>02</span><h3>Choose what feels closest.</h3><p>Reflect on what you did—or would—share. Select a level or description; keep the actual information private.</p><div class="sample-level cosmetic-levels" data-cosmetic-levels role="group" aria-label="Try an example sharing level"><button type="button" data-demo-level="1" aria-label="Example level 1: Keep completely private" aria-pressed="false">1</button><button type="button" data-demo-level="2" aria-label="Example level 2: Share narrowly" aria-pressed="false">2</button><button type="button" data-demo-level="3" aria-label="Example level 3: Context-dependent" aria-pressed="true">3</button><button type="button" data-demo-level="4" aria-label="Example level 4: Share openly" aria-pressed="false">4</button><button type="button" data-demo-level="5" aria-label="Example level 5: Share completely openly" aria-pressed="false">5</button></div><output id="sample-level-description" class="demo-level-caption" aria-live="polite">Context-dependent</output></article>
+          <article><span class="step-number"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#spark"></use></svg>03</span><h3>See your sharing pattern.</h3><p>Your result shows where you lean: more private (P), somewhere in the middle (N0), or more open (O). Neither end is better. It’s a snapshot to reflect on, not a label.</p><div class="step-scale" aria-hidden="true"><span>P100</span><span>N0</span><span>O100</span></div></article>
         </div>
       </div>
     </section>
@@ -121,18 +124,18 @@
     <section class="home-wrap home-section home-areas" aria-labelledby="areas-title">
       <div class="home-section-heading"><p class="home-eyebrow">Five Full result areas</p><h2 id="areas-title">Everyday to<br><em>deeply personal.</em></h2></div>
       <div class="home-area-list">
-        <article><span>A1</span><div><h3>Daily activities</h3><p>Hobbies, preferences, routines, and everyday interests.</p></div></article>
-        <article><span>A2</span><div><h3>Major life events</h3><p>Changes and milestones you might choose to share.</p></div></article>
-        <article><span>B</span><div><h3>Basic information</h3><p>How much you’d share about your background or ways to contact you—not the actual details.</p></div></article>
-        <article><span>C</span><div><h3>Sensitive information</h3><p>Personal topics that may call for more care or context.</p></div></article>
-        <article><span>D</span><div><h3>Very sensitive information</h3><p>High-sensitivity details such as credentials or identifiers. Select descriptions only.</p></div></article>
+        <article><span class="visitor-topic-icon" aria-hidden="true"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#leaf"></use></svg><span class="visitor-topic-code">A1</span></span><div><h3>Daily activities</h3><p>Hobbies, preferences, routines, and everyday interests.</p></div></article>
+        <article><span class="visitor-topic-icon" aria-hidden="true"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#milestone"></use></svg><span class="visitor-topic-code">A2</span></span><div><h3>Major life events</h3><p>Changes and milestones you might choose to share.</p></div></article>
+        <article><span class="visitor-topic-icon" aria-hidden="true"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#identity"></use></svg><span class="visitor-topic-code">B</span></span><div><h3>Basic information</h3><p>How much you’d share about your background or ways to contact you—not the actual details.</p></div></article>
+        <article><span class="visitor-topic-icon" aria-hidden="true"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#shield"></use></svg><span class="visitor-topic-code">C</span></span><div><h3>Sensitive information</h3><p>Personal topics that may call for more care or context.</p></div></article>
+        <article><span class="visitor-topic-icon" aria-hidden="true"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#key"></use></svg><span class="visitor-topic-code">D</span></span><div><h3>Very sensitive information</h3><p>High-sensitivity details such as credentials or identifiers. Select descriptions only.</p></div></article>
       </div>
     </section>
 
     <section id="privacy" class="home-privacy">
       <div class="home-wrap home-section privacy-layout">
         <div class="home-section-heading"><p class="home-eyebrow"><span class="quiet-dot" aria-hidden="true"></span> Private by design</p><h2>The reflection is yours.<br><em>The answers stay yours.</em></h2><p>No sign-up or answer upload. Your choices and score stay in this browser unless you choose to share them. Like any website, loading HISTI still sends ordinary file requests to its host.</p><div class="home-actions"><a class="home-button-primary" href="/checkin-4#privacy-proof" data-privacy-proof>See the privacy proof <span aria-hidden="true">↗</span></a><a class="home-text-link" href="/privacy">Read the policy</a></div></div>
-        <div class="privacy-summary"><div><strong>On device</strong><span>Answers, progress, and scoring</span></div><div><strong>No account</strong><span>No signup to begin</span></div><div><strong>Check it yourself</strong><span>Live page checks and open source</span></div><a class="home-text-link" href="https://github.com/adbscoalition/histiii" rel="noopener noreferrer">Inspect the source <span aria-hidden="true">↗</span></a></div>
+        <div class="privacy-summary"><div><strong><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#device"></use></svg>On device</strong><span>Answers, progress, and scoring</span></div><div><strong><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#door"></use></svg>No account</strong><span>No signup to begin</span></div><div><strong><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#shield"></use></svg>Check it yourself</strong><span>Live page checks and open source</span></div><a class="home-text-link" href="https://github.com/adbscoalition/histiii" rel="noopener noreferrer">Inspect the source <span aria-hidden="true">↗</span></a></div>
       </div>
     </section>
 
@@ -149,13 +152,26 @@
       </div>
     </section>
 
-    <section class="home-wrap home-final">
-      <p class="home-eyebrow">A little space to understand yourself</p><h2>Ready when<br><em>you are.</em></h2><a class="home-button-primary" href="/checkin-page">Choose your check-in <span aria-hidden="true">↗</span></a>
+    <section class="home-wrap home-final" aria-labelledby="ready-title">
+      <div class="ready-copy">
+        <p class="home-eyebrow">On your terms</p>
+        <h2 id="ready-title">Ready when<br><em>you are.</em></h2>
+        <p class="ready-description">A little space to understand your boundaries. Start with one person, move at your own pace, and keep the reflection yours.</p>
+        <a class="home-button-primary" href="/checkin-page">Choose your check-in <span aria-hidden="true">↗</span></a>
+        <p class="ready-reassurance">No account. No pressure to finish today.</p>
+      </div>
+      <ol class="ready-path" aria-label="Your next steps">
+        <li><span class="ready-icon"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#friends"></use></svg></span><div><span>01 · A person in mind</span><strong>Who are you sharing with?</strong><p>Someone you know, or a hypothetical person.</p></div></li>
+        <li><span class="ready-icon"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#levels"></use></svg></span><div><span>02 · Your comfort level</span><strong>Choose levels, not details.</strong><p>Reflect without entering private information.</p></div></li>
+        <li><span class="ready-icon"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#lock"></use></svg></span><div><span>03 · A reflection for you</span><strong>Your result. Your choice.</strong><p>Keep it to yourself, or share only if you want.</p></div></li>
+      </ol>
       <p class="home-final-note">The score is not fully accurate to true privacy and openness values. HISTI is a reflection tool; it does not diagnose anything, decide whether sharing was safe, provide legal advice, or score your worth.</p>
     </section>
   </main>
 
   <footer class="home-footer home-wrap"><div><img src="/histi-logo.webp?v=facelift-1" alt="HISTI" width="76" height="41"><span>Human Information-Sharing<br>Transparency Index</span></div><nav aria-label="Footer"><a href="/checkin-page">Check-ins</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="https://github.com/adbscoalition/histiii" rel="noopener noreferrer">Source</a></nav><p>Keep close what matters.</p></footer>
   <script type="module" src="/histi4-privacy.js?v=motion-1"></script>
+  <script type="module" src="/visitor-play.js?v=play-1"></script>
+  <script type="module" src="/home-disclosures.js?v=faq-1"></script>
 </body>
 </html>

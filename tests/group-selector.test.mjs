@@ -6,7 +6,7 @@ const read = file => readFileSync(new URL(`../${file}`, import.meta.url), 'utf8'
 
 test('the facelift keeps all four recipient links and existing privacy controls', () => {
   const html = read('checkin-4.html');
-  assert.match(html, /group-selector\.css\?v=facelift-1/);
+  assert.match(html, /group-selector\.css\?v=facelift-2/);
   assert.match(html, /55–70 minutes per person/);
   assert.equal((html.match(/class="h4-choice"/g) || []).length, 4);
   for (let group=1; group<=4; group++) assert.match(html, new RegExp(`href="/checkin-4-g${group}"`));
