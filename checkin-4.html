@@ -20,6 +20,7 @@
   <script src="/site-color-motion.js?v=bright-1" defer></script>
   <link rel="stylesheet" href="/site-experience.css?v=group-entry-1">
   <link rel="stylesheet" href="/site-motion.css?v=controls-1">
+  <link rel="stylesheet" href="/group-selector.css?v=facelift-1">
   <link rel="stylesheet" href="/site-typography.css?v=1">
 </head>
 <body class="histi-group-selector">
@@ -43,16 +44,28 @@
     <div class="progress-track" aria-hidden="true"><span></span></div>
     <main class="screen landing-screen">
       <section class="start-card" aria-labelledby="group-title">
-        <p class="eyebrow">Human Information-Sharing Transparency Index · Full assessment</p>
+        <div class="group-setup-meta"><p class="eyebrow">HISTI Full</p><span>55–70 minutes per person</span></div>
         <h1 id="group-title">Who are you thinking of?</h1>
-        <p class="start-lede">The same questions are answered separately for each person. Choose one place to begin. You can return for the others later.</p>
+        <p class="start-lede">Choose one person or relationship. You can return for the others later.</p>
         <div class="h4-choice-grid" aria-label="Four recipients">
-          <a class="h4-choice" href="/checkin-4-g1"><span>01 · G1</span><strong>Stranger / regular person</strong><small>Someone you do not personally know.</small><b>Start check-in <span aria-hidden="true">→</span></b></a>
-          <a class="h4-choice" href="/checkin-4-g2"><span>02 · G2</span><strong>Acquaintance</strong><small>Someone you know casually.</small><b>Start check-in <span aria-hidden="true">→</span></b></a>
-          <a class="h4-choice" href="/checkin-4-g3"><span>03 · G3</span><strong>Friend</strong><small>Someone you personally consider a friend.</small><b>Start check-in <span aria-hidden="true">→</span></b></a>
-          <a class="h4-choice" href="/checkin-4-g4"><span>04 · G4</span><strong>Spouse / partner</strong><small>A current or hypothetical committed partner.</small><b>Start check-in <span aria-hidden="true">→</span></b></a>
+          <a class="h4-choice" href="/checkin-4-g1">
+            <div class="group-choice-heading"><span class="group-choice-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="3"></circle><path d="M5 21v-2a7 7 0 0 1 14 0v2"></path></svg></span><strong>Stranger / regular person</strong><span class="group-choice-number" aria-hidden="true">01</span></div>
+            <small>Someone you do not personally know.</small><b>Start check-in <span class="group-choice-arrow" aria-hidden="true">↗</span></b>
+          </a>
+          <a class="h4-choice" href="/checkin-4-g2">
+            <div class="group-choice-heading"><span class="group-choice-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="8" cy="7" r="3"></circle><path d="M2 21v-2a6 6 0 0 1 12 0v2M17 4a3 3 0 0 1 0 6M17 13a5 5 0 0 1 5 5v3"></path></svg></span><strong>Acquaintance</strong><span class="group-choice-number" aria-hidden="true">02</span></div>
+            <small>Someone you know casually.</small><b>Start check-in <span class="group-choice-arrow" aria-hidden="true">↗</span></b>
+          </a>
+          <a class="h4-choice" href="/checkin-4-g3">
+            <div class="group-choice-heading"><span class="group-choice-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="7" cy="7" r="3"></circle><circle cx="17" cy="7" r="3"></circle><path d="M1 21v-2a6 6 0 0 1 12 0v2M11 19a6 6 0 0 1 12 0v2"></path></svg></span><strong>Friend</strong><span class="group-choice-number" aria-hidden="true">03</span></div>
+            <small>Someone you personally consider a friend.</small><b>Start check-in <span class="group-choice-arrow" aria-hidden="true">↗</span></b>
+          </a>
+          <a class="h4-choice" href="/checkin-4-g4">
+            <div class="group-choice-heading"><span class="group-choice-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21 3.7 13A5.5 5.5 0 0 1 12 5.8 5.5 5.5 0 0 1 20.3 13Z"></path></svg></span><strong>Spouse / partner</strong><span class="group-choice-number" aria-hidden="true">04</span></div>
+            <small>A current or hypothetical committed partner.</small><b>Start check-in <span class="group-choice-arrow" aria-hidden="true">↗</span></b>
+          </a>
         </div>
-        <div class="suite-privacy-reminder" role="note"><span>Private by design</span><p>Reflect on sharing without sharing the information itself. Your choices and progress stay in this browser. You can skip, stop, or reset.</p><a href="/privacy">How your privacy is protected →</a></div>
+        <div class="suite-privacy-reminder group-privacy" role="note"><span class="group-privacy-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="3"></rect><path d="M8 10V6a4 4 0 0 1 8 0v4M12 14v3"></path></svg></span><div><strong>Private by design</strong><p>Your choices and progress stay in this browser. You can skip, stop, or reset.</p></div><a href="/privacy">How it stays private <span aria-hidden="true">↗</span></a></div>
         <p class="start-disclaimer"><strong>HISTI is a reflection tool.</strong> Choose levels only; never enter real private details. The score is not fully accurate to true privacy and openness values.</p>
       </section>
     </main>
