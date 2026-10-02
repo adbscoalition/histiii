@@ -97,5 +97,12 @@ test('topic badges center the complete icon-and-label stack with equal breathing
   const css=read('visitor-play.css');
   assert.match(css,/\.home-area-list \.visitor-topic-icon \{[^}]*align-items:center; justify-content:center; gap:4px; line-height:1;/);
   assert.match(css,/\.home-area-list \.visitor-topic-icon \.visitor-icon \{ display:block; width:20px; height:20px;/);
-  assert.match(read('index.html'),/visitor-play\.css\?v=play-2/);
+  assert.match(read('index.html'),/visitor-play\.css\?v=play-3/);
+});
+
+test('step badges fit their icon and number together with contrast on a light pill', () => {
+  const home=read('index.html'),css=read('visitor-play.css');
+  assert.deepEqual([...home.matchAll(/class="visitor-step-code">(\d+)<\/span>/g)].map(match=>match[1]),['01','02','03']);
+  assert.match(css,/\.home-steps \.step-number \{[^}]*display:inline-flex;[^}]*width:auto; height:auto;[^}]*padding:8px 12px;[^}]*background:var\(--palette-card\); color:var\(--palette-iris-ink\);/);
+  assert.match(css,/\.home-steps \.step-number \.visitor-icon \{ display:block; width:22px; height:22px; color:var\(--palette-blue-ink\);/);
 });

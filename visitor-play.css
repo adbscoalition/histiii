@@ -37,8 +37,9 @@
 .cosmetic-levels button[aria-pressed="true"] { background:var(--control-fill); color:var(--control-ink); }
 .cosmetic-levels button:hover:not([aria-pressed="true"]) { background:var(--control-soft); }
 .demo-level-caption { display:block; margin-top:10px; color:var(--palette-blue-ink); font-size:13px; line-height:1.6; }
-.home-steps .step-number { display:flex; align-items:center; gap:10px; }
-.home-steps .step-number .visitor-icon { width:22px; height:22px; color:var(--palette-blue-ink); }
+.home-steps .step-number { display:inline-flex; align-items:center; gap:8px; width:auto; height:auto; min-height:40px; padding:8px 12px; box-sizing:border-box; border:1px solid #b9c5dd; border-radius:999px; background:var(--palette-card); color:var(--palette-iris-ink); font-size:11px; letter-spacing:.04em; }
+.home-steps .step-number .visitor-icon { display:block; width:22px; height:22px; color:var(--palette-blue-ink); }
+.visitor-step-code { font-variant-numeric:tabular-nums; line-height:1; }
 .people-tags a { display:inline-flex; align-items:center; gap:6px; min-height:44px; padding:7px 10px; border:1px solid var(--palette-line); border-radius:999px; background:var(--palette-card); color:var(--palette-ink); font-size:12px; text-decoration:none; transition:background-color 180ms ease; }
 .people-tags a:hover { background:var(--palette-blue-soft); }
 .people-tags .visitor-icon { width:16px; height:16px; }
