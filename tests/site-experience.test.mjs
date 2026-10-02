@@ -12,7 +12,7 @@ test('every page has one static safety notice and the shared visual system', () 
     const html = read(file);
     assert.equal((html.match(/class="histi-safety-notice"/g) || []).length, 1, file);
     assert.match(html, /Never enter passwords, codes, or personal information\./, file);
-    const sharedStyle = html.indexOf('/site-experience.css?v=controls-1');
+    const sharedStyle = html.indexOf('/site-experience.css?v=');
     assert.ok(sharedStyle > 0 && sharedStyle < html.indexOf('/site-typography.css'), file);
     assert.match(html, /page-transitions\.js\?v=suite-1/, file);
     assert.match(html, /class="site-header topbar histi-header"/, file);
@@ -51,6 +51,22 @@ test('page entrance is finite and respects reduced motion', () => {
   const css = read('site-experience.css');
   assert.match(css, /@media\(prefers-reduced-motion:reduce\)/);
   assert.doesNotMatch(css, /infinite|will-change/);
+});
+
+test('group selector fades once without restarting or moving the cards', () => {
+  const html = read('checkin-4.html');
+  const css = read('site-experience.css');
+  assert.match(html, /<body class="histi-group-selector">/);
+  assert.match(html, /site-experience\.css\?v=group-entry-1/);
+  for (const font of ['idiqlat/regular', 'tiro-gurmukhi/regular', 'instrument-sans/variable']) {
+    assert.ok(html.includes(`rel="preload" href="/fonts/${font}.woff2" as="font" type="font/woff2" crossorigin`));
+  }
+  assert.match(css, /body\.histi-group-selector :is\(\.start-card,\.h4-choice\) \{ animation:none; \}/);
+  assert.match(css, /@media\(prefers-reduced-motion:no-preference\) \{\s+html\.histi-page-enter body\.histi-group-selector \.start-card \{ animation:suite-selector-enter 720ms var\(--suite-ease\) backwards!important; \}/);
+  const fade = css.match(/@keyframes suite-selector-enter \{([^\n]+)\}/)?.[1];
+  assert.match(fade, /opacity:0/);
+  assert.match(fade, /opacity:1/);
+  assert.doesNotMatch(fade, /transform|height|margin|padding/);
 });
 
 test('existing reflection questions remain on all Full recipient pages', () => {
