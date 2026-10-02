@@ -56,7 +56,7 @@ test('page entrance is finite and respects reduced motion', () => {
 test('group selector fades once without restarting or moving the cards', () => {
   const html = read('checkin-4.html');
   const css = read('site-experience.css');
-  assert.match(html, /<body class="histi-group-selector">/);
+  assert.match(html, /<body class="histi-group-selector"[^>]*>/);
   assert.match(html, /site-experience\.css\?v=group-entry-1/);
   for (const font of ['idiqlat/regular', 'tiro-gurmukhi/regular', 'instrument-sans/variable']) {
     assert.ok(html.includes(`rel="preload" href="/fonts/${font}.woff2" as="font" type="font/woff2" crossorigin`));

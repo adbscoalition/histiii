@@ -1,20 +1,20 @@
 /* Three bounded, decorative layers. Only transforms animate; nothing is generated. */
 body { isolation:isolate; }
 .suite-color-field { position:fixed; inset:0; z-index:-1; pointer-events:none; overflow:hidden; contain:layout paint; }
-.suite-color-field span { position:absolute; width:220px; height:220px; border-radius:44% 56% 61% 39% / 52% 37% 63% 48%; background:#ffb98455; animation:suite-color-drift 32s ease-in-out infinite alternate; }
-.suite-color-field span:nth-child(1) { left:-60px; top:18%; }
-.suite-color-field span:nth-child(2) { right:-45px; top:36%; width:250px; height:250px; background:#a1dafa55; border-radius:64% 36% 43% 57% / 46% 62% 38% 54%; animation-duration:39s; animation-delay:-12s; }
-.suite-color-field span:nth-child(3) { right:24%; bottom:-70px; width:190px; height:190px; background:#aab6f955; border-radius:40% 60% 54% 46% / 58% 41% 59% 42%; animation-duration:45s; animation-delay:-22s; }
+.suite-color-field span { position:absolute; box-sizing:border-box; width:var(--spot-width,var(--spot-size,220px)); height:var(--spot-height,var(--spot-size,220px)); border:var(--spot-border,0 solid transparent); border-radius:var(--spot-shape,44% 56% 61% 39% / 52% 37% 63% 48%); background:var(--spot-color,#ffb98455); opacity:var(--spot-opacity,1); animation:suite-color-drift var(--spot-duration,32s) ease-in-out infinite alternate; }
+.suite-color-field span:nth-child(1) { left:var(--spot-left,-60px); right:var(--spot-right,auto); top:var(--spot-top,18%); bottom:var(--spot-bottom,auto); }
+.suite-color-field span:nth-child(2) { left:var(--spot-left,auto); right:var(--spot-right,-45px); top:var(--spot-top,36%); bottom:var(--spot-bottom,auto); width:var(--spot-width,var(--spot-size,250px)); height:var(--spot-height,var(--spot-size,250px)); background:var(--spot-color,#a1dafa55); border-radius:var(--spot-shape,64% 36% 43% 57% / 46% 62% 38% 54%); animation-duration:var(--spot-duration,39s); animation-delay:-12s; }
+.suite-color-field span:nth-child(3) { left:var(--spot-left,auto); right:var(--spot-right,24%); top:var(--spot-top,auto); bottom:var(--spot-bottom,-70px); width:var(--spot-width,var(--spot-size,190px)); height:var(--spot-height,var(--spot-size,190px)); background:var(--spot-color,#aab6f955); border-radius:var(--spot-shape,40% 60% 54% 46% / 58% 41% 59% 42%); animation-duration:var(--spot-duration,45s); animation-delay:-22s; }
 @keyframes suite-color-drift { from { transform:translate3d(-12px,-14px,0) rotate(-6deg); } to { transform:translate3d(32px,24px,0) rotate(9deg); } }
 /* Native scroll timelines: three fixed spots, no scroll listener or frame allocation. */
 @supports(animation-timeline:scroll(root block)) {
-  .suite-color-field span { --spot-end:90px -200px; animation-name:suite-color-drift,suite-scroll-spots; animation-duration:32s,1ms; animation-timing-function:ease-in-out,linear; animation-iteration-count:infinite,1; animation-direction:alternate,normal; animation-fill-mode:none,both; animation-delay:0s,0s; animation-timeline:auto,scroll(root block); }
-  .suite-color-field span:nth-child(2) { --spot-end:-70px 160px; animation-duration:39s,1ms; animation-delay:-12s,0s; }
-  .suite-color-field span:nth-child(3) { --spot-end:140px -100px; animation-duration:45s,1ms; animation-delay:-22s,0s; }
+  .suite-color-field span { --spot-end:90px -200px; animation-name:suite-color-drift,suite-scroll-spots; animation-duration:var(--spot-duration,32s),1ms; animation-timing-function:ease-in-out,linear; animation-iteration-count:infinite,1; animation-direction:alternate,normal; animation-fill-mode:none,both; animation-delay:0s,0s; animation-timeline:auto,scroll(root block); }
+  .suite-color-field span:nth-child(2) { --spot-end:-70px 160px; animation-duration:var(--spot-duration,39s),1ms; animation-delay:-12s,0s; }
+  .suite-color-field span:nth-child(3) { --spot-end:140px -100px; animation-duration:var(--spot-duration,45s),1ms; animation-delay:-22s,0s; }
 }
 @keyframes suite-scroll-spots { from { translate:0px 0px; } to { translate:var(--spot-end); } }
 html.suite-motion-paused .suite-color-field span { animation-play-state:paused; }
 body.reduce-motion .suite-color-field span { animation:none; }
-@media(max-width:680px) { .suite-color-field span,.suite-color-field span:nth-child(2),.suite-color-field span:nth-child(3) { width:145px; height:145px; } }
+@media(max-width:680px) { .suite-color-field span,.suite-color-field span:nth-child(2),.suite-color-field span:nth-child(3) { width:min(var(--spot-width,var(--spot-size,145px)),145px); height:min(var(--spot-height,var(--spot-size,145px)),145px); } }
 @media(prefers-reduced-motion:reduce) { .suite-color-field span { animation:none; } }
 @media print { .suite-color-field { display:none; } }

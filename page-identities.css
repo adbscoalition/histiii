@@ -1,0 +1,60 @@
+/* Page identities reuse the same three spots. No new layers or motion loops. */
+body[data-page] { --page-cue:var(--palette-blue-ink); --page-cue-soft:var(--palette-blue-soft); --page-cue-line:#a9cddd; }
+body[data-page] .histi-brand .brand-logo { filter:brightness(.18)!important; }
+
+/* Home: loose petals and a warm, editorial marker. */
+body[data-page="home"] .suite-color-field span:nth-child(1) { --spot-size:280px; --spot-left:-140px; --spot-top:10%; --spot-color:#ffc99c55; --spot-shape:18% 82% 30% 70% / 50% 32% 68% 50%; --spot-duration:42s; --spot-end:50px -170px; }
+body[data-page="home"] .suite-color-field span:nth-child(2) { --spot-size:210px; --spot-right:-105px; --spot-top:50%; --spot-color:#c4c5fa44; --spot-shape:70% 30% 50% 50% / 32% 68% 32% 68%; --spot-duration:48s; --spot-end:-90px 100px; }
+body[data-page="home"] .suite-color-field span:nth-child(3) { --spot-size:230px; --spot-left:12%; --spot-right:auto; --spot-bottom:-100px; --spot-color:#f2bdd144; --spot-shape:50% 50% 12% 88% / 70% 30% 70% 30%; --spot-duration:54s; --spot-end:100px -150px; }
+body[data-page="home"] .hero-copy>.home-eyebrow>.quiet-dot { width:8px; height:8px; border-radius:2px 6px 2px 6px; background:var(--palette-apricot-ink); box-shadow:none; }
+
+/* Library: rounded tiles, with numbered catalogue tabs. */
+body[data-page="formats"] .suite-color-field span:nth-child(1) { --spot-width:150px; --spot-height:240px; --spot-left:-65px; --spot-top:17%; --spot-color:#b4ddf655; --spot-shape:38px; --spot-duration:46s; --spot-end:45px -130px; }
+body[data-page="formats"] .suite-color-field span:nth-child(2) { --spot-width:240px; --spot-height:130px; --spot-right:-110px; --spot-top:42%; --spot-color:#c4c5fa55; --spot-shape:42px; --spot-duration:52s; --spot-end:-60px 180px; }
+body[data-page="formats"] .suite-color-field span:nth-child(3) { --spot-size:170px; --spot-right:22%; --spot-bottom:-90px; --spot-color:#ffc99c55; --spot-shape:36px; --spot-duration:58s; --spot-end:110px -80px; }
+body[data-page="formats"] .selector-heading>p { width:fit-content; padding:8px 12px; border:1px solid #b7bddd; border-radius:10px; background:var(--palette-iris-soft); color:var(--palette-iris-ink); }
+body[data-page="formats"] .card-number { display:grid; place-items:center; width:30px; height:30px; border:1px solid var(--palette-line); border-radius:10px; background:var(--palette-card); color:var(--palette-muted); font-weight:600; letter-spacing:0; }
+
+/* People: linked rings. Friend has a distinct rose identity. */
+body[data-page="people"] .suite-color-field span:nth-child(1) { --spot-size:240px; --spot-left:-145px; --spot-top:11%; --spot-color:transparent; --spot-border:27px solid #afd9f655; --spot-shape:50%; --spot-duration:44s; --spot-end:45px -150px; }
+body[data-page="people"] .suite-color-field span:nth-child(2) { --spot-size:300px; --spot-right:-160px; --spot-top:41%; --spot-color:transparent; --spot-border:32px solid #ffc99c66; --spot-shape:50%; --spot-duration:50s; --spot-end:-70px 120px; }
+body[data-page="people"] .suite-color-field span:nth-child(3) { --spot-size:150px; --spot-left:16%; --spot-right:auto; --spot-bottom:-80px; --spot-color:#c4c5fa55; --spot-shape:50%; --spot-duration:56s; --spot-end:110px -80px; }
+body[data-page="people"] .h4-choice:nth-child(3) { --recipient-color:var(--palette-rose); --recipient-line:#d6a2b7; --recipient-ink:var(--palette-rose-ink); }
+
+/* Check-ins: quieter rings and capsules, matched to the person being considered. */
+body[data-page="checkin"] { --recipient-spot-color:#b4ddf633; --recipient-spot-line:#99ccec44; }
+body[data-page="checkin"][data-recipient="G2"] { --page-cue:var(--palette-apricot-ink); --page-cue-soft:var(--palette-apricot-soft); --page-cue-line:#d8aa8b; --recipient-spot-color:#ffc99c33; --recipient-spot-line:#e3b68e44; }
+body[data-page="checkin"][data-recipient="G3"] { --page-cue:var(--palette-rose-ink); --page-cue-soft:var(--palette-rose-soft); --page-cue-line:#d6a2b7; --recipient-spot-color:#f2bdd133; --recipient-spot-line:#d6a2b744; }
+body[data-page="checkin"][data-recipient="G4"] { --page-cue:var(--palette-iris-ink); --page-cue-soft:var(--palette-iris-soft); --page-cue-line:#a5afd6; --recipient-spot-color:#c4c5fa33; --recipient-spot-line:#a5afd644; }
+body[data-page="checkin"] .suite-color-field span:nth-child(1) { --spot-size:190px; --spot-left:-110px; --spot-top:22%; --spot-color:transparent; --spot-border:15px solid var(--recipient-spot-line); --spot-shape:50%; --spot-duration:52s; --spot-end:35px -100px; }
+body[data-page="checkin"] .suite-color-field span:nth-child(2) { --spot-width:80px; --spot-height:250px; --spot-right:-35px; --spot-top:48%; --spot-color:var(--recipient-spot-color); --spot-shape:999px; --spot-duration:60s; --spot-end:-25px 90px; }
+body[data-page="checkin"] .suite-color-field span:nth-child(3) { --spot-size:130px; --spot-right:19%; --spot-bottom:-60px; --spot-color:var(--recipient-spot-color); --spot-shape:50%; --spot-duration:68s; --spot-end:70px -65px; }
+body[data-page="checkin"]:has(#assessment-screen:not([hidden])) .suite-color-field span { --spot-opacity:.55; }
+body[data-page="checkin"] .start-card>.eyebrow { width:fit-content; padding:8px 12px; border:1px solid var(--page-cue-line); border-radius:999px; color:var(--page-cue)!important; background:var(--page-cue-soft); font-size:11px; line-height:1.6; }
+body[data-page="checkin"][data-recipient] .h4-question-context { color:var(--page-cue)!important; }
+body[data-page="checkin"] .h4-question-context::before { content:""; display:inline-block; width:6px; height:6px; margin-right:7px; border-radius:50%; background:var(--page-cue); vertical-align:middle; }
+
+/* Results: a brighter trio and a small recipient-colored score frame. */
+body[data-page="checkin"]:has(#results-screen:not([hidden])) .suite-color-field span:nth-child(1) { --spot-size:260px; --spot-left:-130px; --spot-top:15%; --spot-color:#ffc99c66; --spot-border:0 solid transparent; --spot-shape:15% 85% 30% 70% / 50% 30% 70% 50%; --spot-opacity:1; }
+body[data-page="checkin"]:has(#results-screen:not([hidden])) .suite-color-field span:nth-child(2) { --spot-width:250px; --spot-height:250px; --spot-right:-125px; --spot-top:43%; --spot-color:#b4ddf666; --spot-shape:50% 50% 85% 15% / 30% 70% 30% 70%; --spot-opacity:1; }
+body[data-page="checkin"]:has(#results-screen:not([hidden])) .suite-color-field span:nth-child(3) { --spot-size:170px; --spot-left:18%; --spot-right:auto; --spot-bottom:-65px; --spot-color:#c4c5fa66; --spot-shape:42px; --spot-opacity:1; }
+body[data-page="checkin"] #results-screen .result-score-line { width:fit-content; max-width:100%; padding:10px 18px; border:1px solid var(--page-cue-line); border-radius:18px; background:var(--page-cue-soft); }
+
+/* Reading pages: still, outlined corners instead of distracting idle drift. */
+body[data-page="privacy"] .suite-color-field span:nth-child(1) { --spot-size:230px; --spot-left:-155px; --spot-top:16%; --spot-color:transparent; --spot-border:22px solid #afd9f655; --spot-shape:50%; --spot-end:30px -80px; }
+body[data-page="privacy"] .suite-color-field span:nth-child(2) { --spot-size:200px; --spot-right:-115px; --spot-top:53%; --spot-color:transparent; --spot-border:15px solid #c4c5fa55; --spot-shape:50%; --spot-end:-40px 80px; }
+body[data-page="privacy"] .suite-color-field span:nth-child(3) { --spot-size:100px; --spot-left:10%; --spot-right:auto; --spot-bottom:-50px; --spot-color:#b4ddf633; --spot-shape:50%; --spot-end:60px -50px; }
+body[data-page="terms"] { --page-cue:var(--palette-iris-ink); --page-cue-soft:var(--palette-iris-soft); --page-cue-line:#b7bddd; }
+body[data-page="terms"] .suite-color-field span:nth-child(1) { --spot-size:170px; --spot-left:-100px; --spot-top:22%; --spot-color:transparent; --spot-border:18px solid #c4c5fa55; --spot-shape:34px; --spot-end:30px -65px; }
+body[data-page="terms"] .suite-color-field span:nth-child(2) { --spot-width:220px; --spot-height:130px; --spot-right:-125px; --spot-top:56%; --spot-color:transparent; --spot-border:14px solid #ffc99c55; --spot-shape:30px; --spot-end:-35px 70px; }
+body[data-page="terms"] .suite-color-field span:nth-child(3) { --spot-size:110px; --spot-right:17%; --spot-bottom:-60px; --spot-color:#c4c5fa33; --spot-shape:24px; --spot-end:50px -40px; }
+html:not(.suite-motion-paused) body:is([data-page="privacy"],[data-page="terms"]) .suite-color-field span { animation-play-state:paused,running; }
+body:is([data-page="privacy"],[data-page="terms"]) .policy-hero { border-color:var(--page-cue-line); border-top:4px solid var(--page-cue); background:var(--page-cue-soft); }
+body:is([data-page="privacy"],[data-page="terms"]) .policy-hero .eyebrow { color:var(--page-cue)!important; }
+body:is([data-page="privacy"],[data-page="terms"]) .policy-date { width:fit-content; padding:6px 10px; border:1px solid var(--page-cue-line); border-radius:8px; background:var(--palette-card); font-size:12px; }
+body:is([data-page="privacy"],[data-page="terms"]) .policy-section h2 { padding-left:14px; border-left:3px solid var(--page-cue-line); }
+body:is([data-page="privacy"],[data-page="terms"]) .policy-callout { border-color:var(--page-cue-line); background:var(--page-cue-soft); }
+@media(max-width:680px) {
+  body[data-page] .suite-color-field span:nth-child(1) { --spot-left:-85px; }
+  body[data-page] .suite-color-field span:nth-child(2) { --spot-right:-65px; }
+}

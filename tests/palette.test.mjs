@@ -52,9 +52,9 @@ test('start cards override old pale text and dark hover colors', () => {
 
 test('decorative pigments remain exactly three bounded transform layers', () => {
   const motion = readFileSync(new URL('../site-color-motion.css', import.meta.url), 'utf8');
-  assert.match(motion, /background:#ffb98455/);
-  assert.match(motion, /background:#a1dafa55/);
-  assert.match(motion, /background:#aab6f955/);
+  assert.match(motion, /background:var\(--spot-color,#ffb98455\)/);
+  assert.match(motion, /background:var\(--spot-color,#a1dafa55\)/);
+  assert.match(motion, /background:var\(--spot-color,#aab6f955\)/);
   assert.doesNotMatch(motion, /radial-gradient|filter:|backdrop-filter:|will-change:|mix-blend-mode:/);
   assert.match(motion, /contain:layout paint/);
   assert.match(motion, /@supports\(animation-timeline:scroll\(root block\)\)/);
