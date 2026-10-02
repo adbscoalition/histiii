@@ -72,7 +72,7 @@ test('group selector fades once without restarting or moving the cards', () => {
 test('existing reflection questions remain on all Full recipient pages', () => {
   for (const group of ['g1', 'g2', 'g3', 'g4']) {
     const html = read(`checkin-4-${group}.html`);
-    assert.match(html, /245 questions for this recipient/);
+    assert.match(html, /<span>245 questions<\/span>/);
     assert.match(html, /id="question-list"/);
     assert.match(html, /app-histi4\.js\?v=motion-1/);
     assert.match(html, /suite-privacy-reminder/);

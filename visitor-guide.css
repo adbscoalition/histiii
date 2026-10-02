@@ -1,0 +1,48 @@
+/* Visitor guidance only. The question UI and existing motion remain unchanged. */
+.visitor-benefits { display:flex; flex-wrap:wrap; gap:8px; margin:24px 0 0; padding:0; list-style:none; }
+.visitor-benefits li { padding:8px 12px; border:1px solid var(--palette-line); border-radius:999px; background:var(--palette-card); color:var(--palette-ink); font-size:13px; line-height:1.4; }
+.visitor-benefits li:nth-child(2) { background:var(--palette-rose-soft); }
+.visitor-benefits li:nth-child(3) { background:var(--palette-iris-soft); }
+.home-hero .hero-note { margin-top:16px; }
+body.histi-home .home-hero { padding-top:48px; }
+.home-before summary { font-size:15px; }
+.home-before details>p { font-size:14px; }
+.home-before details a { text-underline-offset:4px; }
+.visitor-description { max-width:60ch; color:var(--palette-muted); font-size:17px; line-height:1.7; }
+body[data-page="formats"] .selector-heading .visitor-description { margin:20px 0 0; padding:0; border:0; border-radius:0; background:transparent; color:var(--palette-muted); font-size:17px; font-weight:400; letter-spacing:normal; text-transform:none; }
+.visitor-path { display:flex; flex-wrap:wrap; align-items:center; gap:10px 16px; margin:0 0 22px; padding:0; list-style:none; color:var(--palette-muted); font-size:13px; line-height:1.5; }
+.visitor-path li { display:flex; align-items:center; gap:8px; }
+.visitor-path li>span { display:grid; place-items:center; width:25px; height:25px; flex:none; border:1px solid var(--palette-line); border-radius:50%; background:var(--palette-card); color:var(--palette-blue-ink); font-variant-numeric:tabular-nums; }
+.visitor-path [aria-current="step"] { color:var(--palette-ink); font-weight:600; }
+.visitor-path [aria-current="step"]>span { background:var(--palette-blue-soft); border-color:#a9cddd; }
+.visitor-help { margin:18px 0 0; color:var(--palette-muted); font-size:14px; line-height:1.7; }
+.visitor-help a,.visitor-back { color:var(--palette-blue-ink); text-underline-offset:4px; }
+.visitor-back { display:inline-block; margin-bottom:22px; font-size:14px; }
+body[data-page="checkin"][data-recipient] #intro-screen .eyebrow { letter-spacing:.06em; }
+body[data-page="checkin"][data-recipient] #intro-screen .start-rights-card { padding:22px; }
+body[data-page="checkin"][data-recipient] #intro-screen .start-rights-grid { gap:16px; font-size:15px; line-height:1.6; }
+body[data-page="checkin"][data-recipient] #intro-screen .start-rights-grid span { display:block; }
+body[data-page="checkin"][data-recipient] #intro-screen .start-safety-note { color:var(--palette-ink); font-size:14px; line-height:1.65; }
+.visitor-time { display:flex; flex-wrap:wrap; align-items:center; gap:7px 14px; margin:22px 0 0; color:var(--palette-muted); font-size:14px; line-height:1.6; }
+.visitor-time strong { color:var(--palette-ink); font-weight:600; }
+.visitor-time>span+span { padding-left:14px; border-left:1px solid var(--palette-line); }
+.visitor-policy-nav { display:grid; gap:15px; margin:24px 0; padding:22px; border:1px solid var(--palette-line); border-radius:20px; background:var(--palette-card); }
+.visitor-policy-nav>strong { color:var(--palette-ink); font-size:15px; font-weight:600; }
+.visitor-policy-nav>div { display:flex; flex-wrap:wrap; gap:10px; }
+.visitor-policy-nav a { padding:10px 14px; border:1px solid var(--palette-line); border-radius:999px; color:var(--palette-blue-ink); background:var(--palette-blue-soft); font-size:14px; line-height:1.5; text-decoration:none; }
+body[data-page="terms"] .visitor-policy-nav a { background:var(--palette-iris-soft); color:var(--palette-iris-ink); }
+.visitor-policy-nav a:hover { text-decoration:underline; text-underline-offset:4px; }
+body.policy-page .policy-section[id] { scroll-margin-top:110px; }
+@media(max-width:680px) {
+  body.histi-home .home-hero { padding-top:34px; }
+  .visitor-benefits { gap:6px; margin-top:20px; }
+  .visitor-benefits li { padding:7px 10px; font-size:12px; }
+  .home-before summary { font-size:14px; }
+  .home-before details>p { font-size:14px; }
+  .visitor-path { gap:8px 13px; font-size:12px; }
+  .visitor-back { margin-bottom:18px; }
+  .visitor-time { gap:5px 12px; font-size:13px; }
+  body[data-page="checkin"][data-recipient] #intro-screen .start-rights-card { padding:18px; }
+  .visitor-policy-nav { padding:18px; }
+  .visitor-policy-nav a { font-size:13px; }
+}

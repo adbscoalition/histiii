@@ -31,6 +31,7 @@
   <link rel="stylesheet" href="/site-experience.css?v=controls-1">
   <link rel="stylesheet" href="/site-motion.css?v=controls-1">
   <link rel="stylesheet" href="/page-identities.css?v=pages-1">
+  <link rel="stylesheet" href="/visitor-guide.css?v=welcome-1">
   <link rel="stylesheet" href="/site-typography.css?v=1">
 </head>
 <body class="policy-page" data-page="terms">
@@ -60,6 +61,7 @@
         <p class="policy-date">Effective September 14, 2026</p>
       </header>
 
+      <nav class="visitor-policy-nav" aria-label="Terms quick links"><strong>Find what matters to you</strong><div><a href="#about-histi">What HISTI is</a><a href="#your-choice">Your choices</a><a href="#local-data">Your data</a><a href="#sharing">Sharing a result</a><a href="#availability">Changes and availability</a></div></nav>
       <div class="suite-privacy-reminder" role="note"><span>Private by design</span><p>Reflect on sharing without sharing the information itself. Your choices and progress stay in this browser. You can skip, stop, or reset.</p><a href="/privacy">How your privacy is protected →</a></div>
       <section class="policy-section">
         <h2>1. Using HISTI</h2>
@@ -68,7 +70,7 @@
         <p>You may stop using HISTI at any time. You may also reset locally stored check-in data from the check-in interface.</p>
       </section>
 
-      <section class="policy-section">
+      <section id="about-histi" class="policy-section">
         <h2>2. What HISTI is</h2>
         <p>HISTI is a self-guided reflection tool about information sharing. It helps you describe what you did or would share with a person or audience and summarizes those answers using HISTI’s scoring rules.</p>
         <p class="policy-callout"><strong>HISTI is not a diagnosis, legal opinion, safety certificate, professional risk assessment, personality test, or measure of your character.</strong> A result cannot determine whether a specific disclosure was safe, unsafe, necessary, lawful, helpful, or harmful.</p>
@@ -85,7 +87,7 @@
         </ul>
       </section>
 
-      <section class="policy-section">
+      <section id="your-choice" class="policy-section">
         <h2>4. Your choices and rights while using the check-in</h2>
         <ul>
           <li>You may refuse any question.</li>
@@ -96,14 +98,14 @@
         </ul>
       </section>
 
-      <section class="policy-section">
+      <section id="local-data" class="policy-section">
         <h2>5. Privacy and local data</h2>
         <p>Check-in answers, recipient labels, progress, and result snapshots are designed to stay in your browser. HISTI uses localStorage for resumable progress and result history. <strong>HISTI does not set or use cookies for the check-in.</strong></p>
         <p>You can export the HISTI data stored in your browser as JSON, copy it, view the raw export, or delete it using Reset/browser site-data controls.</p>
         <p>The production service uses a Content Security Policy with <code>connect-src 'none'</code> and <code>form-action 'none'</code>. See the <a href="/privacy">Privacy Policy</a> for the technical details and the limits of that statement, including ordinary static hosting requests.</p>
       </section>
 
-      <section class="policy-section">
+      <section id="sharing" class="policy-section">
         <h2>6. Sharing is your action</h2>
         <p>If you use the Share feature, your browser or operating system may hand the generated result to an app or destination you select. HISTI does not control what that destination does with information after you choose to share it.</p>
         <p>Review anything before sharing it. Do not share a result if doing so would reveal information you want to keep private.</p>
@@ -115,7 +117,7 @@
         <p>Do not represent a HISTI result as a professional diagnosis, legal determination, safety certification, or official judgment about another person.</p>
       </section>
 
-      <section class="policy-section">
+      <section id="availability" class="policy-section">
         <h2>8. Availability and changes</h2>
         <p>HISTI may be changed, updated, interrupted, or discontinued. Features, questions, scoring rules, wording, and presentation may change over time.</p>
         <p>Locally stored data may become incompatible with a future version or may be lost if your browser clears site data. If a result matters to you, keep your own copy.</p>
@@ -157,7 +159,7 @@
 
       <footer class="policy-footer">
         <span>HISTI · Terms of Service</span>
-        <div><a href="/">Home</a> · <a href="/checkin">Check-in</a> · <a href="/privacy">Privacy</a></div>
+        <div><a href="/">Home</a> · <a href="/checkin-page">Check-ins</a> · <a href="/privacy">Privacy</a></div>
       </footer>
     </main>
   </div>

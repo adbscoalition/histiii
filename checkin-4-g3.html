@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="/site-experience.css?v=controls-1">
   <link rel="stylesheet" href="/site-motion.css?v=controls-1">
   <link rel="stylesheet" href="/page-identities.css?v=pages-1">
+  <link rel="stylesheet" href="/visitor-guide.css?v=welcome-1">
   <link rel="stylesheet" href="/site-typography.css?v=1">
 </head>
 <body data-recipient="G3" data-page="checkin">
@@ -42,13 +43,15 @@
 
     <main id="intro-screen" class="screen landing-screen">
       <section class="start-card" aria-labelledby="intro-title">
-        <p class="eyebrow">Human Information-Sharing Transparency Index · Full assessment</p>
+        <a class="visitor-back" href="/checkin-4">← Think of someone else</a>
+        <p class="eyebrow">HISTI Full · A moment for you</p>
         <h1 id="intro-title">Sharing with <span id="intro-recipient"></span>.</h1>
         <p id="intro-description" class="start-lede"></p>
-        <div class="start-rights-card" role="note"><strong>How this check-in works</strong><div class="start-rights-grid">
-          <span>245 questions for this recipient.</span><span id="slide-count"></span>
-          <span>10–12 level questions or up to three yes/no questions per card.</span><span>Answers stay on this device.</span>
-        </div><p class="start-safety-note">Choose descriptions only. Never enter actual private information, credentials, codes, addresses, or medical details.</p></div>
+        <p class="visitor-time"><strong>55–70 minutes</strong><span>245 questions</span><span id="slide-count"></span></p>
+        <div class="start-rights-card" role="note"><strong>Before you begin</strong><div class="start-rights-grid">
+          <span>Keep this person in mind as you answer.</span><span>Choose the level that feels closest to you.</span>
+          <span>Leave a question blank if you need to.</span><span>Take breaks; return in this same browser.</span>
+        </div><p class="start-safety-note">You’re describing how much you’d share—not sharing the information itself. No names, passwords, codes, or real private details.</p></div>
         <div class="suite-privacy-reminder" role="note"><span>Private by design</span><p>Reflect on sharing without sharing the information itself. Your choices and progress stay in this browser. You can skip, stop, or reset.</p><a href="/privacy">How your privacy is protected →</a></div>
         <p class="start-disclaimer"><strong>HISTI is a reflection tool.</strong> The score is not fully accurate to true privacy and openness values.</p>
         <button id="start-btn" class="primary start-primary" type="button">Start HISTI Full</button>
@@ -76,13 +79,13 @@
 
     <main id="results-screen" class="screen results-screen" hidden>
       <section class="result-card" aria-labelledby="result-heading">
-        <div class="result-hero"><p class="eyebrow">Your disclosure preference</p><h1 id="result-heading" class="result-title" tabindex="-1"></h1>
+        <div class="result-hero"><p class="eyebrow">A snapshot of your sharing</p><h1 id="result-heading" class="result-title" tabindex="-1"></h1>
           <div class="result-spectrum" aria-label="HISTI spectrum from P100 private through N0 neutral to O100 open"><div class="spectrum-labels" aria-hidden="true"><span>Private</span><span>Open</span></div><div class="spectrum-track"><span class="spectrum-center" aria-hidden="true"></span><span id="result-marker" class="spectrum-marker" aria-hidden="true"></span></div><div class="spectrum-values" aria-hidden="true"><span>P100</span><span>N0</span><span>O100</span></div></div>
           <div class="result-score-line"><span>HISTI</span><strong id="result-score" class="score"></strong></div><p id="result-coverage" class="result-note muted"></p>
         </div>
-        <div class="subscore-section"><div class="subscore-heading"><h2>Information categories</h2><span>Each category is scored independently</span></div><div id="category-results" class="category-grid"></div></div>
-        <div class="result-disclaimer"><img src="/histi-logo.webp?v=facelift-1" alt="HISTI"><div><strong>WHAT THIS RESULT MEANS</strong><p>The score is not fully accurate to true privacy and openness values. Being more private or more open is not inherently better.</p></div></div>
-        <div class="result-actions"><button id="resume-btn" class="secondary" type="button">Review questions</button><a class="primary" href="/checkin-4">Choose another recipient</a></div>
+        <div class="subscore-section"><div class="subscore-heading"><h2>Your sharing by topic</h2><span>A closer look at each part of your check-in</span></div><div id="category-results" class="category-grid"></div></div>
+        <div class="result-disclaimer"><img src="/histi-logo.webp?v=facelift-1" alt="HISTI"><div><strong>A SNAPSHOT, NOT A LABEL</strong><p>The score is not fully accurate to true privacy and openness values. P means more private, O means more open, and N0 is the midpoint. Neither end is better.</p></div></div>
+        <div class="result-actions"><button id="resume-btn" class="secondary" type="button">Review questions</button><a class="primary" href="/checkin-4">Think of someone else</a></div>
         <div class="h4-reset-row"><button id="result-reset-btn" type="button">Reset this check-in</button></div>
       </section>
     </main>

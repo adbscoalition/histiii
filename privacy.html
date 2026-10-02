@@ -31,6 +31,7 @@
   <link rel="stylesheet" href="/site-experience.css?v=controls-1">
   <link rel="stylesheet" href="/site-motion.css?v=controls-1">
   <link rel="stylesheet" href="/page-identities.css?v=pages-1">
+  <link rel="stylesheet" href="/visitor-guide.css?v=welcome-1">
   <link rel="stylesheet" href="/site-typography.css?v=1">
 </head>
 <body class="policy-page" data-page="privacy">
@@ -60,13 +61,14 @@
         <p class="policy-date">Effective September 14, 2026</p>
       </header>
 
-      <div class="suite-privacy-reminder" role="note"><span>Private by design</span><p>Reflect on sharing without sharing the information itself. Your choices and progress stay in this browser. You can skip, stop, or reset.</p><a href="/privacy">How your privacy is protected →</a></div>
+      <nav class="visitor-policy-nav" aria-label="Privacy policy quick links"><strong>Find what matters to you</strong><div><a href="#your-answers">Where answers stay</a><a href="#hosting">What the host sees</a><a href="#delete-data">Reset your data</a><a href="#shared-devices">Using a shared device</a><a href="#privacy-checks">Check the privacy proof</a></div></nav>
+      <div class="suite-privacy-reminder" role="note"><span>Private by design</span><p>Reflect on sharing without sharing the information itself. Your choices and progress stay in this browser. You can skip, stop, or reset.</p><a href="/checkin-page">Explore the check-ins →</a></div>
       <section class="policy-section">
         <h2>1. Scope</h2>
         <p>This policy explains the privacy practices of the HISTI website and check-in at <code>www.histi.org</code>. It distinguishes information kept in your browser from ordinary technical information processed when a website is delivered over the internet.</p>
       </section>
 
-      <section class="policy-section">
+      <section id="your-answers" class="policy-section">
         <h2>2. Check-in data stays on your device</h2>
         <p>HISTI processes the check-in in your browser. The current app may store these items in localStorage so you can resume or review the check-in:</p>
         <ul>
@@ -91,7 +93,7 @@
         <p class="policy-callout"><strong>Server-retention policy for fill-in text: 0 minutes.</strong> If a current or future HISTI-controlled application handler ever receives content from a fill-in field, HISTI’s policy is to discard that field content immediately and not persist it in HISTI application storage. The current check-in does not send the field in the first place.</p>
       </section>
 
-      <section class="policy-section">
+      <section id="hosting" class="policy-section">
         <h2>5. What ordinary website hosting can see</h2>
         <p>Loading any website requires ordinary network requests for files such as HTML, JavaScript, CSS, the logo, and the static question catalogue. HISTI is hosted on Vercel, so hosting infrastructure may process technical request information such as:</p>
         <ul>
@@ -122,13 +124,13 @@
         <p>If those controls cannot be used, you can inspect the same local storage through your browser’s developer/site-storage tools.</p>
       </section>
 
-      <section class="policy-section">
+      <section id="delete-data" class="policy-section">
         <h2>8. Deleting your local HISTI data</h2>
         <p>Use <strong>Reset</strong> inside HISTI to remove the HISTI progress and saved-result keys from the current browser profile. As an alternative method, clear site data for <code>www.histi.org</code> using your browser settings.</p>
         <p>Because HISTI does not receive the check-in state, HISTI cannot remotely retrieve or delete data that exists only in your browser.</p>
       </section>
 
-      <section class="policy-section">
+      <section id="shared-devices" class="policy-section">
         <h2>9. Local retention</h2>
         <p>Local HISTI progress remains in the browser until you reset it, clear site data, or the browser/device removes it. Saved result history is limited by the app to the most recent 12 completed-result snapshots.</p>
         <p>Local browser storage is not a secure vault. Anyone with access to your unlocked browser profile/device may be able to inspect it. On a shared device, consider exporting what you want to keep and then resetting HISTI.</p>
@@ -170,7 +172,7 @@
         </ul>
       </section>
 
-      <section class="policy-section">
+      <section id="privacy-checks" class="policy-section">
         <h2>14. Privacy and security verification</h2>
         <p>The check-in includes a privacy-proof panel that checks its visible CSP, same-origin runtime resources, HISTI local-storage keys, and whether any cookies are visible to the page. You can also inspect the public source in the <a href="https://github.com/adbscoalition/histiii" rel="noopener noreferrer">HISTI repository</a>.</p>
         <p>No technical control can make a general-purpose browser or device perfectly secure. HISTI’s design reduces data transmission rather than promising absolute security.</p>
@@ -189,7 +191,7 @@
 
       <footer class="policy-footer">
         <span>HISTI · Privacy Policy</span>
-        <div><a href="/">Home</a> · <a href="/checkin">Check-in</a> · <a href="/terms">Terms</a></div>
+        <div><a href="/">Home</a> · <a href="/checkin-page">Check-ins</a> · <a href="/terms">Terms</a></div>
       </footer>
     </main>
   </div>
