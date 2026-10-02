@@ -2,10 +2,18 @@
   const root = document.documentElement;
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const isHome = root.hasAttribute('data-home-entry');
+  const HOME_HANDOFF = 'histi.navigation.home';
+  const HANDOFF_VALID_MS = 15000;
   let homeReturn = false;
   if (isHome) {
+    // Production intentionally sends no referrer. Consume one short-lived, answer-free handoff.
+    try {
+      const expires = Number(window.sessionStorage.getItem(HOME_HANDOFF));
+      window.sessionStorage.removeItem(HOME_HANDOFF);
+      homeReturn = expires > Date.now() && expires <= Date.now() + HANDOFF_VALID_MS;
+    } catch {}
     const navigation = window.performance?.getEntriesByType?.('navigation')?.[0];
-    homeReturn = navigation?.type === 'back_forward' || navigation?.type === 'reload';
+    homeReturn ||= navigation?.type === 'back_forward' || navigation?.type === 'reload';
     try { homeReturn ||= new URL(document.referrer).origin === window.location.origin; } catch {}
     if (homeReturn) root.classList.add('histi-home-return');
   }
@@ -17,6 +25,22 @@
   let secondFrame = 0;
   let entryTimer = 0;
   let cardGhost = null;
+  let outgoingHomeFlag = null;
+
+  function markHomeHandoff(url) {
+    if (!['/', '/index', '/index.html'].includes(url.pathname)) return;
+    try {
+      outgoingHomeFlag = String(Date.now() + HANDOFF_VALID_MS);
+      window.sessionStorage.setItem(HOME_HANDOFF, outgoingHomeFlag);
+    } catch {}
+  }
+
+  function clearHomeHandoff() {
+    try {
+      if (outgoingHomeFlag && window.sessionStorage.getItem(HOME_HANDOFF) === outgoingHomeFlag) window.sessionStorage.removeItem(HOME_HANDOFF);
+    } catch {}
+    outgoingHomeFlag = null;
+  }
 
   function expandCard(link) {
     if (!link.matches?.('.app-card[href]:not(.soon), .home-format[href], .h4-choice[href]')) return false;
@@ -56,7 +80,9 @@
     root.classList.remove('histi-page-enter');
   }
 
-  function reveal() {
+  function reveal(preserveHandoff = false) {
+    if (preserveHandoff === true) outgoingHomeFlag = null;
+    else clearHomeHandoff();
     clearTimeout(navigationTimer);
     clearTimeout(recoveryTimer);
     cancelAnimationFrame(firstFrame);
@@ -91,6 +117,7 @@
     if (!destination) return;
     clearTimeout(navigationTimer);
     try {
+      markHomeHandoff(new URL(destination));
       window.location.assign(destination);
       // Recover if a navigation is cancelled or the browser keeps this document.
       recoveryTimer = setTimeout(reveal, 1800);
@@ -119,7 +146,7 @@
     if (url.origin !== window.location.origin || !/^https?:$/.test(url.protocol)) return;
     if (url.pathname === window.location.pathname && url.search === window.location.search) return;
     if (/\.[^/]+$/.test(url.pathname) && !url.pathname.endsWith('.html')) return;
-    if (motion.matches || document.hidden) return;
+    if (motion.matches || document.hidden) { markHomeHandoff(url); return; }
     event.preventDefault();
     if (destination) return;
     clearEntry();
@@ -134,12 +161,12 @@
     navigationTimer = setTimeout(navigate, cardOpening ? 720 : 340);
   });
 
-  window.addEventListener('pagehide', () => { reveal(); clearEntry(); });
+  window.addEventListener('pagehide', () => { reveal(true); clearEntry(); });
   window.addEventListener('pageshow', event => { if (event.persisted) enter(true); });
   motion.addEventListener('change', () => {
     if (!motion.matches) return;
     if (destination) navigate();
-    reveal();
+    reveal(true);
     clearEntry();
   });
 })();

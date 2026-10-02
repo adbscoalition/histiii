@@ -4,21 +4,22 @@ import { readFileSync, existsSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 
 const read=file=>readFileSync(new URL(`../${file}`,import.meta.url),'utf8');
-const fixture=({home=true,hash='',reduced=false,referrer='',navigation='navigate'}={})=>{
+const fixture=({home=true,hash='',reduced=false,referrer='',navigation='navigate',storage=new Map(),storageBlocked=false,clock=100000,assignFails=false}={})=>{
   const classes=new Set(),timers=new Map(),frames=new Map(),documentEvents={},windowEvents={},motionEvents={};let id=0;
   const root={hasAttribute:name=>home&&name==='data-home-entry',classList:{contains:value=>classes.has(value),add:(...values)=>values.forEach(v=>classes.add(v)),remove:(...values)=>values.forEach(v=>classes.delete(v))}};
   const motion={matches:reduced,addEventListener:(name,fn)=>{motionEvents[name]=fn;}};
-  const location={pathname:home?'/':'/checkin-page',hash,href:`https://www.histi.org/${home?'':'checkin-page'}${hash}`,origin:'https://www.histi.org',assign(url){this.assigned=url;}};
+  const location={pathname:home?'/':'/checkin-page',hash,href:`https://www.histi.org/${home?'':'checkin-page'}${hash}`,origin:'https://www.histi.org',assign(url){if(assignFails)throw new Error('Navigation cancelled');this.assigned=url;}};
   const ghosts=[];
   const makeNode=()=>({children:[],style:{setProperty(name,value){this[name]=value;}},setAttribute(){},append(...nodes){this.children.push(...nodes);},remove(){ghosts.splice(ghosts.indexOf(this),1);}});
   const document={documentElement:root,referrer,readyState:'loading',hidden:false,body:{append:node=>ghosts.push(node)},createElement:makeNode,querySelectorAll:()=>[],addEventListener:(name,fn)=>{documentEvents[name]=fn;}};
-  const window={location,performance:{getEntriesByType:()=>[{type:navigation}]},innerWidth:1280,innerHeight:800,getComputedStyle:()=>({getPropertyValue:key=>key==='border-top-left-radius'?'28px':''}),matchMedia:()=>motion,addEventListener:(name,fn)=>{windowEvents[name]=fn;}};
-  const context={document,window,URL,setTimeout:(fn,ms)=>{const key=++id;timers.set(key,{fn,ms});return key;},clearTimeout:key=>timers.delete(key),requestAnimationFrame:fn=>{const key=++id;frames.set(key,fn);return key;},cancelAnimationFrame:key=>frames.delete(key)};
+  const sessionStorage={getItem(key){if(storageBlocked)throw new Error('Storage blocked');return storage.get(key)??null;},setItem(key,value){if(storageBlocked)throw new Error('Storage blocked');storage.set(key,value);},removeItem(key){if(storageBlocked)throw new Error('Storage blocked');storage.delete(key);}};
+  const window={location,sessionStorage,performance:{getEntriesByType:()=>[{type:navigation}]},innerWidth:1280,innerHeight:800,getComputedStyle:()=>({getPropertyValue:key=>key==='border-top-left-radius'?'28px':''}),matchMedia:()=>motion,addEventListener:(name,fn)=>{windowEvents[name]=fn;}};
+  const context={document,window,URL,Date:{now:()=>clock},setTimeout:(fn,ms)=>{const key=++id;timers.set(key,{fn,ms});return key;},clearTimeout:key=>timers.delete(key),requestAnimationFrame:fn=>{const key=++id;frames.set(key,fn);return key;},cancelAnimationFrame:key=>frames.delete(key)};
   runInNewContext(read('page-transitions.js'),context);
   const flushFrames=()=>{while(frames.size){const [key,fn]=frames.entries().next().value;frames.delete(key);fn();}};
   const fireTimer=ms=>{const [key,task]=[...timers].find(([,task])=>task.ms===ms)||[];assert.ok(task,`Expected ${ms}ms timer`);timers.delete(key);task.fn();};
   const ready=()=>{documentEvents.DOMContentLoaded({type:'DOMContentLoaded'});flushFrames();};
-  return{classes,timers,frames,documentEvents,windowEvents,motionEvents,motion,document,location,ready,fireTimer,ghosts,runIntro:()=>runInNewContext(read('home-intro.js'),context)};
+  return{classes,timers,frames,documentEvents,windowEvents,motionEvents,motion,document,location,storage,ready,fireTimer,ghosts,runIntro:()=>runInNewContext(read('home-intro.js'),context)};
 };
 
 test('the homepage remains the destination, with no welcome page or required enter action',()=>{
@@ -52,7 +53,7 @@ test('direct homepage entry never paints the navigation veil or locks the page',
   f.ready();assert.equal(f.classes.has('histi-url-covered'),false);
   assert.equal(f.classes.has('histi-url-motion'),true);assert.equal(f.classes.has('histi-page-enter'),true);
   f.fireTimer(900);assert.equal(f.classes.has('histi-page-enter'),false);assert.equal(f.timers.size,0);
-  assert.doesNotMatch(read('home-entry.css')+read('page-transitions.js'),/sessionStorage|localStorage|showModal|body\.style\.overflow/);
+  assert.doesNotMatch(read('home-entry.css')+read('page-transitions.js'),/localStorage|showModal|body\.style\.overflow/);
 });
 
 test('deep links and reduced motion show the real page immediately',()=>{
@@ -116,4 +117,49 @@ test('returning home skips the intro before paint; external arrivals remain elig
   }
   const f=fixture();f.ready();f.windowEvents.pagehide();f.windowEvents.pageshow({persisted:true});
   assert.equal(f.classes.has('histi-home-return'),true);assert.equal(f.classes.has('histi-url-covered'),false);assert.equal(f.frames.size+f.timers.size,0);
+});
+
+const homeClick=f=>f.documentEvents.click({button:0,target:{closest:()=>({href:'https://www.histi.org/',hasAttribute:()=>false,target:''})},preventDefault(){}});
+
+test('no-referrer home navigation consumes one short-lived answer-free handoff',()=>{
+  const outgoing=fixture({home:false});outgoing.ready();homeClick(outgoing);
+  assert.equal(outgoing.storage.size,0);outgoing.fireTimer(340);
+  assert.deepEqual([...outgoing.storage],[['histi.navigation.home','115000']]);
+  outgoing.windowEvents.pagehide();assert.equal(outgoing.storage.size,1);
+  const incoming=fixture({storage:outgoing.storage,clock:100500});
+  assert.equal(incoming.classes.has('histi-home-return'),true);assert.equal(incoming.classes.has('histi-url-covered'),true);
+  assert.equal(incoming.storage.size,0);incoming.runIntro();assert.equal(incoming.classes.has('histi-intro-pending'),false);
+  incoming.ready();assert.equal(incoming.classes.has('histi-url-covered'),false);
+  assert.equal(fixture({storage:incoming.storage}).classes.has('histi-home-return'),false);
+  const headers=JSON.parse(read('vercel.json')).headers.flatMap(rule=>rule.headers);
+  assert.ok(headers.some(header=>header.key==='Referrer-Policy'&&header.value==='no-referrer'));
+  assert.ok(headers.some(header=>header.key==='Content-Security-Policy'&&header.value.includes("connect-src 'none'")));
+  assert.match(read('privacy.html'),/single-use navigation flag[\s\S]*contains no answers or personal details/);
+});
+
+test('invalid handoffs and blocked storage do not block a fresh arrival',()=>{
+  for(const flag of ['99999','100000','115001','NaN','https://example.org/']) {
+    const f=fixture({storage:new Map([['histi.navigation.home',flag]])});
+    assert.equal(f.classes.has('histi-home-return'),false);assert.equal(f.storage.size,0);
+  }
+  const f=fixture({storageBlocked:true});f.ready();assert.equal(f.classes.has('histi-url-covered'),false);
+  const outgoing=fixture({home:false,storageBlocked:true});outgoing.ready();homeClick(outgoing);outgoing.fireTimer(340);
+  assert.equal(outgoing.location.assigned,'https://www.histi.org/');
+});
+
+test('cancelled navigation clears its handoff; reduced motion preserves a native home link',()=>{
+  for(const assignFails of [false,true]) {
+    const f=fixture({home:false,assignFails});f.ready();homeClick(f);f.fireTimer(340);
+    if(!assignFails){assert.equal(f.storage.size,1);f.fireTimer(1800);}
+    assert.equal(f.storage.size,0);assert.equal(f.classes.has('histi-url-covered'),false);
+  }
+  const f=fixture({home:false,reduced:true});f.ready();homeClick(f);
+  assert.equal(f.storage.size,1);assert.equal(f.timers.size,0);f.windowEvents.pagehide();assert.equal(f.storage.size,1);
+  const incoming=fixture({storage:f.storage,reduced:true});incoming.runIntro();incoming.ready();
+  assert.equal(incoming.classes.has('histi-home-return'),true);assert.equal(incoming.classes.has('histi-intro-pending'),false);assert.equal(incoming.storage.size,0);
+  for(const options of [{ctrlKey:true},{button:1},{defaultPrevented:true}]) {
+    const other=fixture({home:false});other.ready();
+    other.documentEvents.click({button:0,...options,target:{closest:()=>({href:'https://www.histi.org/',hasAttribute:()=>false,target:''})},preventDefault(){}});
+    assert.equal(other.storage.size,0);assert.equal(other.location.assigned,undefined);
+  }
 });
