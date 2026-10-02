@@ -19,10 +19,16 @@ body[data-page="formats"] .selector-heading .visitor-description { margin:20px 0
 .visitor-help a,.visitor-back { color:var(--palette-blue-ink); text-underline-offset:4px; }
 .visitor-back { display:inline-block; margin-bottom:22px; font-size:14px; }
 body[data-page="checkin"][data-recipient] #intro-screen .eyebrow { letter-spacing:.06em; }
+body[data-page="checkin"][data-recipient] #intro-screen .start-card { padding:32px!important; }
+body[data-page="checkin"][data-recipient] #intro-screen #intro-title { max-width:none; margin:18px 0; font-size:clamp(32px,4.2vw,48px)!important; line-height:1.2; }
 body[data-page="checkin"][data-recipient] #intro-screen .start-rights-card { padding:22px; }
 body[data-page="checkin"][data-recipient] #intro-screen .start-rights-grid { gap:16px; font-size:15px; line-height:1.6; }
 body[data-page="checkin"][data-recipient] #intro-screen .start-rights-grid span { display:block; }
 body[data-page="checkin"][data-recipient] #intro-screen .start-safety-note { color:var(--palette-ink); font-size:14px; line-height:1.65; }
+body[data-page="checkin"][data-recipient] #intro-screen .suite-privacy-reminder { display:flex; flex-wrap:wrap; align-items:center; gap:8px 16px; padding:16px; }
+body[data-page="checkin"][data-recipient] #intro-screen .suite-privacy-reminder>span { flex-basis:100%; }
+body[data-page="checkin"][data-recipient] #intro-screen .suite-privacy-reminder p { flex:1 1 40ch; margin:0; }
+body[data-page="checkin"][data-recipient] #intro-screen .suite-privacy-reminder a { margin-left:auto; }
 .visitor-time { display:flex; flex-wrap:wrap; align-items:center; gap:7px 14px; margin:22px 0 0; color:var(--palette-muted); font-size:14px; line-height:1.6; }
 .visitor-time strong { color:var(--palette-ink); font-weight:600; }
 .visitor-time>span+span { padding-left:14px; border-left:1px solid var(--palette-line); }
@@ -43,6 +49,7 @@ body.policy-page .policy-section[id] { scroll-margin-top:110px; }
   .visitor-back { margin-bottom:18px; }
   .visitor-time { gap:5px 12px; font-size:13px; }
   body[data-page="checkin"][data-recipient] #intro-screen .start-rights-card { padding:18px; }
+  body[data-page="checkin"][data-recipient] #intro-screen .start-card { padding:24px!important; }
   .visitor-policy-nav { padding:18px; }
   .visitor-policy-nav a { font-size:13px; }
 }
