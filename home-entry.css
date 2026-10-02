@@ -1,30 +1,30 @@
-/* The actual homepage is the entrance. One finite, composited reveal; no gate. */
+/* Begin the homepage's slide-in only when the introductory curtains open. */
 body.histi-home .home-hero h1 { animation:none; }
 body.histi-home .hero-entry-line { display:inline-block; }
 body.histi-home .home-hero :is(.home-eyebrow,.hero-lede,.home-actions,.hero-note),
 body.histi-home .home-result { animation:none; }
 
 @media(prefers-reduced-motion:no-preference) {
-  html[data-home-entry]:not(.histi-home-deep-link) body.histi-home .site-header { animation:home-entry-fade 450ms ease-out backwards; }
-  html[data-home-entry]:not(.histi-home-deep-link) body.histi-home .hero-copy>.home-eyebrow { animation:home-entry-rise 650ms var(--home-ease) backwards; }
-  html[data-home-entry]:not(.histi-home-deep-link) body.histi-home .hero-entry-line { animation:home-entry-line 850ms var(--home-ease) backwards; }
-  html[data-home-entry]:not(.histi-home-deep-link) body.histi-home span.hero-entry-line:nth-of-type(1) { animation-delay:80ms; }
-  html[data-home-entry]:not(.histi-home-deep-link) body.histi-home span.hero-entry-line:nth-of-type(2) { animation-delay:160ms; }
-  html[data-home-entry]:not(.histi-home-deep-link) body.histi-home em.hero-entry-line { animation-delay:240ms; }
-  html[data-home-entry]:not(.histi-home-deep-link) body.histi-home .hero-lede { animation:home-entry-rise 700ms 300ms var(--home-ease) backwards; }
-  html[data-home-entry]:not(.histi-home-deep-link) body.histi-home .visitor-benefits { animation:home-entry-rise 650ms 380ms var(--home-ease) backwards; }
-  html[data-home-entry]:not(.histi-home-deep-link) body.histi-home .hero-copy>.home-actions { animation:home-entry-rise 650ms 460ms var(--home-ease) backwards; }
-  html[data-home-entry]:not(.histi-home-deep-link) body.histi-home .hero-note { animation:home-entry-rise 650ms 540ms var(--home-ease) backwards; }
-  html[data-home-entry]:not(.histi-home-deep-link) body.histi-home .home-result { animation:home-entry-card 900ms 260ms var(--home-ease) backwards; }
-  html[data-home-entry]:not(.histi-home-deep-link) body.histi-home .hero-baseline { animation:home-entry-fade 650ms 600ms ease-out backwards; }
+  html.histi-home-arriving:not(.histi-home-deep-link) body.histi-home .site-header { animation:home-entry-fade 600ms 150ms ease-out backwards; }
+  html.histi-home-arriving:not(.histi-home-deep-link) body.histi-home .hero-copy>.home-eyebrow { animation:home-entry-rise 650ms var(--home-ease) backwards; }
+  html.histi-home-arriving:not(.histi-home-deep-link) body.histi-home .hero-entry-line { animation:home-entry-line 850ms var(--home-ease) backwards; }
+  html.histi-home-arriving:not(.histi-home-deep-link) body.histi-home span.hero-entry-line:nth-of-type(1) { animation-delay:80ms; }
+  html.histi-home-arriving:not(.histi-home-deep-link) body.histi-home span.hero-entry-line:nth-of-type(2) { animation-delay:160ms; }
+  html.histi-home-arriving:not(.histi-home-deep-link) body.histi-home em.hero-entry-line { animation-delay:240ms; }
+  html.histi-home-arriving:not(.histi-home-deep-link) body.histi-home .hero-lede { animation:home-entry-rise 700ms 300ms var(--home-ease) backwards; }
+  html.histi-home-arriving:not(.histi-home-deep-link) body.histi-home .visitor-benefits { animation:home-entry-rise 650ms 380ms var(--home-ease) backwards; }
+  html.histi-home-arriving:not(.histi-home-deep-link) body.histi-home .hero-copy>.home-actions { animation:home-entry-rise 650ms 460ms var(--home-ease) backwards; }
+  html.histi-home-arriving:not(.histi-home-deep-link) body.histi-home .hero-note { animation:home-entry-rise 650ms 540ms var(--home-ease) backwards; }
+  html.histi-home-arriving:not(.histi-home-deep-link) body.histi-home .home-result { animation:home-entry-card 900ms 260ms var(--home-ease) backwards; }
+  html.histi-home-arriving:not(.histi-home-deep-link) body.histi-home .hero-baseline { animation:home-entry-fade 650ms 600ms ease-out backwards; }
 }
 
 @keyframes home-entry-fade { from { opacity:0; } to { opacity:1; } }
 @keyframes home-entry-rise { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
-@keyframes home-entry-line { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:none; } }
-@keyframes home-entry-card { from { opacity:0; transform:translateY(22px) scale(.985); } to { opacity:1; transform:none; } }
+@keyframes home-entry-line { from { opacity:0; transform:translateX(-32px) translateY(12px); } to { opacity:1; transform:none; } }
+@keyframes home-entry-card { from { opacity:0; transform:translateX(40px) translateY(20px) scale(.985); } to { opacity:1; transform:none; } }
 
-/* Focus never waits for an animation. The page remains usable from first paint. */
+/* Keyboard focus never waits for the content's slide-in. */
 body.histi-home .home-hero :is(.home-actions,.home-result):focus-within { animation:none!important; }
 html.histi-home-deep-link body.histi-home .home-hero :is(.home-eyebrow,h1,.hero-lede,.home-actions,.hero-note,.home-result,.hero-entry-line) { animation:none; }
 @media(prefers-reduced-motion:reduce) { body.histi-home :is(.site-header,.hero-entry-line,.hero-copy>*,.home-result,.hero-baseline) { animation:none!important; } }

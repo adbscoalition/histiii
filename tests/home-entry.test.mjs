@@ -18,7 +18,7 @@ const fixture=({home=true,hash='',reduced=false}={})=>{
   return{classes,timers,frames,documentEvents,windowEvents,motionEvents,motion,document,location,ready,fireTimer};
 };
 
-test('the actual homepage is the entrance, with no welcome screen or extra action',()=>{
+test('the homepage remains the destination, with no welcome page or required enter action',()=>{
   const html=read('index.html');
   assert.match(html,/<html lang="en" data-home-entry>/);
   assert.match(html,/id="hero-title"/);
@@ -27,6 +27,7 @@ test('the actual homepage is the entrance, with no welcome screen or extra actio
   assert.doesNotMatch(html,/histi-welcome|home-welcome|data-welcome|Enter HISTI|Skip welcome/);
   for(const file of ['home-welcome.css','home-welcome.js','tests/home-welcome.test.mjs']) assert.equal(existsSync(new URL(`../${file}`,import.meta.url)),false);
   assert.ok(html.indexOf('home-entry.css')<html.indexOf('site-typography.css'));
+  assert.match(read('home-entry.css'),/html\.histi-home-arriving:not\(\.histi-home-deep-link\)/);
   for(const font of ['idiqlat/regular','tiro-gurmukhi/regular','instrument-sans/variable']) assert.ok(html.includes(`rel="preload" href="/fonts/${font}.woff2"`));
 });
 
