@@ -129,7 +129,7 @@ test('one reset dialog defaults to cancel and only explicit confirmation returns
 test('shared animation coverage is finite, accessible, and does not move slider hit areas', () => {
   for (const file of readdirSync(root).filter(file => file.endsWith('.html'))) {
     const html = read(file);
-    const motion = html.indexOf('/site-motion.css?v=motion-1');
+    const motion = html.indexOf('/site-motion.css?v=controls-1');
     assert.ok(motion > html.indexOf('/site-experience.css') && motion < html.indexOf('/site-typography.css'), file);
   }
   const css = read('site-motion.css');

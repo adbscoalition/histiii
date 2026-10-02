@@ -29,6 +29,27 @@ test('color roles span landing sections, assessment headers, and results', () =>
   assert.doesNotMatch(css, /#272438|#655f73|#ded6e8|#f6f1fb/);
 });
 
+test('blue controls keep dark text readable in default and hover states', () => {
+  const controls = Object.fromEntries([...css.matchAll(/--control-([\w-]+): (#[\da-f]{6});/g)].map(match => [match[1], match[2]]));
+  for (const surface of ['fill', 'hover', 'soft']) assert.ok(contrast(controls.ink, controls[surface]) >= 4.5, `control text on ${surface}`);
+  assert.ok(contrast(controls.border, tokens.card) >= 3, 'control boundary on paper');
+  assert.match(css, /--suite-accent: var\(--control-fill\)/);
+  assert.match(css, /\.h4-slider-thumb \{ background:var\(--control-fill\)/);
+  assert.match(css, /\.h4-slider-fill \{ background:var\(--control-soft\)/);
+  assert.match(css, /\.sample-level \.sample-selected \{ background:var\(--control-fill\)/);
+  assert.match(css, /\.histi-header \.histi-start,\.home-button-primary \{ background:var\(--control-fill\)/);
+  assert.match(readFileSync(new URL('../site-motion.css', import.meta.url), 'utf8'), /\.suite-reset-actions \.primary \{ background: var\(--control-fill\)/);
+  assert.doesNotMatch(css, /\.h4-slider-thumb \{ background:var\(--palette-sun\)/);
+});
+
+test('start cards override old pale text and dark hover colors', () => {
+  assert.match(css, /\.start-rights-grid,\.start-rights-grid span,\.rights-card li,\.rights-card strong,\.boundary-rights ul\) \{ color:var\(--palette-ink\)!important/);
+  assert.match(css, /\.h4-switch a:hover \{ background:var\(--control-soft\)/);
+  assert.match(css, /\.home-format\.full-format,\.app-card\.available\.full \{ background:var\(--control-soft\)/);
+  assert.match(css, /\.start-rights-card,\.rights-card\) \{ background:var\(--palette-blue-soft\)!important/);
+  assert.match(css, /\.start-rights-grid span::before \{ color:var\(--palette-blue-ink\)!important/);
+});
+
 test('decorative pigments remain exactly three bounded transform layers', () => {
   const motion = readFileSync(new URL('../site-color-motion.css', import.meta.url), 'utf8');
   assert.match(motion, /background:#ffb98455/);
