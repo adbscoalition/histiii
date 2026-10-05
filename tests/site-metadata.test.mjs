@@ -31,7 +31,7 @@ test('public pages have unique, consistent canonical and social metadata', () =>
     assert.ok(head.includes(`<meta property="og:url" content="${urlFor(page)}">`));
     assert.ok(head.includes(`<meta property="og:title" content="${title}">`));
     assert.ok(head.includes(`<meta name="twitter:title" content="${title}">`));
-    assert.doesNotMatch(head, /histi\.ocharlotted\.com/);
+    assert.doesNotMatch(head.replace(/<script type="application\/ld\+json"[\s\S]*?<\/script>/g, ''), /histi\.ocharlotted\.com/);
     assert.doesNotMatch(body, /application\/ld\+json|histi-site-definitions|histi-page-metadata/);
     const data = metadata(head);
     assert.equal(data['@context'], 'https://schema.org');
@@ -57,7 +57,7 @@ test('definitions describe the real current test, not an invented validated asse
   assert.equal(entity('histi-120').creativeWorkStatus, 'Temporarily paused');
   assert.match(entity('histi-120').description, /temporarily unavailable/);
   const glossary = entity('definitions').hasDefinedTerm;
-  const codes = glossary.filter(term => term.termCode);
+  const codes = glossary.filter(term => term.termCode in CATEGORY_META);
   assert.deepEqual(codes.map(term => term.termCode), Object.keys(CATEGORY_META));
   codes.forEach(term => {
     assert.equal(term.name, CATEGORY_META[term.termCode].label);
@@ -72,6 +72,47 @@ test('definitions describe the real current test, not an invented validated asse
     assert.equal(data.name, `${recipient.label} | HISTI Full`);
     assert.match(data.description, /rather than real private details/);
     assert.match(data.description, /The score is not fully accurate/);
+  }
+});
+
+test('identity metadata disambiguates HISTI without treating other names as aliases', () => {
+  const website = entity('website');
+  assert.equal(website.name, 'HISTI');
+  assert.equal(website.alternateName, 'Human Information-Sharing Transparency Index');
+  assert.equal(website.identifier, 'HISTI — Human Information-Sharing Transparency Index');
+  assert.deepEqual(website.sameAs, ['https://histi.org/', 'https://histi.ocharlotted.com/']);
+  const clarification = website.disambiguatingDescription;
+  assert.match(clarification, /H-I-S-T-I/);
+  assert.match(clarification, /canonical URL https:\/\/www\.histi\.org\//);
+  assert.match(clarification, /not HiSET \(the high-school equivalency test\)/);
+  assert.match(clarification, /spelling hiset is not HISTI/);
+  assert.match(clarification, /not histio/);
+  assert.match(clarification, /not the Histiocytosis Association/);
+  assert.match(clarification, /histio\.org is a different website and is not a HISTI domain/);
+  assert.match(clarification, /not a medical or histiocytosis resource/);
+  for (const node of graph) {
+    const identityFields = JSON.stringify([node.name, node.alternateName, node.identifier, node.url, node.sameAs]);
+    assert.doesNotMatch(identityFields, /hiset|histio\.org|Histiocytosis Association/i);
+  }
+  for (const field of ['description', 'og:description', 'twitter:description']) {
+    const value = home.match(new RegExp(`<meta (?:name|property)="${field}" content="([^"]+)"`))[1];
+    assert.match(value, /HISTI at histi\.org: Human Information-Sharing Transparency Index/);
+    assert.match(value, /not HiSET, Histio, or Histiocytosis Association/);
+    assert.ok(value.length <= 160, 'keep the clarification short enough for typical snippets');
+  }
+  const glossaryTerm = entity('definitions').hasDefinedTerm.find(term => term.name === 'HISTI');
+  assert.equal(glossaryTerm.termCode, 'HISTI');
+  assert.match(glossaryTerm.disambiguatingDescription, /H-I-S-T-I/);
+  assert.match(entity('full-test').disambiguatingDescription, /not an academic equivalency exam or a medical assessment/);
+  assert.doesNotMatch(home.split('</head>')[1], /HiSET|hiset|histio\.org|Histiocytosis Association/);
+  for (const page of pages.filter(page => page !== 'index')) {
+    const identity = metadata(read(`${page}.html`)).isPartOf;
+    assert.equal(identity['@type'], 'WebSite');
+    assert.equal(identity.name, website.name);
+    assert.equal(identity.alternateName, website.alternateName);
+    assert.equal(identity.url, website.url);
+    assert.match(identity.disambiguatingDescription, /H-I-S-T-I/);
+    assert.match(identity.disambiguatingDescription, /not an academic equivalency exam or a medical resource/);
   }
 });
 
