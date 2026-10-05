@@ -2,6 +2,13 @@
   const root = document.documentElement;
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const isHome = root.hasAttribute('data-home-entry');
+  const browserNavigation = window.navigation;
+  const loadType = window.performance?.getEntriesByType?.('navigation')?.[0]?.type;
+  const HISTORY_CURSOR = 'histi.navigation.cursor';
+  const HISTORY_ENTRY = '__histiTransitionEntry';
+  const trackedDirection = trackHistoryEntry(loadType === 'back_forward');
+  let historyDirection = traversalDirection(browserNavigation?.activation) || trackedDirection;
+  let nativeHistory = null;
   const HOME_HANDOFF = 'histi.navigation.home';
   const HANDOFF_VALID_MS = 15000;
   let homeReturn = false;
@@ -12,8 +19,7 @@
       window.sessionStorage.removeItem(HOME_HANDOFF);
       homeReturn = expires > Date.now() && expires <= Date.now() + HANDOFF_VALID_MS;
     } catch {}
-    const navigation = window.performance?.getEntriesByType?.('navigation')?.[0];
-    homeReturn ||= navigation?.type === 'back_forward' || navigation?.type === 'reload';
+    homeReturn ||= loadType === 'back_forward' || loadType === 'reload' || browserNavigation?.activation?.navigationType === 'traverse';
     try { homeReturn ||= new URL(document.referrer).origin === window.location.origin; } catch {}
     if (homeReturn) root.classList.add('histi-home-return');
   }
@@ -26,6 +32,42 @@
   let entryTimer = 0;
   let cardGhost = null;
   let outgoingHomeFlag = null;
+
+  function traversalDirection(activation) {
+    if (activation?.navigationType !== 'traverse') return null;
+    const from = activation.from?.index, to = activation.entry?.index;
+    if (Number.isInteger(from) && Number.isInteger(to) && from >= 0 && to >= 0 && from !== to) return to < from ? 'back' : 'forward';
+    // Some engines expose page activation but not the Navigation API entry list.
+    try {
+      const previous = activation.from?.getState?.()?.[HISTORY_ENTRY];
+      const next = activation.entry?.getState?.()?.[HISTORY_ENTRY];
+      if (Number.isSafeInteger(previous) && Number.isSafeInteger(next) && previous !== next) return next < previous ? 'back' : 'forward';
+    } catch {}
+    return null;
+  }
+
+  function trackHistoryEntry(traversal) {
+    try {
+      const state = window.history.state;
+      // Preserve other applications' state, including non-object state. Never push an entry.
+      if (state !== null && (typeof state !== 'object' || Array.isArray(state))) return null;
+      const cursor = Number(window.sessionStorage.getItem(HISTORY_CURSOR));
+      const previous = Number.isSafeInteger(cursor) && cursor > 0 && cursor < 1e9 ? cursor : 0;
+      let current = state?.[HISTORY_ENTRY];
+      if (!Number.isSafeInteger(current) || current < 1 || current >= 1e9) {
+        current = previous + 1;
+        window.history.replaceState({ ...state, [HISTORY_ENTRY]: current }, '');
+      }
+      window.sessionStorage.setItem(HISTORY_CURSOR, String(current));
+      return traversal && previous && current !== previous ? current < previous ? 'back' : 'forward' : null;
+    } catch { return null; }
+  }
+
+  function clearNativeHistory() {
+    nativeHistory?.skipTransition();
+    nativeHistory = null;
+    root.classList.remove('histi-native-back', 'histi-native-forward');
+  }
 
   function markHomeHandoff(url) {
     if (!['/', '/index', '/index.html'].includes(url.pathname)) return;
@@ -90,7 +132,7 @@
     destination = null;
     cardGhost?.remove();
     cardGhost = null;
-    root.classList.remove('histi-url-covered', 'histi-url-leaving', 'histi-url-card');
+    root.classList.remove('histi-url-covered', 'histi-url-leaving', 'histi-url-card', 'histi-refresh');
   }
 
   function enter(restored = false) {
@@ -101,11 +143,18 @@
       return;
     }
     if (motion.matches) return;
+    if (nativeHistory) return;
+    if (loadType === 'reload') {
+      root.classList.add('histi-url-motion', 'histi-refresh', 'histi-url-covered');
+      recoveryTimer = setTimeout(reveal, 700);
+      return;
+    }
     if (!isHome || homeReturn) root.classList.add('histi-url-covered');
     // Let the destination paint behind the same veil before fading it away.
     firstFrame = requestAnimationFrame(() => {
       secondFrame = requestAnimationFrame(() => {
         reveal();
+        if (nativeHistory) return;
         root.classList.add('histi-page-enter');
         entryTimer = setTimeout(clearEntry, 900);
       });
@@ -132,6 +181,7 @@
     root.classList.add('histi-url-motion');
     if (!isHome || homeReturn) {
       root.classList.add('histi-url-covered');
+      if (loadType === 'reload') root.classList.add('histi-refresh');
       recoveryTimer = setTimeout(reveal, 1500);
     }
   }
@@ -161,12 +211,47 @@
     navigationTimer = setTimeout(navigate, cardOpening ? 720 : 340);
   });
 
-  window.addEventListener('pagehide', () => { reveal(true); clearEntry(); });
-  window.addEventListener('pageshow', event => { if (event.persisted) enter(true); });
+  window.addEventListener('pageswap', event => {
+    const direction = traversalDirection(event.activation);
+    if (!event.viewTransition) return;
+    if (!direction || motion.matches || document.hidden) { event.viewTransition.skipTransition(); return; }
+    reveal(true); clearEntry();
+    root.classList.add(`histi-native-${direction}`);
+  });
+  window.addEventListener('pagereveal', event => {
+    const direction = traversalDirection(browserNavigation?.activation) || historyDirection;
+    if (!event.viewTransition) return;
+    if (!direction || motion.matches || document.hidden) { event.viewTransition.skipTransition(); return; }
+    clearNativeHistory(); reveal(); clearEntry();
+    const transition = event.viewTransition;
+    nativeHistory = transition;
+    root.classList.add('histi-url-motion', `histi-native-${direction}`);
+    const finish = () => {
+      if (nativeHistory !== transition) return;
+      nativeHistory = null;
+      root.classList.remove('histi-native-back', 'histi-native-forward');
+    };
+    transition.finished.then(finish, finish);
+  });
+  window.addEventListener('pagehide', () => { reveal(true); clearEntry(); clearNativeHistory(); });
+  window.addEventListener('pageshow', event => {
+    if (!event.persisted) return;
+    const tracked = trackHistoryEntry(true);
+    historyDirection = traversalDirection(browserNavigation?.activation) || tracked;
+    enter(true);
+  });
+  browserNavigation?.addEventListener('navigate', event => {
+    // Native reload cannot be intercepted or delayed. Start its fade while the browser loads.
+    if (event.navigationType !== 'reload' || motion.matches || document.hidden) return;
+    clearEntry(); clearNativeHistory();
+    root.classList.add('histi-url-motion', 'histi-refresh', 'histi-url-covered');
+    clearTimeout(recoveryTimer);
+    recoveryTimer = setTimeout(reveal, 1500);
+  });
   motion.addEventListener('change', () => {
     if (!motion.matches) return;
     if (destination) navigate();
     reveal(true);
-    clearEntry();
+    clearEntry(); clearNativeHistory();
   });
 })();

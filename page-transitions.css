@@ -1,4 +1,21 @@
 /* Bounded, composited handoffs; no blur, particles, or animation loops. */
+@view-transition { navigation:auto; }
+/* The browser owns both snapshots; they are released after this single handoff. */
+html::view-transition {
+  background:url('/histi-logo.webp?v=facelift-1') center / 118px auto no-repeat,
+    radial-gradient(ellipse 102px 74px at center,#27668e 99%,transparent 100%),
+    radial-gradient(ellipse at 8% 90%,#bce6fb 0,transparent 50%),
+    radial-gradient(ellipse at 92% 8%,#ffd3e1 0,transparent 52%),#fff8ef;
+}
+html:is(.histi-native-back,.histi-native-forward)::view-transition-group(root) { animation:none; }
+html:is(.histi-native-back,.histi-native-forward)::view-transition-image-pair(root) { isolation:auto; }
+html:is(.histi-native-back,.histi-native-forward)::view-transition-old(root) { mix-blend-mode:normal; z-index:2; }
+html.histi-native-back::view-transition-old(root) { animation:histi-browser-back 460ms cubic-bezier(.4,0,.2,1) both; }
+html.histi-native-forward::view-transition-old(root) { animation:histi-browser-forward 460ms cubic-bezier(.4,0,.2,1) both; }
+html:is(.histi-native-back,.histi-native-forward)::view-transition-new(root) { mix-blend-mode:normal; z-index:1; animation:histi-browser-reveal 380ms 520ms cubic-bezier(.22,1,.36,1) both; }
+@keyframes histi-browser-back { from { transform:none; } to { transform:translateX(100%); } }
+@keyframes histi-browser-forward { from { transform:none; } to { transform:translateX(-100%); } }
+@keyframes histi-browser-reveal { from { opacity:0; } to { opacity:1; } }
 html.histi-url-motion::after,html.histi-url-motion::before {
   content:""; position:fixed; inset:0; opacity:0; visibility:hidden; pointer-events:none;
   transition:opacity 420ms cubic-bezier(.22,1,.36,1),transform 500ms cubic-bezier(.22,1,.36,1),visibility 0s 500ms;
@@ -15,7 +32,11 @@ html.histi-url-motion::before {
   transform:translateY(14px);
 }
 html.histi-url-covered::after,html.histi-url-covered::before { opacity:1; visibility:visible; transform:none; transition-delay:0s; }
+/* Do not capture the ordinary fade veil into the incoming history snapshot. */
+html:is(.histi-native-back,.histi-native-forward)::before,html:is(.histi-native-back,.histi-native-forward)::after { opacity:0!important; visibility:hidden!important; animation:none!important; transition:none!important; }
 html.histi-url-leaving::after { pointer-events:auto; }
+html.histi-refresh.histi-url-covered::before,html.histi-refresh.histi-url-covered::after { animation:histi-refresh-cover 320ms ease both; }
+@keyframes histi-refresh-cover { from { opacity:0; transform:none; } to { opacity:1; transform:none; } }
 html.histi-url-card.histi-url-covered::after { animation:histi-card-veil 680ms ease both; }
 html.histi-url-card.histi-url-covered::before { animation:histi-card-brand 680ms ease both; }
 .histi-card-morph {
@@ -71,6 +92,8 @@ html body .h4-transition-line::after { background:#27668e; }
 .reset-transition.is-visible .reset-transition-symbol { animation:histi-reset-turn 800ms cubic-bezier(.22,1,.36,1) both; }
 @keyframes histi-reset-turn { from { opacity:0; transform:rotate(-130deg) scale(.8); } to { opacity:1; transform:none; } }
 @media(prefers-reduced-motion:reduce) {
+  @view-transition { navigation:none; }
+  html::view-transition-group(*),html::view-transition-old(*),html::view-transition-new(*) { animation:none!important; }
   html.histi-url-motion::before,html.histi-url-motion::after,.histi-card-morph { display:none; transition:none; animation:none!important; }
   html body .h4-transition,.reset-transition,html body .h4-transition-inner,.reset-transition-inner { transition:none; }
   .reset-transition-symbol { animation:none!important; }

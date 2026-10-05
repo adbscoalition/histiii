@@ -46,7 +46,7 @@ test('policy shortcuts point to real sections and back to the current check-in l
     const links = [...nav.matchAll(/href="#([^"]+)"/g)];
     assert.equal(links.length, page === 'terms.html' ? 6 : 5);
     for (const [,id] of links) assert.ok(html.includes(`<section id="${id}" class="policy-section">`));
-    assert.match(html, /Effective October 2, 2026/);
+    assert.match(html, page==='privacy.html' ? /Effective October 4, 2026/ : /Effective October 2, 2026/);
     assert.doesNotMatch(html, /href="\/checkin"/);
   }
 });
