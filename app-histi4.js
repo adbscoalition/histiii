@@ -2,6 +2,7 @@ import { FAMILIES, CATEGORY_META, RECIPIENTS } from './histi4-data.js';
 import { resetTransition } from './reset-transition.js?v=1';
 import { openDialog, closeDialog, confirmReset } from './site-dialogs.js?v=motion-1';
 import { makeSlides, remapLegacySlideIndex, calculate, rubricPoints, displayScore } from './histi4-core.js?v=pna-1';
+import { describeScore, describeTopic, coverageText, createResultReveal } from './histi4-results.js?v=1';
 
 const group = document.body.dataset.recipient;
 const recipient = RECIPIENTS[group];
@@ -49,6 +50,7 @@ let state = loadState();
 state.index = Math.max(0, Math.min(slides.length - 1, Number(state.index) || 0));
 function save() { try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch {} }
 function show(screen, scroll = true) {
+  resultReveal.cancel();
   state.screen = screen;
   $('intro-screen').hidden = screen !== 'intro';
   $('assessment-screen').hidden = screen !== 'assessment';
@@ -58,6 +60,11 @@ function show(screen, scroll = true) {
 }
 let transitionBusy = false;
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const resultReveal = createResultReveal(() => reducedMotion.matches || document.hidden || document.body.classList.contains('reduce-motion'));
+const revealResult = () => resultReveal.play(document.querySelector('#results-screen .result-card'));
+window.addEventListener('pagehide', resultReveal.cancel);
+document.addEventListener('visibilitychange', () => { if (document.hidden) resultReveal.cancel(); });
+reducedMotion.addEventListener('change', () => { if (reducedMotion.matches) resultReveal.cancel(); });
 const wait = ms => new Promise(resolve => window.setTimeout(resolve, ms));
 async function transitionPage(kicker, title, detail, render, focusId) {
   if (transitionBusy) return;
@@ -97,6 +104,7 @@ async function transitionPage(kicker, title, detail, render, focusId) {
       document.querySelector('.question-top').classList.add('h4-header-reveal');
       document.querySelectorAll('#question-list .h4-question').forEach(card => card.classList.add('h4-reveal'));
     }
+    if (rendered && focusId === 'result-heading') revealResult();
     if (rendered) $(focusId)?.focus({ preventScroll: true });
   }
 }
@@ -387,29 +395,53 @@ function renderSlide(scroll = true) {
 function resultCategory(key, result) {
   const meta = CATEGORY_META[key];
   const bucket = result.categories[key];
-  const card = el('div', 'category-card');
+  const reading = describeTopic(key, bucket);
+  const card = el('article', 'category-card');
+  card.setAttribute('aria-labelledby', `result-topic-${key}`);
   card.style.setProperty('--score-position', `${bucket.score === null ? 50 : (bucket.score + 100) / 2}%`);
   const top = el('div', 'category-card-top');
-  top.append(el('span', 'category-letter h4-category-letter', key), el('span', 'category-name', meta.label), el('strong', '', displayScore(bucket.score)));
-  const track = el('div', 'category-track'); track.setAttribute('aria-hidden', 'true'); track.append(el('span'));
+  const title = el('h3', 'category-name', meta.label); title.id = `result-topic-${key}`;
+  const score = el('strong', '', displayScore(bucket.score));
+  score.setAttribute('aria-label', bucket.score === null ? 'Not scored yet' : `${displayScore(bucket.score)}: ${reading.label}`);
+  top.append(el('span', 'category-letter h4-category-letter', key), title, score);
+  const track = el('div', 'category-track'); track.setAttribute('aria-hidden', 'true');
+  const marker = el('span'); marker.hidden = bucket.score === null; track.append(marker);
   const labels = el('div', 'v3-topic-labels'); labels.append(el('span', '', 'P100'), el('span', '', 'N0'), el('span', '', 'O100'));
-  card.append(top, track, labels, el('small', 'h4-category-summary', `${bucket.answered} of ${bucket.total} questions scored`));
+  labels.setAttribute('aria-hidden', 'true');
+  const prompt = el('p', 'result-topic-prompt'); prompt.append(el('span', '', 'A moment to reflect'), document.createTextNode(reading.prompt));
+  card.append(top, el('p', 'result-topic-scope', reading.scope), track, labels,
+    el('p', 'result-topic-label', reading.label), el('p', 'result-topic-description', reading.description), prompt,
+    el('small', 'h4-category-summary', `${bucket.answered} of ${bucket.total} questions scored`));
   return card;
 }
 function renderResults(completed = false) {
   if (completed) state.completed = true;
   const result = calculate(state.answers);
+  const reading = describeScore(result.score);
   show('results');
-  $('result-heading').textContent = `Your result for ${recipient.label.toLowerCase()}.`;
+  $('result-recipient').textContent = `Sharing with ${sharingWith}`;
+  $('result-state').textContent = completed ? 'End-of-check-in snapshot' : 'Current snapshot · You can keep going';
+  $('result-heading').textContent = reading.title;
+  $('result-description').textContent = reading.description;
+  $('result-context').textContent = `Read this in the context of sharing with ${sharingWith}. It describes this set of answers—not who you are.`;
   $('result-score').textContent = displayScore(result.score);
+  $('result-score').setAttribute('aria-label', result.score === null ? 'No score yet' : `${displayScore(result.score)}: ${reading.label}`);
+  $('result-score-meaning').textContent = reading.label;
   $('result-marker').hidden = result.score === null;
   $('result-marker').parentElement.style.setProperty('--score-position', `${result.score === null ? 50 : (result.score + 100) / 2}%`);
-  $('result-coverage').textContent = `${completed ? 'Completed' : 'Partial'} result · ${result.answered} of ${result.total} questions scored. “Prefer not to answer” counts as 1 point for that question. Unanswered, “I don’t know,” and “Not applicable” are excluded. Partial scores can change as you answer more.`;
+  $('result-coverage').textContent = coverageText(result);
+  $('result-early-note').textContent = result.answered === 0 ? 'No scored answers yet. Missing answers are not treated as neutral.'
+    : result.answered < result.total ? 'An incomplete snapshot. The score can change as more questions or areas are included.' : 'All questions are scored. This is still a reflection, not a precise measurement.';
+  const unknown = FAMILIES.filter(row => state.answers[row[0]]?.status === 'unknown').length;
+  const na = FAMILIES.filter(row => state.answers[row[0]]?.status === 'na').length;
+  const pna = FAMILIES.filter(row => state.answers[row[0]]?.status === 'pna').length;
+  $('result-scoring-detail').textContent = `This snapshot scores ${result.answered} of ${result.total} questions, including ${pna} “Prefer not to answer” response${pna === 1 ? '' : 's'}. ${unknown} “I don’t know” and ${na} “Not applicable” responses are excluded; ${result.total - result.answered - unknown - na} other questions are not scored.`;
   const fragment = document.createDocumentFragment();
   Object.keys(CATEGORY_META).forEach(key => fragment.append(resultCategory(key, result)));
   $('category-results').replaceChildren(fragment);
   $('resume-btn').textContent = completed ? 'Review questions' : 'Resume questions';
   document.title = `Result · ${recipient.label} | HISTI Full`;
+  if (!transitionBusy) revealResult();
 }
 async function reset() {
   if (transitionBusy) return;
@@ -550,6 +582,11 @@ $('partial-btn').addEventListener('click', () => { void transitionPage('Current 
 $('resume-btn').addEventListener('click', () => { state.completed = false; void transitionSlide(state.index); });
 $('reset-btn').addEventListener('click', reset);
 $('result-reset-btn').addEventListener('click', reset);
+const resultReadDialog = $('result-read-dialog');
+$('result-explain-btn').addEventListener('click', event => openDialog(resultReadDialog, event.currentTarget));
+$('result-read-close').addEventListener('click', () => { void closeDialog(resultReadDialog); });
+resultReadDialog.addEventListener('click', event => { if (event.target === resultReadDialog) void closeDialog(resultReadDialog); });
+$('result-replay-btn').addEventListener('click', revealResult);
 if (state.completed) renderResults(true);
 else if (state.started && state.screen !== 'intro') renderSlide();
 else show('intro');

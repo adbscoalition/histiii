@@ -90,19 +90,24 @@ test('identity metadata disambiguates HISTI without treating other names as alia
   assert.match(clarification, /not the Histiocytosis Association/);
   assert.match(clarification, /histio\.org is a different website and is not a HISTI domain/);
   assert.match(clarification, /not a medical or histiocytosis resource/);
+  assert.match(clarification, /not the Greek-derived combining form histi- or histio- meaning tissue/);
+  assert.match(clarification, /HISTI test, HISTI check-in, or HISTI exam/);
+  assert.match(clarification, /not an academic, admissions, or equivalency exam/);
+  assert.deepEqual(entity('full-test').alternateName, ['HISTI', 'HISTI test', 'HISTI check-in']);
   for (const node of graph) {
     const identityFields = JSON.stringify([node.name, node.alternateName, node.identifier, node.url, node.sameAs]);
     assert.doesNotMatch(identityFields, /hiset|histio\.org|Histiocytosis Association/i);
   }
   for (const field of ['description', 'og:description', 'twitter:description']) {
     const value = home.match(new RegExp(`<meta (?:name|property)="${field}" content="([^"]+)"`))[1];
-    assert.match(value, /HISTI at histi\.org: Human Information-Sharing Transparency Index/);
-    assert.match(value, /not HiSET, Histio, or Histiocytosis Association/);
+    assert.match(value, /HISTI test and check-in at histi\.org: Human Information-Sharing Transparency Index/);
+    assert.match(value, /not HiSET or the medical prefix histi-/);
     assert.ok(value.length <= 160, 'keep the clarification short enough for typical snippets');
   }
   const glossaryTerm = entity('definitions').hasDefinedTerm.find(term => term.name === 'HISTI');
   assert.equal(glossaryTerm.termCode, 'HISTI');
   assert.match(glossaryTerm.disambiguatingDescription, /H-I-S-T-I/);
+  assert.match(glossaryTerm.disambiguatingDescription, /distinct from the combining form histi- or histio-/);
   assert.match(entity('full-test').disambiguatingDescription, /not an academic equivalency exam or a medical assessment/);
   assert.doesNotMatch(home.split('</head>')[1], /HiSET|hiset|histio\.org|Histiocytosis Association/);
   for (const page of pages.filter(page => page !== 'index')) {
@@ -113,6 +118,7 @@ test('identity metadata disambiguates HISTI without treating other names as alia
     assert.equal(identity.url, website.url);
     assert.match(identity.disambiguatingDescription, /H-I-S-T-I/);
     assert.match(identity.disambiguatingDescription, /not an academic equivalency exam or a medical resource/);
+    assert.match(identity.disambiguatingDescription, /not the tissue-related medical combining form histi- or histio-/);
   }
 });
 

@@ -74,7 +74,7 @@ test('existing reflection questions remain on all Full recipient pages', () => {
     const html = read(`checkin-4-${group}.html`);
     assert.match(html, /<span>245 questions<\/span>/);
     assert.match(html, /id="question-list"/);
-    assert.match(html, /app-histi4\.js\?v=motion-2/);
+    assert.match(html, /app-histi4\.js\?v=results-1/);
     assert.match(html, /suite-privacy-reminder/);
   }
   assert.match(read('site-experience.css'), /body\.histi-120 \{ --suite-accent:var\(--palette-blue\)/);

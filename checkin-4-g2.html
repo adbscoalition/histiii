@@ -31,7 +31,7 @@
       "name": "HISTI",
       "alternateName": "Human Information-Sharing Transparency Index",
       "url": "https://www.histi.org/",
-      "disambiguatingDescription": "HISTI (H-I-S-T-I) at histi.org is a private information-sharing reflection check-in, not an academic equivalency exam or a medical resource."
+      "disambiguatingDescription": "HISTI (H-I-S-T-I) at histi.org is a private information-sharing reflection check-in, not an academic equivalency exam or a medical resource. HISTI here names the Human Information-Sharing Transparency Index test / check-in, not the tissue-related medical combining form histi- or histio-."
     },
     "about": { "@id": "https://www.histi.org/#full-test" },
     "audience": { "@type": "Audience", "audienceType": "People aged 13 and up" },
@@ -51,6 +51,7 @@
   <link rel="stylesheet" href="/site-motion.css?v=spring-1">
   <link rel="stylesheet" href="/page-identities.css?v=pages-1">
   <link rel="stylesheet" href="/visitor-guide.css?v=welcome-1">
+  <link rel="stylesheet" href="/histi4-results.css?v=1">
   <link rel="stylesheet" href="/site-typography.css?v=1">
 </head>
 <body data-recipient="G2" data-page="checkin">
@@ -111,15 +112,32 @@
 
     <main id="results-screen" class="screen results-screen" hidden>
       <section class="result-card" aria-labelledby="result-heading">
-        <div class="result-hero"><p class="eyebrow">A snapshot of your sharing</p><h1 id="result-heading" class="result-title" tabindex="-1"></h1>
-          <div class="result-spectrum" aria-label="HISTI spectrum from P100 private through N0 neutral to O100 open"><div class="spectrum-labels" aria-hidden="true"><span>Private</span><span>Open</span></div><div class="spectrum-track"><span class="spectrum-center" aria-hidden="true"></span><span id="result-marker" class="spectrum-marker" aria-hidden="true"></span></div><div class="spectrum-values" aria-hidden="true"><span>P100</span><span>N0</span><span>O100</span></div></div>
-          <div class="result-score-line"><span>HISTI</span><strong id="result-score" class="score"></strong></div><p id="result-coverage" class="result-note muted"></p>
+        <div class="result-hero">
+          <div class="result-topline"><span id="result-recipient" class="result-recipient"></span><span id="result-state" class="result-state"></span></div>
+          <div class="result-hero-grid">
+            <div class="result-introduction"><p class="eyebrow">Your sharing, in perspective</p><h1 id="result-heading" class="result-title" tabindex="-1"></h1><p id="result-description" class="result-description"></p><p id="result-context" class="result-context"></p></div>
+            <div class="result-score-panel">
+              <div class="result-score-line"><span>HISTI · Overall snapshot</span><strong id="result-score" class="score"></strong></div><p id="result-score-meaning" class="result-score-meaning"></p>
+              <div class="result-spectrum" aria-label="HISTI spectrum from P100 private through N0 neutral to O100 open"><div class="spectrum-labels" aria-hidden="true"><span>More private</span><span>More open</span></div><div class="spectrum-track"><span class="spectrum-center" aria-hidden="true"></span><span id="result-marker" class="spectrum-marker" aria-hidden="true"></span></div><div class="spectrum-values" aria-hidden="true"><span>P100</span><span>N0</span><span>O100</span></div></div>
+              <div class="result-counts"><p id="result-coverage" class="result-note"></p><p id="result-early-note" class="result-early-note"></p></div>
+            </div>
+          </div>
+          <div class="result-perspective"><p><strong>One person. One moment.</strong>This snapshot belongs to the relationship you had in mind, not every relationship in your life.</p><p><strong>No better end of the scale.</strong>More private and more open are descriptions, not grades. The context still matters.</p><p><strong>You keep the choice.</strong>A score is not advice to disclose anything. You decide what stays private.</p></div>
         </div>
-        <div class="subscore-section"><div class="subscore-heading"><h2>Your sharing by topic</h2><span>A closer look at each part of your check-in</span></div><div id="category-results" class="category-grid"></div></div>
-        <div class="result-disclaimer"><img src="/histi-logo.webp?v=facelift-1" alt="HISTI"><div><strong>A SNAPSHOT, NOT A LABEL</strong><p>The score is not fully accurate to true privacy and openness values. P means more private, O means more open, and N0 is the midpoint. Neither end is better.</p></div></div>
-        <div class="result-actions"><button id="resume-btn" class="secondary" type="button">Review questions</button><a class="primary" href="/checkin-4">Think of someone else</a></div>
+        <div class="subscore-section"><div class="subscore-heading"><div><h2>The detail behind your score.</h2><p>Different topics can feel different. Each area below has its own score, a short reading, and a question to reflect on.</p></div><button id="result-explain-btn" class="result-explain-button" type="button" aria-haspopup="dialog" aria-controls="result-read-dialog">How to read this <span aria-hidden="true">↗</span></button></div><div id="category-results" class="category-grid"></div></div>
+        <div class="result-disclaimer"><img src="/histi-logo.webp?v=facelift-1" alt="HISTI"><div><strong>A SNAPSHOT, NOT A LABEL</strong><p>The score is not fully accurate to true privacy and openness values. This is a reflection on your responses—not a diagnosis, a safety assessment, or a measure of your worth.</p></div></div>
+        <div class="result-next-steps"><div class="result-actions"><button id="resume-btn" class="secondary" type="button">Review questions</button><a class="primary" href="/checkin-4">Think of someone else</a></div><button id="result-replay-btn" class="result-replay" type="button"><span aria-hidden="true">↻</span> Replay reveal</button></div>
         <div class="h4-reset-row"><button id="result-reset-btn" type="button">Reset this check-in</button></div>
       </section>
+      <dialog id="result-read-dialog" class="result-read-dialog" aria-labelledby="result-read-title">
+        <div class="result-read-head"><img src="/histi-logo.webp?v=facelift-1" alt="HISTI"><button id="result-read-close" type="button" aria-label="Close result explanation">Close</button></div>
+        <h2 id="result-read-title">A scale, not a verdict.</h2>
+        <p>P and O show which side of the private-to-open scale your included answers lean toward. The number shows distance from the midpoint, not a percentage of your privacy.</p>
+        <dl class="result-read-legend"><div><dt>P100</dt><dd>The private-side endpoint. P40 is 40 points toward the private side of N0.</dd></div><div><dt>N0</dt><dd>The midpoint. It can reflect middle choices or a mix of private and open answers.</dd></div><div><dt>O100</dt><dd>The open-side endpoint. O40 is 40 points toward the open side of N0.</dd></div></dl>
+        <div class="result-read-details"><strong>What’s included in your snapshot</strong><p id="result-scoring-detail"></p><p>“I don’t know,” “Not applicable,” and unanswered questions are not weighted. “Prefer not to answer” counts as 1 point for that question, not as a neutral answer.</p><p>The overall score combines the scored areas using the test’s existing category weights. Each topic uses only its included answers. Missing areas are excluded; they are not filled with zero.</p></div>
+        <p>The descriptions are broad readings of this scale, not validated cutoffs. A similar overall score can hide very different topic patterns. A different person, purpose, or moment may change your answers.</p>
+        <p>The score is not fully accurate to true privacy and openness values. Never use a score as a reason to share passwords, codes, or identifying details.</p>
+      </dialog>
     </main>
 
     <section id="page-transition" class="h4-transition" hidden role="status" aria-label="Changing check-in page" tabindex="-1">
@@ -127,7 +145,7 @@
     </section>
     <footer class="bottom-utility"><div class="bottom-utility-inner"><div class="footer-links"><a href="/checkin-page">Check-ins</a><a href="/privacy">Privacy policy</a><a href="/terms">Terms</a></div><span class="device-note"><span class="device-dot" aria-hidden="true"></span>Saved only on this device</span></div></footer>
   </div>
-    <script type="module" src="/app-histi4.js?v=motion-2"></script>
+    <script type="module" src="/app-histi4.js?v=results-1"></script>
   <script type="module" src="/histi4-privacy.js?v=motion-1"></script>
 </body>
 </html>

@@ -3,9 +3,43 @@ const popups = new WeakMap();
 const reducedMotion = () => document.hidden || document.body.classList.contains('reduce-motion') || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const CLOSE_FALLBACK_MS = 240;
 
+function stopEntry(record) {
+  record.entry?.cancel();
+  record.press?.cancel();
+  record.entry = null;
+  record.press = null;
+}
+
+function animateFromButton(popup, record, trigger) {
+  stopEntry(record);
+  if (reducedMotion() || typeof popup.animate !== 'function' || !trigger?.getBoundingClientRect) return;
+  // No cloned button, overlay, observer, or permanent inline style. Travel is
+  // capped so a footer button never throws a dialog across the whole screen.
+  if (!['BUTTON', 'A'].includes(trigger.tagName?.toUpperCase())) return;
+  const source = trigger.getBoundingClientRect();
+  const target = popup.getBoundingClientRect();
+  if (!source.width || !source.height || !target.width || !target.height) return;
+  const dx = Math.max(-56, Math.min(56, source.x + source.width / 2 - target.x - target.width / 2));
+  const dy = Math.max(-56, Math.min(56, source.y + source.height / 2 - target.y - target.height / 2));
+  const origin = `${Math.max(0, Math.min(100, (source.x + source.width / 2 - target.x) / target.width * 100))}% ${Math.max(0, Math.min(100, (source.y + source.height / 2 - target.y) / target.height * 100))}%`;
+  const entry = popup.animate([
+    { opacity: 0, transform: `translate(${dx}px,${dy}px) scale(.93)`, transformOrigin: origin },
+    { opacity: 1, transform: 'translate(0,0) scale(1.012)', transformOrigin: origin, offset: .75 },
+    { opacity: 1, transform: 'none', transformOrigin: origin }
+  ], { duration: 460, easing: 'cubic-bezier(.22,.8,.25,1)', fill: 'backwards' });
+  record.entry = entry;
+  entry.finished.then(() => { if (record.entry === entry) record.entry = null; entry.cancel(); }, () => {});
+  if (typeof trigger.animate === 'function') {
+    const press = trigger.animate([{ transform: 'scale(.96)' }, { transform: 'none' }], { duration: 260, easing: 'cubic-bezier(.22,.8,.25,1)' });
+    record.press = press;
+    press.finished.then(() => { if (record.press === press) record.press = null; press.cancel(); }, () => {});
+  }
+}
+
 function settle(popup, completed = false) {
   const record = popups.get(popup);
   if (!record) return;
+  stopEntry(record);
   if (record.timer !== null) clearTimeout(record.timer);
   record.timer = null;
   popup.classList.remove('suite-popup-closing');
@@ -18,7 +52,7 @@ function settle(popup, completed = false) {
 function prepare(popup, native) {
   let record = popups.get(popup);
   if (record) return record;
-  record = { timer: null, pending: null, resolve: null, value: '', focus: null };
+  record = { timer: null, pending: null, resolve: null, value: '', focus: null, entry: null, press: null };
   popups.set(popup, record);
   popup.classList.add('suite-popup');
   popup.addEventListener('transitionend', event => {
@@ -59,6 +93,7 @@ function dismiss(popup, native, value = '') {
   const record = prepare(popup, native);
   if (record.pending) return record.pending;
   if (native ? !popup.open : popup.hidden) return Promise.resolve(false);
+  stopEntry(record);
   record.value = value;
   if (reducedMotion()) {
     finish(popup, native);
@@ -70,24 +105,27 @@ function dismiss(popup, native, value = '') {
   return record.pending;
 }
 
-export function openDialog(popup) {
+export function openDialog(popup, trigger = document.activeElement) {
   const record = prepare(popup, true);
   if (record.pending) settle(popup);
   if (!popup.open) {
     popup.returnValue = '';
     popup.showModal();
+    animateFromButton(popup, record, trigger);
   }
 }
 
 export function closeDialog(popup, value = '') { return dismiss(popup, true, value); }
 
-export function openPanel(popup) {
+export function openPanel(popup, trigger = document.activeElement) {
   if (!popup) return;
   const record = prepare(popup, false);
   if (record.pending) settle(popup);
   if (!popup.hidden) return;
   record.focus = document.activeElement;
   popup.hidden = false;
+  // Full-screen legacy sheets keep their existing inner-card entrance.
+  if (popup.classList.contains('utility-panel')) animateFromButton(popup, record, trigger);
   if (popup.getAttribute('role') === 'dialog') popup.querySelector('button:not(:disabled),a[href]')?.focus();
 }
 

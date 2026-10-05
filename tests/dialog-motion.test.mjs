@@ -146,3 +146,35 @@ test('shared animation coverage is finite, accessible, and does not move slider 
     assert.doesNotMatch(read(file), /window\.confirm\(|\!confirm\(/);
   }
 });
+
+test('button-to-dialog entry stays bounded over 100 interrupted openings', async () => {
+  const h = harness();
+  const dialog = new h.Element();
+  const trigger = h.document.activeElement;
+  const running = new Set();
+  const requests = [];
+  const animate = (frames, options) => {
+    let resolve, reject;
+    const effect = { finished: new Promise((yes,no) => {resolve=yes;reject=no;}), cancel(){running.delete(effect);reject(new Error('Cancelled'));}, finish(){resolve();} };
+    running.add(effect);requests.push({frames,options});return effect;
+  };
+  dialog.animate = animate; trigger.animate = animate;
+  dialog.getBoundingClientRect = () => ({x:200,y:100,width:600,height:500});
+  trigger.getBoundingClientRect = () => ({x:5000,y:6000,width:90,height:40});
+  for(let i=0;i<100;i++) {
+    h.openDialog(dialog, trigger);
+    assert.equal(running.size,2);
+    assert.match(requests.at(-2).frames[0].transform,/translate\(56px,56px\) scale\(\.93\)/);
+    assert.ok(requests.at(-2).options.duration<=500);
+    const closing=h.closeDialog(dialog);h.flush();await closing;
+    assert.equal(running.size,0);
+    assert.equal(h.timers.size,0);
+  }
+  assert.equal([...dialog.listeners.values()].flat().length,3);
+  h.openDialog(dialog,trigger);
+  for(const effect of [...running])effect.finish();
+  await Promise.resolve();assert.equal(running.size,0);
+  const close=h.closeDialog(dialog);h.flush();await close;
+  h.reduce(true);h.openDialog(dialog,trigger);assert.equal(running.size,0);
+  await h.closeDialog(dialog);
+});

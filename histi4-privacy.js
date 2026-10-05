@@ -65,7 +65,7 @@ if (trigger) {
     trigger.dataset.state = passed ? 'pass' : 'fail';
     trigger.querySelector('#privacy-live-label').textContent = 'Privacy proof';
   };
-  const openProof = () => { openDialog(panel); run(); };
+  const openProof = event => { openDialog(panel, event?.currentTarget || trigger); run(); };
   trigger.addEventListener('click', openProof);
   document.querySelectorAll('[data-privacy-proof]').forEach(link => {
     link.addEventListener('click', event => { event.preventDefault(); openProof(); });
