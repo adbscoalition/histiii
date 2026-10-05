@@ -38,8 +38,13 @@ html.histi-url-covered::after,html.histi-url-covered::before { opacity:1; visibi
 /* Do not capture the ordinary fade veil into the incoming history snapshot. */
 html:is(.histi-native-back,.histi-native-forward)::before,html:is(.histi-native-back,.histi-native-forward)::after { opacity:0!important; visibility:hidden!important; animation:none!important; transition:none!important; }
 html.histi-url-leaving::after { pointer-events:auto; }
-html.histi-refresh.histi-url-covered::before,html.histi-refresh.histi-url-covered::after { animation:histi-refresh-cover 320ms ease both; }
-@keyframes histi-refresh-cover { from { opacity:0; transform:none; } to { opacity:1; transform:none; } }
+/* Refresh is one continuous handoff: fade the old page out, hold, then softly reveal the new page. */
+html.histi-refresh::before,html.histi-refresh::after {
+  transform:none;
+  transition:opacity 560ms cubic-bezier(.22,1,.36,1),visibility 0s 560ms;
+}
+html.histi-refresh-outgoing::before,html.histi-refresh-outgoing::after { transition:opacity 260ms ease,visibility 0s 260ms; }
+html.histi-refresh-prime::before,html.histi-refresh-prime::after { transition:none; }
 html.histi-url-card.histi-url-covered::after { animation:histi-card-veil 680ms ease both; }
 html.histi-url-card.histi-url-covered::before { animation:histi-card-brand 680ms ease both; }
 .histi-card-morph {

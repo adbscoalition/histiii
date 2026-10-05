@@ -16,7 +16,7 @@ test('spring motion is finite and confined to non-question surfaces and decorati
   assert.doesNotMatch(motion,/infinite|will-change|filter:|setInterval/);
   for(const page of readdirSync(new URL('../',import.meta.url)).filter(f=>f.endsWith('.html'))) {
     const html=read(page);
-    assert.match(html,/page-transitions\.css\?v=unified-history-2/);
+    assert.match(html,/page-transitions\.css\?v=refresh-3/);
     assert.match(html,/site-motion\.css\?v=spring-1/);
     assert.match(html,/site-experience\.css\?v=spring-1/);
   }

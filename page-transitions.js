@@ -33,6 +33,73 @@
   let entryTimer = 0;
   let cardGhost = null;
   let outgoingHomeFlag = null;
+  let refreshCycle = null;
+  const REFRESH_HOLD_MS = 240;
+  const REFRESH_FADE_MS = 560;
+  const REFRESH_MAX_WAIT_MS = 1800;
+
+  function clearRefresh() {
+    const cycle = refreshCycle;
+    refreshCycle = null;
+    clearTimeout(cycle?.holdTimer);
+    clearTimeout(cycle?.fallbackTimer);
+    clearTimeout(cycle?.exitTimer);
+    root.classList.remove('histi-refresh', 'histi-refresh-prime', 'histi-refresh-outgoing');
+  }
+
+  function fadeRefresh(cycle) {
+    if (cycle !== refreshCycle || cycle.phase === 'leaving') return;
+    clearTimeout(cycle.holdTimer);
+    clearTimeout(cycle.fallbackTimer);
+    cancelAnimationFrame(firstFrame);
+    cancelAnimationFrame(secondFrame);
+    cycle.phase = 'leaving';
+    // Keep the refresh styles until opacity reaches zero; removing them now snaps the veil away.
+    root.classList.remove('histi-refresh-prime', 'histi-refresh-outgoing', 'histi-url-covered');
+    cycle.exitTimer = setTimeout(() => {
+      if (cycle === refreshCycle) clearRefresh();
+    }, REFRESH_FADE_MS);
+  }
+
+  function refreshReady(cycle) {
+    if (cycle === refreshCycle && cycle.phase === 'holding' && cycle.held && cycle.pageReady && cycle.fontsReady) fadeRefresh(cycle);
+  }
+
+  function startRefresh(incoming) {
+    reveal(); clearEntry(); clearNativeHistory();
+    if (motion.matches || document.hidden) return;
+    const cycle = { phase: incoming ? 'primed' : 'outgoing', held: false, pageReady: false, fontsReady: false };
+    refreshCycle = cycle;
+    root.classList.add('histi-url-motion', 'histi-refresh', 'histi-url-covered', incoming ? 'histi-refresh-prime' : 'histi-refresh-outgoing');
+    // A missing resource or cancelled reload must never leave an opaque cover behind.
+    cycle.fallbackTimer = setTimeout(() => fadeRefresh(cycle), REFRESH_MAX_WAIT_MS);
+  }
+
+  function prepareRefreshReveal() {
+    const cycle = refreshCycle;
+    if (!cycle || cycle.phase !== 'primed') return;
+    cycle.phase = 'holding';
+    cycle.pageReady = document.readyState === 'complete';
+    const fonts = document.fonts?.ready;
+    cycle.fontsReady = !fonts;
+    const fontsSettled = () => {
+      if (cycle !== refreshCycle) return;
+      cycle.fontsReady = true;
+      refreshReady(cycle);
+    };
+    fonts?.then(fontsSettled, fontsSettled);
+    // Paint the incoming cover fully opaque, not another fade-in over a half-built page.
+    firstFrame = requestAnimationFrame(() => {
+      secondFrame = requestAnimationFrame(() => {
+        if (cycle !== refreshCycle || cycle.phase !== 'holding') return;
+        root.classList.remove('histi-refresh-prime');
+        cycle.holdTimer = setTimeout(() => {
+          cycle.held = true;
+          refreshReady(cycle);
+        }, REFRESH_HOLD_MS);
+      });
+    });
+  }
 
   function traversalDirection(activation) {
     if (activation?.navigationType !== 'traverse') return null;
@@ -135,10 +202,16 @@
     destination = null;
     cardGhost?.remove();
     cardGhost = null;
-    root.classList.remove('histi-url-covered', 'histi-url-leaving', 'histi-url-card', 'histi-refresh');
+    clearRefresh();
+    root.classList.remove('histi-url-covered', 'histi-url-leaving', 'histi-url-card');
   }
 
   function enter(restored = false) {
+    if (restored !== true && loadType === 'reload' && !motion.matches && !nativeHistory) {
+      clearEntry();
+      prepareRefreshReveal();
+      return;
+    }
     reveal();
     clearEntry();
     if (restored === true) {
@@ -147,11 +220,6 @@
     }
     if (motion.matches) return;
     if (nativeHistory) return;
-    if (loadType === 'reload') {
-      root.classList.add('histi-url-motion', 'histi-refresh', 'histi-url-covered');
-      recoveryTimer = setTimeout(reveal, 700);
-      return;
-    }
     if (!isHome || homeReturn) root.classList.add('histi-url-covered');
     // Let the destination paint behind the same veil before fading it away.
     firstFrame = requestAnimationFrame(() => {
@@ -182,9 +250,9 @@
   if (!motion.matches) {
     // Prime the invisible veil on the homepage too; creating it on click jumps straight to opaque.
     root.classList.add('histi-url-motion');
-    if (!isHome || homeReturn) {
+    if (loadType === 'reload') startRefresh(true);
+    else if (!isHome || homeReturn) {
       root.classList.add('histi-url-covered');
-      if (loadType === 'reload') root.classList.add('histi-refresh');
       recoveryTimer = setTimeout(reveal, 1500);
     }
   }
@@ -202,6 +270,7 @@
     if (motion.matches || document.hidden) { markHomeHandoff(url); return; }
     event.preventDefault();
     if (destination) return;
+    clearRefresh();
     clearEntry();
     clearTimeout(recoveryTimer);
     cancelAnimationFrame(firstFrame);
@@ -246,6 +315,12 @@
     transition.finished.then(finish, finish);
   });
   window.addEventListener('pagehide', () => { reveal(true); clearEntry(); clearNativeHistory(); });
+  window.addEventListener('load', () => {
+    const cycle = refreshCycle;
+    if (!cycle || cycle.phase !== 'holding') return;
+    cycle.pageReady = true;
+    refreshReady(cycle);
+  });
   window.addEventListener('pageshow', event => {
     if (!event.persisted) return;
     const tracked = trackHistoryEntry(true);
@@ -255,10 +330,7 @@
   browserNavigation?.addEventListener('navigate', event => {
     // Native reload cannot be intercepted or delayed. Start its fade while the browser loads.
     if (event.navigationType !== 'reload' || motion.matches || document.hidden) return;
-    clearEntry(); clearNativeHistory();
-    root.classList.add('histi-url-motion', 'histi-refresh', 'histi-url-covered');
-    clearTimeout(recoveryTimer);
-    recoveryTimer = setTimeout(reveal, 1500);
+    startRefresh(false);
   });
   motion.addEventListener('change', () => {
     if (!motion.matches) return;

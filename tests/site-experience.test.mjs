@@ -14,7 +14,7 @@ test('every page has one static safety notice and the shared visual system', () 
     assert.match(html, /Never enter passwords, codes, or personal information\./, file);
     const sharedStyle = html.indexOf('/site-experience.css?v=');
     assert.ok(sharedStyle > 0 && sharedStyle < html.indexOf('/site-typography.css'), file);
-    assert.match(html, /page-transitions\.js\?v=unified-history-2/, file);
+    assert.match(html, /page-transitions\.js\?v=refresh-3/, file);
     assert.match(html, /class="site-header topbar histi-header"/, file);
   }
 });

@@ -4,14 +4,14 @@ import { readFileSync, existsSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 
 const read=file=>readFileSync(new URL(`../${file}`,import.meta.url),'utf8');
-const fixture=({home=true,hash='',reduced=false,referrer='',navigation='navigate',storage=new Map(),storageBlocked=false,clock=100000,assignFails=false,history,activation}={})=>{
+const fixture=({home=true,hash='',reduced=false,referrer='',navigation='navigate',storage=new Map(),storageBlocked=false,clock=100000,assignFails=false,history,activation,complete=true,fonts}={})=>{
   const classes=new Set(),timers=new Map(),frames=new Map(),documentEvents={},windowEvents={},motionEvents={};let id=0;
   const root={hasAttribute:name=>home&&name==='data-home-entry',classList:{contains:value=>classes.has(value),add:(...values)=>values.forEach(v=>classes.add(v)),remove:(...values)=>values.forEach(v=>classes.delete(v))}};
   const motion={matches:reduced,addEventListener:(name,fn)=>{motionEvents[name]=fn;}};
   const location={pathname:home?'/':'/checkin-page',hash,href:`https://www.histi.org/${home?'':'checkin-page'}${hash}`,origin:'https://www.histi.org',assign(url){if(assignFails)throw new Error('Navigation cancelled');this.assigned=url;}};
   const ghosts=[];
   const makeNode=()=>({children:[],attributes:{},style:{setProperty(name,value){this[name]=value;}},setAttribute(name,value){this.attributes[name]=value;},append(...nodes){this.children.push(...nodes);},remove(){const index=ghosts.indexOf(this);if(index>=0)ghosts.splice(index,1);}});
-  const document={documentElement:root,referrer,readyState:'loading',hidden:false,body:{append:node=>ghosts.push(node)},createElement:makeNode,querySelectorAll:()=>[],addEventListener:(name,fn)=>{documentEvents[name]=fn;}};
+  const document={documentElement:root,referrer,readyState:'loading',hidden:false,fonts,body:{append:node=>ghosts.push(node)},createElement:makeNode,querySelectorAll:()=>[],addEventListener:(name,fn)=>{documentEvents[name]=fn;}};
   const sessionStorage={getItem(key){if(storageBlocked)throw new Error('Storage blocked');return storage.get(key)??null;},setItem(key,value){if(storageBlocked)throw new Error('Storage blocked');storage.set(key,value);},removeItem(key){if(storageBlocked)throw new Error('Storage blocked');storage.delete(key);}};
   const navigationEvents={};
   const browserNavigation=activation?{activation,addEventListener:(name,fn)=>{navigationEvents[name]=fn;}}:undefined;
@@ -20,7 +20,7 @@ const fixture=({home=true,hash='',reduced=false,referrer='',navigation='navigate
   runInNewContext(read('page-transitions.js'),context);
   const flushFrames=()=>{while(frames.size){const [key,fn]=frames.entries().next().value;frames.delete(key);fn();}};
   const fireTimer=ms=>{const [key,task]=[...timers].find(([,task])=>task.ms===ms)||[];assert.ok(task,`Expected ${ms}ms timer`);timers.delete(key);task.fn();};
-  const ready=()=>{documentEvents.DOMContentLoaded({type:'DOMContentLoaded'});flushFrames();};
+  const ready=()=>{document.readyState=complete?'complete':'interactive';documentEvents.DOMContentLoaded({type:'DOMContentLoaded'});flushFrames();};
   return{classes,timers,frames,documentEvents,windowEvents,navigationEvents,browserNavigation,motionEvents,motion,document,location,storage,ready,fireTimer,ghosts,runIntro:()=>runInNewContext(read('home-intro.js'),context)};
 };
 
@@ -78,7 +78,7 @@ test('repeated back/forward entry uses bounded timers and preserves the badge fi
   const f=fixture();f.ready();
   for(let i=0;i<100;i++){f.windowEvents.pageshow({persisted:true});f.windowEvents.pagehide();assert.equal(f.frames.size,0);assert.equal(f.timers.size,0);}
   assert.deepEqual(Object.keys(f.documentEvents).sort(),['DOMContentLoaded','click']);
-  assert.deepEqual(Object.keys(f.windowEvents).sort(),['pagehide','pagereveal','pageshow','pageswap']);
+  assert.deepEqual(Object.keys(f.windowEvents).sort(),['load','pagehide','pagereveal','pageshow','pageswap']);
   assert.doesNotMatch(read('page-transitions.js'),/setInterval|MutationObserver|innerHTML/);
   assert.equal((read('index.html').match(/class="visitor-step-code"/g)||[]).length,3);
   for(const page of ['checkin-page.html','checkin-4.html','checkin-4-g1.html','checkin-4-g2.html','checkin-4-g3.html','checkin-4-g4.html']) assert.doesNotMatch(read(page),/data-home-entry|home-entry\.css/);
@@ -113,7 +113,7 @@ test('returning home skips the intro before paint; external arrivals remain elig
     const f=fixture(options);assert.equal(f.classes.has('histi-home-return'),true);assert.equal(f.classes.has('histi-url-covered'),true);
     f.runIntro();assert.equal(f.classes.has('histi-intro-pending'),false);
     f.ready();
-    if(options.navigation==='reload'){assert.equal(f.classes.has('histi-refresh'),true);f.fireTimer(700);}
+    if(options.navigation==='reload'){assert.equal(f.classes.has('histi-refresh'),true);f.fireTimer(240);f.fireTimer(560);}
     else {assert.equal(f.classes.has('histi-url-covered'),false);f.fireTimer(900);}
     assert.equal(f.classes.has('histi-url-covered'),false);assert.equal(f.timers.size,0);
   }
@@ -270,7 +270,7 @@ test('BFCache direction updates without retaining snapshots, listeners, timers o
     assert.equal(f.frames.size+f.timers.size+f.ghosts.length,0);assert.equal(f.classes.has('histi-native-back'),false);
   }
   assert.equal(history.calls.length,0);assert.equal(storage.size,1);
-  assert.deepEqual(Object.keys(f.windowEvents).sort(),['pagehide','pagereveal','pageshow','pageswap']);
+  assert.deepEqual(Object.keys(f.windowEvents).sort(),['load','pagehide','pagereveal','pageshow','pageswap']);
 });
 
 test('ordinary links, unknown directions, reduced motion and hidden tabs skip native history effects',()=>{
@@ -285,13 +285,65 @@ test('ordinary links, unknown directions, reduced motion and hidden tabs skip na
   assert.equal(f.frames.size+f.timers.size,0);
 });
 
-test('refresh fades its loading cover in, then releases it without replaying intro',()=>{
+test('refresh arrives opaque and keeps its fade styles until the exit finishes, without replaying intro',()=>{
   const f=fixture({navigation:'reload'});assert.equal(f.classes.has('histi-refresh'),true);f.runIntro();
+  assert.equal(f.classes.has('histi-refresh-prime'),true);assert.equal(f.classes.has('histi-url-covered'),true);
   assert.equal(f.classes.has('histi-intro-pending'),false);f.ready();assert.equal(f.classes.has('histi-refresh'),true);
-  assert.equal(f.classes.has('histi-page-enter'),false);assert.equal(f.frames.size,0);f.fireTimer(700);
+  assert.equal(f.classes.has('histi-refresh-prime'),false);assert.equal(f.classes.has('histi-url-covered'),true);
+  assert.equal(f.classes.has('histi-page-enter'),false);assert.equal(f.frames.size,0);f.fireTimer(240);
+  assert.equal(f.classes.has('histi-url-covered'),false);assert.equal(f.classes.has('histi-refresh'),true);
+  assert.deepEqual([...f.timers.values()].map(t=>t.ms),[560]);f.fireTimer(560);
   assert.equal(f.classes.has('histi-refresh'),false);assert.equal(f.classes.has('histi-url-covered'),false);assert.equal(f.timers.size,0);
   const reduced=fixture({navigation:'reload',reduced:true});reduced.ready();assert.equal(reduced.frames.size+reduced.timers.size,0);
   const outgoing=fixture({activation:{navigationType:'push'}});outgoing.ready();outgoing.navigationEvents.navigate({navigationType:'reload'});
-  assert.equal(outgoing.classes.has('histi-refresh'),true);outgoing.fireTimer(1500);assert.equal(outgoing.classes.has('histi-refresh'),false);
-  const css=read('page-transitions.css');assert.match(css,/histi-refresh-cover 320ms ease both/);assert.doesNotMatch(css,/infinite|will-change/);
+  assert.equal(outgoing.classes.has('histi-refresh-outgoing'),true);assert.equal(outgoing.classes.has('histi-refresh-prime'),false);
+  outgoing.fireTimer(1800);assert.equal(outgoing.classes.has('histi-refresh-outgoing'),false);
+  assert.equal(outgoing.classes.has('histi-url-covered'),false);assert.equal(outgoing.classes.has('histi-refresh'),true);
+  outgoing.fireTimer(560);assert.equal(outgoing.classes.has('histi-refresh'),false);
+  const css=read('page-transitions.css');assert.match(css,/transition:opacity 560ms cubic-bezier/);
+  assert.match(css,/histi-refresh-prime::after \{ transition:none; \}/);
+  assert.doesNotMatch(css,/histi-refresh-cover|infinite|will-change/);
+});
+
+test('refresh waits for a painted cover, page load and fonts, regardless of their completion order',async()=>{
+  for(const fontsFirst of [true,false]) {
+    let resolveFonts;const fontReady=new Promise(resolve=>{resolveFonts=resolve;});
+    const f=fixture({navigation:'reload',complete:false,fonts:{ready:fontReady}});f.ready();
+    f.fireTimer(240);assert.equal(f.classes.has('histi-url-covered'),true);
+    if(fontsFirst){resolveFonts();await Promise.resolve();}else f.windowEvents.load();
+    assert.equal(f.classes.has('histi-url-covered'),true);
+    if(fontsFirst)f.windowEvents.load();else {resolveFonts();await Promise.resolve();}
+    assert.equal(f.classes.has('histi-url-covered'),false);assert.equal(f.classes.has('histi-refresh'),true);
+    f.windowEvents.load();assert.equal(f.timers.size,1);f.fireTimer(560);assert.equal(f.timers.size,0);
+  }
+  const early=fixture({navigation:'reload'});early.fireTimer(1800);early.ready();
+  assert.equal(early.classes.has('histi-url-covered'),false);assert.equal(early.frames.size,0);
+  early.fireTimer(560);assert.equal(early.classes.has('histi-refresh'),false);
+});
+
+test('slow or failed resources cannot strand the refresh screen or revive it after fallback',async()=>{
+  let resolveFonts;const pending=new Promise(resolve=>{resolveFonts=resolve;});
+  const f=fixture({navigation:'reload',complete:false,fonts:{ready:pending}});f.ready();f.fireTimer(240);
+  f.fireTimer(1800);assert.equal(f.classes.has('histi-url-covered'),false);f.fireTimer(560);
+  resolveFonts();await Promise.resolve();f.windowEvents.load();assert.equal(f.classes.has('histi-refresh'),false);assert.equal(f.timers.size+f.frames.size,0);
+  let rejectFonts;const rejected=new Promise((resolve,reject)=>{rejectFonts=reject;});
+  const failed=fixture({navigation:'reload',fonts:{ready:rejected}});failed.ready();failed.fireTimer(240);
+  rejectFonts(new Error('Font failed'));await Promise.resolve();
+  assert.equal(failed.classes.has('histi-url-covered'),false);failed.fireTimer(560);assert.equal(failed.timers.size,0);
+});
+
+test('100 interrupted refreshes leave no timers, clones, extra storage or growing listeners',()=>{
+  const f=fixture({activation:{navigationType:'push'}});f.ready();
+  for(let i=0;i<100;i++) {
+    f.navigationEvents.navigate({navigationType:'reload'});f.navigationEvents.navigate({navigationType:'reload'});
+    assert.equal(f.timers.size,1);assert.equal(f.classes.has('histi-refresh-outgoing'),true);
+    if(i%2){f.fireTimer(1800);assert.equal(f.timers.size,1);}
+    f.windowEvents.pagehide();f.windowEvents.pageshow({persisted:true});
+    assert.equal(f.timers.size+f.frames.size+f.ghosts.length,0);assert.equal(f.classes.has('histi-refresh'),false);
+  }
+  assert.equal(f.storage.size,0);assert.deepEqual(Object.keys(f.windowEvents).sort(),['load','pagehide','pagereveal','pageshow','pageswap']);
+  const motion=fixture({navigation:'reload'});motion.ready();motion.motion.matches=true;motion.motionEvents.change();
+  assert.equal(motion.timers.size+motion.frames.size,0);assert.equal(motion.classes.has('histi-url-covered'),false);
+  const link=fixture({navigation:'reload'});link.ready();homeClick(link);assert.equal(link.classes.has('histi-refresh'),false);
+  link.windowEvents.pagehide();assert.equal(link.timers.size,0);
 });
