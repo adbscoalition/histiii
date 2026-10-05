@@ -1,0 +1,5 @@
+# Public search access. This does not change the existing defaults for other bots.
+User-agent: OAI-SearchBot
+Allow: /
+
+Sitemap: https://www.histi.org/sitemap.xml
