@@ -10,7 +10,7 @@ const fixture=({home=true,hash='',reduced=false,referrer='',navigation='navigate
   const motion={matches:reduced,addEventListener:(name,fn)=>{motionEvents[name]=fn;}};
   const location={pathname:home?'/':'/checkin-page',hash,href:`https://www.histi.org/${home?'':'checkin-page'}${hash}`,origin:'https://www.histi.org',assign(url){if(assignFails)throw new Error('Navigation cancelled');this.assigned=url;}};
   const ghosts=[];
-  const makeNode=()=>({children:[],style:{setProperty(name,value){this[name]=value;}},setAttribute(){},append(...nodes){this.children.push(...nodes);},remove(){ghosts.splice(ghosts.indexOf(this),1);}});
+  const makeNode=()=>({children:[],attributes:{},style:{setProperty(name,value){this[name]=value;}},setAttribute(name,value){this.attributes[name]=value;},append(...nodes){this.children.push(...nodes);},remove(){const index=ghosts.indexOf(this);if(index>=0)ghosts.splice(index,1);}});
   const document={documentElement:root,referrer,readyState:'loading',hidden:false,body:{append:node=>ghosts.push(node)},createElement:makeNode,querySelectorAll:()=>[],addEventListener:(name,fn)=>{documentEvents[name]=fn;}};
   const sessionStorage={getItem(key){if(storageBlocked)throw new Error('Storage blocked');return storage.get(key)??null;},setItem(key,value){if(storageBlocked)throw new Error('Storage blocked');storage.set(key,value);},removeItem(key){if(storageBlocked)throw new Error('Storage blocked');storage.delete(key);}};
   const navigationEvents={};
@@ -203,6 +203,33 @@ test('an early page reveal cannot restart the ordinary entrance or capture its v
   assert.equal(f.classes.has('histi-native-back'),true);assert.equal(f.classes.has('histi-url-covered'),false);
   assert.equal(f.frames.size+f.timers.size,0);vt.finish();await Promise.resolve();
   assert.equal(f.classes.has('histi-native-back'),false);
+});
+
+test('history uses the exact ordinary veil appearance, not a separate logo treatment',()=>{
+  const css=read('page-transitions.css');
+  assert.match(css,/html\.histi-url-motion::after,\.histi-history-veil::after \{\s*background:radial-gradient/);
+  assert.match(css,/html\.histi-url-motion::before,\.histi-history-veil::before \{\s*content:"A little space\. Just for you\."/);
+  assert.match(css,/center calc\(50% - 25px\) \/ 118px auto no-repeat/);
+  assert.match(css,/view-transition-name:histi-intermediate/);
+  assert.match(css,/::view-transition-group\(histi-intermediate\) \{ animation:none; z-index:0; \}/);
+  assert.match(css,/::view-transition-group\(root\) \{ animation:none; z-index:1; \}/);
+  assert.doesNotMatch(css,/ellipse 102px 74px|html::view-transition \{/);
+});
+
+test('the history veil is temporary, inert, singular and safe under interrupted handoffs',async()=>{
+  const f=fixture({home:false,activation:activation(2,1)});f.ready();
+  const first=transition();f.windowEvents.pagereveal({viewTransition:first});
+  assert.equal(f.ghosts.length,1);assert.equal(f.ghosts[0].className,'histi-history-veil');
+  assert.equal(f.ghosts[0].attributes['aria-hidden'],'true');assert.equal(f.ghosts[0].attributes.inert,'');
+  const next=transition();f.windowEvents.pagereveal({viewTransition:next});
+  const current=f.ghosts[0];assert.equal(first.skips,1);assert.equal(f.ghosts.length,1);
+  first.finish();await Promise.resolve();assert.equal(f.ghosts.length,1);assert.equal(f.ghosts[0],current);
+  next.finish();await Promise.resolve();assert.equal(f.ghosts.length,0);
+  const interrupted=transition();f.windowEvents.pagereveal({viewTransition:interrupted});
+  f.windowEvents.pageswap({activation:activation(1,2),viewTransition:transition()});
+  assert.equal(interrupted.skips,1);assert.equal(f.ghosts.length,0);assert.equal(f.classes.has('histi-native-forward'),true);
+  interrupted.finish();await Promise.resolve();assert.equal(f.classes.has('histi-native-forward'),true);
+  f.windowEvents.pagehide();assert.equal(f.ghosts.length+f.frames.size+f.timers.size,0);
 });
 
 test('numeric direction fallback preserves history state, adds no entries and stores no URLs',async()=>{

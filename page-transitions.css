@@ -1,13 +1,11 @@
 /* Bounded, composited handoffs; no blur, particles, or animation loops. */
 @view-transition { navigation:auto; }
-/* The browser owns both snapshots; they are released after this single handoff. */
-html::view-transition {
-  background:url('/histi-logo.webp?v=facelift-1') center / 118px auto no-repeat,
-    radial-gradient(ellipse 102px 74px at center,#27668e 99%,transparent 100%),
-    radial-gradient(ellipse at 8% 90%,#bce6fb 0,transparent 50%),
-    radial-gradient(ellipse at 92% 8%,#ffd3e1 0,transparent 52%),#fff8ef;
-}
-html:is(.histi-native-back,.histi-native-forward)::view-transition-group(root) { animation:none; }
+/* One temporary, independently captured veil sits underneath both page snapshots. */
+.histi-history-veil { position:fixed; inset:0; z-index:10000; pointer-events:none; view-transition-name:histi-intermediate; }
+.histi-history-veil::before,.histi-history-veil::after { content:""; position:fixed; inset:0; pointer-events:none; }
+html:is(.histi-native-back,.histi-native-forward)::view-transition-group(histi-intermediate) { animation:none; z-index:0; }
+html:is(.histi-native-back,.histi-native-forward)::view-transition-new(histi-intermediate) { animation:none; mix-blend-mode:normal; }
+html:is(.histi-native-back,.histi-native-forward)::view-transition-group(root) { animation:none; z-index:1; }
 html:is(.histi-native-back,.histi-native-forward)::view-transition-image-pair(root) { isolation:auto; }
 html:is(.histi-native-back,.histi-native-forward)::view-transition-old(root) { mix-blend-mode:normal; z-index:2; }
 html.histi-native-back::view-transition-old(root) { animation:histi-browser-back 460ms cubic-bezier(.4,0,.2,1) both; }
@@ -22,13 +20,18 @@ html.histi-url-motion::after,html.histi-url-motion::before {
 }
 html.histi-url-motion::after {
   z-index:10000; transform:translateY(-12px) scale(1.035);
+}
+html.histi-url-motion::after,.histi-history-veil::after {
   background:radial-gradient(ellipse at 8% 90%,#bce6fb 0,transparent 50%),radial-gradient(ellipse at 92% 8%,#ffd3e1 0,transparent 52%),#fff8ef;
 }
-html.histi-url-motion::before {
+/* Shared appearance: ordinary navigation, refresh and browser history are identical. */
+html.histi-url-motion::before,.histi-history-veil::before {
   content:"A little space. Just for you."; z-index:10001; display:grid; place-content:center;
   padding:150px 24px 0; color:#52616a; font-family:var(--font-ui); font-size:14px; text-align:center;
   background:url('/histi-logo.webp?v=facelift-1') center calc(50% - 25px) / 118px auto no-repeat;
   filter:brightness(.18);
+}
+html.histi-url-motion::before {
   transform:translateY(14px);
 }
 html.histi-url-covered::after,html.histi-url-covered::before { opacity:1; visibility:visible; transform:none; transition-delay:0s; }
@@ -94,7 +97,7 @@ html body .h4-transition-line::after { background:#27668e; }
 @media(prefers-reduced-motion:reduce) {
   @view-transition { navigation:none; }
   html::view-transition-group(*),html::view-transition-old(*),html::view-transition-new(*) { animation:none!important; }
-  html.histi-url-motion::before,html.histi-url-motion::after,.histi-card-morph { display:none; transition:none; animation:none!important; }
+  html.histi-url-motion::before,html.histi-url-motion::after,.histi-card-morph,.histi-history-veil { display:none; transition:none; animation:none!important; }
   html body .h4-transition,.reset-transition,html body .h4-transition-inner,.reset-transition-inner { transition:none; }
   .reset-transition-symbol { animation:none!important; }
 }

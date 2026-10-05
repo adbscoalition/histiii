@@ -9,6 +9,7 @@
   const trackedDirection = trackHistoryEntry(loadType === 'back_forward');
   let historyDirection = traversalDirection(browserNavigation?.activation) || trackedDirection;
   let nativeHistory = null;
+  let historyVeil = null;
   const HOME_HANDOFF = 'histi.navigation.home';
   const HANDOFF_VALID_MS = 15000;
   let homeReturn = false;
@@ -66,6 +67,8 @@
   function clearNativeHistory() {
     nativeHistory?.skipTransition();
     nativeHistory = null;
+    historyVeil?.remove();
+    historyVeil = null;
     root.classList.remove('histi-native-back', 'histi-native-forward');
   }
 
@@ -215,7 +218,7 @@
     const direction = traversalDirection(event.activation);
     if (!event.viewTransition) return;
     if (!direction || motion.matches || document.hidden) { event.viewTransition.skipTransition(); return; }
-    reveal(true); clearEntry();
+    clearNativeHistory(); reveal(true); clearEntry();
     root.classList.add(`histi-native-${direction}`);
   });
   window.addEventListener('pagereveal', event => {
@@ -225,10 +228,19 @@
     clearNativeHistory(); reveal(); clearEntry();
     const transition = event.viewTransition;
     nativeHistory = transition;
+    // Promoted out of the destination snapshot, so the actual page fades in above it.
+    // Reuse the ordinary veil's styles rather than drawing another version of the logo.
+    historyVeil = document.createElement('div');
+    historyVeil.className = 'histi-history-veil';
+    historyVeil.setAttribute('aria-hidden', 'true');
+    historyVeil.setAttribute('inert', '');
+    document.body.append(historyVeil);
     root.classList.add('histi-url-motion', `histi-native-${direction}`);
     const finish = () => {
       if (nativeHistory !== transition) return;
       nativeHistory = null;
+      historyVeil?.remove();
+      historyVeil = null;
       root.classList.remove('histi-native-back', 'histi-native-forward');
     };
     transition.finished.then(finish, finish);
