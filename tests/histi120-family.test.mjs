@@ -99,3 +99,11 @@ test('new routes use the Full UI and separate saved answers for every format and
   assert.match(selector,/40–50 minutes per person · 245 questions/);
   assert.match(selector,/20–25 minutes per person · 120 questions/);
 });
+
+test('HISTI-60 replaces the upcoming HISTI-50 without making it available', () => {
+  const selector=read('checkin-page.html');
+  const metadata=JSON.parse(selector.match(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/)[1]);
+  assert.match(metadata.description,/HISTI-60[\s\S]*are coming soon/);
+  assert.match(selector,/<article class="app-card soon" aria-disabled="true">\s*<span class="status">Coming soon<\/span>\s*<span class="card-number">03<\/span>\s*<span class="card-name">HISTI-60<\/span>\s*<span class="card-description">60-question version<\/span>\s*<\/article>/);
+  assert.doesNotMatch(selector,/HISTI-50|50-question version|href="\/checkin-60/);
+});
