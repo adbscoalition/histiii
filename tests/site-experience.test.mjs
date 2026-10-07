@@ -7,7 +7,7 @@ const read = file => readFileSync(new URL(file, root), 'utf8');
 
 test('every page has one static safety notice and the shared visual system', () => {
   const pages = readdirSync(root).filter(file => file.endsWith('.html'));
-  assert.equal(pages.length, 12);
+  assert.equal(pages.length, 16);
   for (const file of pages) {
     const html = read(file);
     assert.equal((html.match(/class="histi-safety-notice"/g) || []).length, 1, file);
@@ -81,7 +81,7 @@ test('existing reflection questions remain on all Full recipient pages', () => {
 });
 
 test('optional recipient labels discourage actual identifying information', () => {
-  for (const file of ['checkin.html', 'checkin-120.html']) {
+  for (const file of ['checkin.html']) {
     assert.match(read(file), /e\.g\. my friend \(no real names\)/);
     assert.match(read(file), /aria-describedby="recipient-label-privacy"/);
     assert.match(read(file), /Use an anonymous label only/);

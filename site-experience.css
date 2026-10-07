@@ -405,6 +405,13 @@ body:has(>main>.selector)>footer a { color:var(--palette-blue-ink); }
 body.reduce-motion #results-screen :is(.result-title,.result-score-line,.result-spectrum,.category-card) { animation:none!important; }
 @media(prefers-reduced-motion:reduce) { #results-screen :is(.result-title,.result-score-line,.result-spectrum,.category-card) { animation:none!important; } }
 
+/* Keep font/layout geometry stable; removing an entrance class must not restart a legacy rise. */
+html { scrollbar-gutter:stable; }
+body:not(.histi-home) :is(.start-card,.result-card) { animation:none; }
+.card-expansion { position:relative; z-index:1; margin-top:12px; color:var(--suite-ink); font-size:13px; line-height:1.45; }
+.app-card.social { background:var(--palette-rose-soft)!important; }
+.app-card.professional { background:var(--palette-iris-soft)!important; }
+
 /* One finite entrance; drifting accents live in their own bounded stylesheet. */
 html.histi-page-enter body:not(.histi-home) :is(.start-card,.assessment-card,.result-card,.selector-heading,.policy-hero) { animation:suite-enter 720ms var(--suite-ease) both!important; }
 html.histi-page-enter .app-card { animation:suite-enter 700ms 70ms var(--suite-ease) both; }

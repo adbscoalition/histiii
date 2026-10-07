@@ -1,0 +1,8 @@
+/* Same assessment system, with HISTI-120's blue identity. */
+body.histi-120 { --palette-paper:#f5faff; --suite-bg:var(--palette-paper); --suite-accent:var(--palette-blue); --suite-accent-ink:var(--palette-blue-ink); }
+body.histi-120 .group-setup-meta .eyebrow, body.histi-120 .eyebrow { color:var(--palette-blue-ink); }
+body.histi-120 .result-spectrum { background:linear-gradient(90deg,#7180ce,#d9eaff 50%,#8ed7fa)!important; }
+body.histi-120 .assessment-card:is([data-category="A1"],[data-category="A2"]) .question-top { background:var(--palette-blue-soft)!important; border-color:#a9cddd!important; }
+.h4-question-scope { margin:8px 0 20px; color:var(--suite-muted); font-size:14px; line-height:1.6; }
+.abridged-context,.abridged-validation { max-width:76ch; color:var(--suite-muted); font-size:14px; line-height:1.6; }
+.abridged-validation { font-size:12px; }

@@ -31,6 +31,7 @@
   let firstFrame = 0;
   let secondFrame = 0;
   let entryTimer = 0;
+  let entryReady = null;
   let cardGhost = null;
   let outgoingHomeFlag = null;
   let refreshCycle = null;
@@ -189,7 +190,23 @@
 
   function clearEntry() {
     clearTimeout(entryTimer);
+    entryReady = null;
     root.classList.remove('histi-page-enter');
+  }
+
+  function finishEntry(cycle) {
+    if (cycle !== entryReady || !cycle.pageReady || !cycle.fontsReady) return;
+    // Reveal only after modules and fonts settle; otherwise text and cards move under the fade.
+    firstFrame = requestAnimationFrame(() => {
+      secondFrame = requestAnimationFrame(() => {
+        if (cycle !== entryReady) return;
+        entryReady = null;
+        reveal();
+        if (nativeHistory) return;
+        root.classList.add('histi-page-enter');
+        entryTimer = setTimeout(clearEntry, 900);
+      });
+    });
   }
 
   function reveal(preserveHandoff = false) {
@@ -221,16 +238,18 @@
     if (motion.matches) return;
     if (nativeHistory) return;
     if (!isHome || homeReturn) root.classList.add('histi-url-covered');
-    // Let the destination paint behind the same veil before fading it away.
-    firstFrame = requestAnimationFrame(() => {
-      secondFrame = requestAnimationFrame(() => {
-        reveal();
-        if (nativeHistory) return;
-        root.classList.add('histi-page-enter');
-        entryTimer = setTimeout(clearEntry, 900);
-      });
-    });
-    recoveryTimer = setTimeout(reveal, 1500);
+    const fonts = !isHome ? document.fonts?.ready : null;
+    const cycle = { pageReady: isHome || document.readyState === 'complete', fontsReady: !fonts };
+    entryReady = cycle;
+    const fontsSettled = () => {
+      if (cycle !== entryReady) return;
+      cycle.fontsReady = true;
+      finishEntry(cycle);
+    };
+    fonts?.then(fontsSettled, fontsSettled);
+    finishEntry(cycle);
+    // Fail open, and invalidate late font promises so they cannot replay the entry.
+    recoveryTimer = setTimeout(() => { entryReady = null; reveal(); }, 1500);
   }
 
   function navigate() {
@@ -316,6 +335,10 @@
   });
   window.addEventListener('pagehide', () => { reveal(true); clearEntry(); clearNativeHistory(); });
   window.addEventListener('load', () => {
+    if (entryReady) {
+      entryReady.pageReady = true;
+      finishEntry(entryReady);
+    }
     const cycle = refreshCycle;
     if (!cycle || cycle.phase !== 'holding') return;
     cycle.pageReady = true;

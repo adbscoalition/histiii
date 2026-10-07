@@ -1,9 +1,13 @@
-import { FAMILIES, CATEGORY_META, RECIPIENTS } from './histi4-data.js';
 import { resetTransition } from './reset-transition.js?v=1';
 import { openDialog, closeDialog, confirmReset } from './site-dialogs.js?v=motion-1';
-import { makeSlides, remapLegacySlideIndex, calculate, rubricPoints, displayScore } from './histi4-core.js?v=pna-1';
+import { makeSlides, remapLegacySlideIndex, calculate as calculateFamilies, rubricPoints, displayScore } from './histi4-core.js?v=pna-1';
 import { describeScore, describeTopic, coverageText, createResultReveal } from './histi4-results.js?v=1';
 
+const abridged = document.body.dataset.test === '120';
+const { FAMILIES, CATEGORY_META, RECIPIENTS } = await import(abridged ? './histi120-family-data.js?v=1' : './histi4-data.js');
+const testName = abridged ? 'HISTI-120' : 'HISTI Full';
+const routeBase = abridged ? '/checkin-120' : '/checkin-4';
+const calculate = answers => calculateFamilies(answers, FAMILIES);
 const group = document.body.dataset.recipient;
 const recipient = RECIPIENTS[group];
 if (!recipient) throw new Error('Unknown HISTI recipient group');
@@ -14,9 +18,9 @@ const sharingWith = {
   G3: 'a friend',
   G4: 'a spouse or partner'
 }[group];
-const slides = makeSlides();
+const slides = makeSlides(FAMILIES);
 const familyByCode = new Map(FAMILIES.map(row => [row[0], row]));
-const storageKey = `histi.four-groups.${group}.v1`;
+const storageKey = abridged ? `histi.120-families.${group}.v1` : `histi.four-groups.${group}.v1`;
 const $ = id => document.getElementById(id);
 const el = (tag, className, text) => {
   const node = document.createElement(tag);
@@ -31,7 +35,7 @@ function loadState() {
     const stored = JSON.parse(localStorage.getItem(storageKey) || 'null');
     if (!stored || typeof stored !== 'object') return freshState();
     const state = { ...freshState(), ...stored, answers: stored.answers && typeof stored.answers === 'object' ? stored.answers : {} };
-    if (stored.layoutVersion !== 2) state.index = remapLegacySlideIndex(stored.index);
+    if (stored.layoutVersion !== 2) state.index = remapLegacySlideIndex(stored.index, FAMILIES);
     state.layoutVersion = 2;
     // Existing freeform answers are snapped to the nearest documented rubric stop.
     for (const [code, answer] of Object.entries(state.answers)) {
@@ -127,7 +131,8 @@ function setAnswer(code, status, value = null) {
   $('partial-btn').hidden = result.answered === 0;
 }
 function questionCard(row, animate = false) {
-  const [code, , prompt, type, , anchors] = row;
+  const [code, , defaultPrompt, type, , anchors, variants] = row;
+  const prompt = abridged ? variants[Number(group.slice(1)) - 1] : defaultPrompt;
   const answer = state.answers[code];
   const card = el('article', 'h4-question');
   if (animate) card.classList.add('h4-reveal');
@@ -135,6 +140,7 @@ function questionCard(row, animate = false) {
   const top = el('div', 'h4-question-top');
   top.append(el('p', 'h4-question-context', `Sharing with ${sharingWith}`), el('h2', '', prompt));
   card.append(top);
+  if (abridged) card.append(el('p', 'h4-question-scope', defaultPrompt));
   const control = el('div', 'h4-control');
   let clearChoice = () => {};
   const clearStatus = () => card.querySelectorAll('.h4-status button').forEach(button => button.setAttribute('aria-pressed', 'false'));
@@ -390,7 +396,7 @@ function renderSlide(scroll = true) {
   $('back-btn').disabled = state.index === 0;
   $('next-btn').textContent = state.index === slides.length - 1 ? 'See result' : 'Next';
   $('partial-btn').hidden = result.answered === 0;
-  document.title = `${state.index + 1} / ${slides.length} · ${recipient.label} | HISTI Full`;
+  document.title = `${state.index + 1} / ${slides.length} · ${recipient.label} | ${testName}`;
 }
 function resultCategory(key, result) {
   const meta = CATEGORY_META[key];
@@ -440,7 +446,7 @@ function renderResults(completed = false) {
   Object.keys(CATEGORY_META).forEach(key => fragment.append(resultCategory(key, result)));
   $('category-results').replaceChildren(fragment);
   $('resume-btn').textContent = completed ? 'Review questions' : 'Resume questions';
-  document.title = `Result · ${recipient.label} | HISTI Full`;
+  document.title = `Result · ${recipient.label} | ${testName}`;
   if (!transitionBusy) revealResult();
 }
 async function reset() {
@@ -451,7 +457,7 @@ async function reset() {
     try { localStorage.removeItem(storageKey); } catch {}
     syncDebugWatermark();
     show('intro');
-    document.title = `${recipient.label} | HISTI Full`;
+    document.title = `${recipient.label} | ${testName}`;
   });
 }
 
@@ -569,13 +575,13 @@ $('slide-count').textContent = `${slides.length} cards.`;
 const groupLinks = document.createDocumentFragment();
 for (const [key, info] of Object.entries(RECIPIENTS)) {
   if (key === group) continue;
-  const link = el('a', '', info.label); link.href = `/checkin-4-${key.toLowerCase()}${debugMode ? '?debug=1' : ''}`; groupLinks.append(link);
+  const link = el('a', '', info.label); link.href = `${routeBase}-${key.toLowerCase()}${debugMode ? '?debug=1' : ''}`; groupLinks.append(link);
 }
 $('intro-group-links').append(groupLinks);
 $('start-btn').addEventListener('click', () => { state.started = true; save(); void transitionSlide(state.index); });
 $('back-btn').addEventListener('click', () => { if (state.index > 0) void transitionSlide(state.index - 1); });
 $('next-btn').addEventListener('click', () => {
-  if (state.index === slides.length - 1) void transitionPage('Check-in complete', 'Your result is ready.', `${recipient.label} · HISTI Full`, () => renderResults(true), 'result-heading');
+  if (state.index === slides.length - 1) void transitionPage('Check-in complete', 'Your result is ready.', `${recipient.label} · ${testName}`, () => renderResults(true), 'result-heading');
   else void transitionSlide(state.index + 1);
 });
 $('partial-btn').addEventListener('click', () => { void transitionPage('Current results', 'Your snapshot is ready.', `${recipient.label} · You can return to your questions`, () => renderResults(false), 'result-heading'); });

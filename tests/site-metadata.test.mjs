@@ -6,7 +6,7 @@ import { makeSlides, displayScore } from '../histi4-core.js';
 
 const read = file => readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
 const origin = 'https://www.histi.org';
-const pages = ['index', 'checkin-page', 'checkin-4', ...[1, 2, 3, 4].map(n => `checkin-4-g${n}`)];
+const pages = ['index', 'checkin-page', 'checkin-4', ...[1, 2, 3, 4].map(n => `checkin-4-g${n}`), 'checkin-120', ...[1,2,3,4].map(n=>`checkin-120-g${n}`)];
 const urlFor = page => `${origin}/${page === 'index' ? '' : page}`;
 const metadata = html => {
   const blocks = [...html.matchAll(/<script type="application\/ld\+json" id="[^"]+">([\s\S]*?)<\/script>/g)];
@@ -39,7 +39,7 @@ test('public pages have unique, consistent canonical and social metadata', () =>
     assert.equal(webpage.url, urlFor(page));
     assert.equal(webpage.name, title);
     assert.equal(webpage.isPartOf['@id'], `${origin}/#website`);
-    assert.equal(webpage.about['@id'], `${origin}/#full-test`);
+    assert.equal(webpage.about['@id'], `${origin}/#${page.startsWith('checkin-120')?'histi-120':'full-test'}`);
   }
 });
 
@@ -48,14 +48,14 @@ test('definitions describe the real current test, not an invented validated asse
   assert.equal(full['@type'], 'CreativeWork');
   assert.ok(full.description.includes(`${FAMILIES.length} questions`));
   assert.ok(full.description.includes(`${makeSlides().length} cards`));
-  assert.match(full.description, /55–70 minutes for one person/);
+  assert.match(full.description, /40–50 minutes for one person/);
   assert.match(full.audience.audienceType, /13 and up/);
   assert.match(full.description, /no requirement to complete all four relationships/i);
   assert.match(full.abstract, /The score is not fully accurate to true privacy and openness values\./);
   assert.match(full.abstract, /not a diagnosis, legal opinion, safety assessment/);
   assert.match(full.abstract, /Neither a more private nor a more open result is better/);
-  assert.equal(entity('histi-120').creativeWorkStatus, 'Temporarily paused');
-  assert.match(entity('histi-120').description, /temporarily unavailable/);
+  assert.equal(entity('histi-120').creativeWorkStatus, 'Available');
+  assert.match(entity('histi-120').description, /not yet been revalidated/);
   const glossary = entity('definitions').hasDefinedTerm;
   const codes = glossary.filter(term => term.termCode in CATEGORY_META);
   assert.deepEqual(codes.map(term => term.termCode), Object.keys(CATEGORY_META));
@@ -148,7 +148,7 @@ test('search discovery lists only current public destinations', () => {
   const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
   assert.deepEqual(urls, [...pages, 'privacy', 'terms'].map(urlFor));
   assert.equal(new Set(urls).size, urls.length);
-  urls.forEach(url => assert.doesNotMatch(url, /checkin-120|checkin-v3|[?#]/));
+  urls.forEach(url => assert.doesNotMatch(url, /checkin-v3|[?#]/));
   for (const page of ['privacy', 'terms']) {
     assert.ok(read(`${page}.html`).includes(`<link rel="canonical" href="${urlFor(page)}">`));
   }

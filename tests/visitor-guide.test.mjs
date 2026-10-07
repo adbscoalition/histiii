@@ -22,16 +22,16 @@ test('getting started makes the available format and optional other relationship
   assert.match(formats, /<ol class="visitor-path" aria-label="Getting started">/);
   assert.match(formats, /aria-current="step"/);
   assert.match(formats, /Available now · Ages 13\+/);
-  assert.match(formats, /55–70 minutes per person · 245 questions/);
-  assert.doesNotMatch(formats, /href="\/checkin-120/);
-  assert.equal((formats.match(/aria-disabled="true"/g) || []).length, 5);
+  assert.match(formats, /40–50 minutes per person · 245 questions/);
+  assert.match(formats, /href="\/checkin-120/);
+  assert.equal((formats.match(/aria-disabled="true"/g) || []).length, 6);
   assert.match(read('checkin-4.html'), /No names needed/);
   for (const page of fullPages) {
     const html = read(page);
     const intro = html.match(/<main id="intro-screen"[\s\S]*?<\/main>/)[0];
     assert.match(intro, /Before you begin/);
     assert.match(intro, /Take breaks; return in this same browser/);
-    assert.match(intro, /<strong>55–70 minutes<\/strong>/);
+    assert.match(intro, /<strong>40–50 minutes<\/strong>/);
     for (const id of ['intro-recipient','intro-description','slide-count','start-btn','intro-group-links']) assert.ok(intro.includes(`id="${id}"`));
     assert.doesNotMatch(intro, /10–12 level questions|Full assessment/);
     assert.match(html, /A SNAPSHOT, NOT A LABEL/);

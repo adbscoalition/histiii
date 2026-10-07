@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const read = file => readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
-const pages = {'index.html':'home','checkin-page.html':'formats','checkin-4.html':'people','checkin-4-g1.html':'checkin','checkin-4-g2.html':'checkin','checkin-4-g3.html':'checkin','checkin-4-g4.html':'checkin','checkin.html':'checkin','checkin-v3.html':'checkin','checkin-120.html':'checkin','privacy.html':'privacy','terms.html':'terms'};
+const pages = {'index.html':'home','checkin-page.html':'formats','checkin-4.html':'people','checkin-4-g1.html':'checkin','checkin-4-g2.html':'checkin','checkin-4-g3.html':'checkin','checkin-4-g4.html':'checkin','checkin.html':'checkin','checkin-v3.html':'checkin','checkin-120.html':'people',...Object.fromEntries([1,2,3,4].map(n=>[`checkin-120-g${n}.html`,'checkin'])),'privacy.html':'privacy','terms.html':'terms'};
 
 test('every page has an explicit identity and still uses only three decorative spots', () => {
   for (const [file,identity] of Object.entries(pages)) {

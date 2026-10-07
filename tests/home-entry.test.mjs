@@ -24,6 +24,37 @@ const fixture=({home=true,hash='',reduced=false,referrer='',navigation='navigate
   return{classes,timers,frames,documentEvents,windowEvents,navigationEvents,browserNavigation,motionEvents,motion,document,location,storage,ready,fireTimer,ghosts,runIntro:()=>runInNewContext(read('home-intro.js'),context)};
 };
 
+test('ordinary entry holds the veil until fonts and page modules settle, then reveals once', async()=>{
+  let settleFonts;
+  const fonts={ready:new Promise(resolve=>{settleFonts=resolve;})};
+  const f=fixture({home:false,complete:false,fonts});
+  f.ready();
+  assert.equal(f.classes.has('histi-url-covered'),true);
+  assert.equal(f.classes.has('histi-page-enter'),false);
+  settleFonts();await Promise.resolve();
+  assert.equal(f.frames.size,0,'fonts alone cannot reveal unfinished content');
+  f.document.readyState='complete';f.windowEvents.load();
+  while(f.frames.size){const [key,fn]=f.frames.entries().next().value;f.frames.delete(key);fn();}
+  assert.equal(f.classes.has('histi-url-covered'),false);
+  assert.equal(f.classes.has('histi-page-enter'),true);
+  f.fireTimer(900);assert.equal(f.timers.size,0);
+  assert.match(read('site-experience.css'),/body:not\(\.histi-home\) :is\(\.start-card,\.result-card\) \{ animation:none; \}/);
+  assert.match(read('site-experience.css'),/scrollbar-gutter:stable/);
+});
+
+test('entry font failures fail open and cannot revive the animation after fallback or navigation', async()=>{
+  for(const interrupted of [false,true]) {
+    let settleFonts;
+    const f=fixture({home:false,fonts:{ready:new Promise(resolve=>{settleFonts=resolve;})}});
+    f.ready();
+    if(interrupted) f.windowEvents.pagehide();else f.fireTimer(1500);
+    settleFonts();await Promise.resolve();
+    assert.equal(f.classes.has('histi-url-covered'),false);
+    assert.equal(f.classes.has('histi-page-enter'),false);
+    assert.equal(f.frames.size,0);assert.equal(f.timers.size,0);
+  }
+});
+
 test('the homepage remains the destination, with no welcome page or required enter action',()=>{
   const html=read('index.html');
   assert.match(html,/<html lang="en" data-home-entry>/);

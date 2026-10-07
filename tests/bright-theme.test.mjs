@@ -51,16 +51,13 @@ test('motion pauses on hidden tabs and page exit, and resumes on return', () => 
   windowEvents.pageshow(); assert.equal(classes.has('suite-motion-paused'), false);
 });
 
-test('HISTI-120 is paused reversibly, including direct and HTML links', () => {
+test('new HISTI-120 replaces the paused legacy route, including HTML links', () => {
   const config = JSON.parse(read('vercel.json'));
-  for (const source of ['/checkin-120','/checkin-120.html','/checkin-120/:path*']) {
-    assert.deepEqual(config.redirects.find(rule => rule.source === source), {source, destination:'/checkin-page', permanent:false});
-  }
+  assert.equal(config.redirects.some(rule => rule.source.startsWith('/checkin-120')), false);
   for (const file of ['index.html','checkin-page.html']) {
-    assert.doesNotMatch(read(file), /href="\/checkin-120/);
-    assert.match(read(file), /is-paused" aria-disabled="true"/);
-    assert.match(read(file), /temporarily (unavailable|paused)/i);
+    assert.match(read(file), /href="\/checkin-120/);
+    assert.doesNotMatch(read(file), /temporarily (unavailable|paused)/i);
   }
-  assert.match(read('checkin-120.html'), /app-histi120\.js/);
-  assert.match(read('questions-histi120.js'), /questions/);
+  assert.match(read('checkin-120.html'), /checkin-120-g4/);
+  assert.doesNotMatch(read('checkin-120.html'), /app-histi120\.js/);
 });
