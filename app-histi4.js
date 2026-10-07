@@ -3,10 +3,11 @@ import { openDialog, closeDialog, confirmReset } from './site-dialogs.js?v=motio
 import { makeSlides, remapLegacySlideIndex, calculate as calculateFamilies, rubricPoints, displayScore } from './histi4-core.js?v=pna-1';
 import { describeScore, describeTopic, coverageText, createResultReveal } from './histi4-results.js?v=1';
 
-const abridged = document.body.dataset.test === '120';
-const { FAMILIES, CATEGORY_META, RECIPIENTS } = await import(abridged ? './histi120-family-data.js?v=1' : './histi4-data.js');
-const testName = abridged ? 'HISTI-120' : 'HISTI Full';
-const routeBase = abridged ? '/checkin-120' : '/checkin-4';
+const shortForm = document.body.dataset.test === '60';
+const abridged = shortForm || document.body.dataset.test === '120';
+const { FAMILIES, CATEGORY_META, RECIPIENTS } = await import(shortForm ? './histi60-family-data.js?v=1' : abridged ? './histi120-family-data.js?v=1' : './histi4-data.js');
+const testName = shortForm ? 'HISTI-60' : abridged ? 'HISTI-120' : 'HISTI Full';
+const routeBase = shortForm ? '/checkin-60' : abridged ? '/checkin-120' : '/checkin-4';
 const calculate = answers => calculateFamilies(answers, FAMILIES);
 const group = document.body.dataset.recipient;
 const recipient = RECIPIENTS[group];
@@ -20,7 +21,7 @@ const sharingWith = {
 }[group];
 const slides = makeSlides(FAMILIES);
 const familyByCode = new Map(FAMILIES.map(row => [row[0], row]));
-const storageKey = abridged ? `histi.120-families.${group}.v1` : `histi.four-groups.${group}.v1`;
+const storageKey = shortForm ? `histi.60-families.${group}.v1` : abridged ? `histi.120-families.${group}.v1` : `histi.four-groups.${group}.v1`;
 const $ = id => document.getElementById(id);
 const el = (tag, className, text) => {
   const node = document.createElement(tag);

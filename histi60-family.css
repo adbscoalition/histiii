@@ -1,0 +1,8 @@
+/* The existing Full UI, with a soft iris identity for the 60-question short form. */
+body.histi-60 { --palette-paper:#f8f7ff; --suite-bg:var(--palette-paper); --suite-accent:var(--palette-iris); --suite-accent-ink:var(--palette-iris-ink); }
+body.histi-60 .group-setup-meta .eyebrow, body.histi-60 .eyebrow { color:var(--palette-iris-ink); }
+body.histi-60 .result-spectrum { background:linear-gradient(90deg,#7180ce,#eceaff 50%,#a9c7fa)!important; }
+body.histi-60 .assessment-card:is([data-category="A1"],[data-category="A2"]) .question-top { background:var(--palette-iris-soft)!important; border-color:#c2bedd!important; }
+.h4-question-scope { margin:8px 0 20px; color:var(--suite-muted); font-size:14px; line-height:1.6; }
+.abridged-context,.abridged-validation { max-width:76ch; color:var(--suite-muted); font-size:14px; line-height:1.6; }
+.abridged-validation { font-size:12px; }

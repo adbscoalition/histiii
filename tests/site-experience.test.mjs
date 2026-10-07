@@ -7,7 +7,7 @@ const read = file => readFileSync(new URL(file, root), 'utf8');
 
 test('every page has one static safety notice and the shared visual system', () => {
   const pages = readdirSync(root).filter(file => file.endsWith('.html'));
-  assert.equal(pages.length, 16);
+  assert.equal(pages.length, 21);
   for (const file of pages) {
     const html = read(file);
     assert.equal((html.match(/class="histi-safety-notice"/g) || []).length, 1, file);

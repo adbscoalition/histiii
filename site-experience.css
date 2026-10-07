@@ -239,6 +239,9 @@ img[src*="histi-logo"] { filter:brightness(.18); }
 .example-disclaimer { background:#ffe6d2; border-color:#d6ae94; }
 .home-format.full-format,.app-card.available.full { background:var(--control-soft); border-color:#96bdd5; }
 .home-format.short-format,.app-card.condensed { background:var(--palette-iris-soft); border-color:#b7bfde; }
+.home-format.compact-format,.app-card.available.short { background:var(--palette-rose-soft); border-color:#d8b4c7; }
+.home-format.compact-format h3 em { color:var(--palette-rose-ink); }
+@media(min-width:1060px) { .home-format-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
 .home-format h3 em { color:var(--palette-apricot-ink); }
 .short-format h3 em { color:var(--palette-iris-ink); }
 .full-format .format-top,.full-format .format-link { color:var(--palette-blue-ink); border-color:#96bdd5; }

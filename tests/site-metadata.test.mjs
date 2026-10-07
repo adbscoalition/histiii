@@ -6,7 +6,7 @@ import { makeSlides, displayScore } from '../histi4-core.js';
 
 const read = file => readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
 const origin = 'https://www.histi.org';
-const pages = ['index', 'checkin-page', 'checkin-4', ...[1, 2, 3, 4].map(n => `checkin-4-g${n}`), 'checkin-120', ...[1,2,3,4].map(n=>`checkin-120-g${n}`)];
+const pages = ['index', 'checkin-page', 'checkin-4', ...[1, 2, 3, 4].map(n => `checkin-4-g${n}`), 'checkin-120', ...[1,2,3,4].map(n=>`checkin-120-g${n}`), 'checkin-60', ...[1,2,3,4].map(n=>`checkin-60-g${n}`)];
 const urlFor = page => `${origin}/${page === 'index' ? '' : page}`;
 const metadata = html => {
   const blocks = [...html.matchAll(/<script type="application\/ld\+json" id="[^"]+">([\s\S]*?)<\/script>/g)];
@@ -39,7 +39,7 @@ test('public pages have unique, consistent canonical and social metadata', () =>
     assert.equal(webpage.url, urlFor(page));
     assert.equal(webpage.name, title);
     assert.equal(webpage.isPartOf['@id'], `${origin}/#website`);
-    assert.equal(webpage.about['@id'], `${origin}/#${page.startsWith('checkin-120')?'histi-120':'full-test'}`);
+    assert.equal(webpage.about['@id'], `${origin}/#${page.startsWith('checkin-60')?'histi-60':page.startsWith('checkin-120')?'histi-120':'full-test'}`);
   }
 });
 
@@ -56,6 +56,10 @@ test('definitions describe the real current test, not an invented validated asse
   assert.match(full.abstract, /Neither a more private nor a more open result is better/);
   assert.equal(entity('histi-120').creativeWorkStatus, 'Available');
   assert.match(entity('histi-120').description, /not yet been revalidated/);
+  assert.equal(entity('histi-60').creativeWorkStatus, 'Available');
+  assert.match(entity('histi-60').description, /60 questions per recipient across 7 cards, estimated at 10–15 minutes/);
+  assert.match(entity('histi-60').description, /not yet been revalidated/);
+  assert.equal(entity('histi-60').license, 'https://creativecommons.org/licenses/by-nd/4.0/');
   const glossary = entity('definitions').hasDefinedTerm;
   const codes = glossary.filter(term => term.termCode in CATEGORY_META);
   assert.deepEqual(codes.map(term => term.termCode), Object.keys(CATEGORY_META));
