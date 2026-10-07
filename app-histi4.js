@@ -596,4 +596,5 @@ $('result-replay-btn').addEventListener('click', revealResult);
 if (state.completed) renderResults(true);
 else if (state.started && state.screen !== 'intro') renderSlide();
 else show('intro');
+$('start-btn').disabled = false;
 window.__HISTI4__ = { group, slides, calculate, rubricPoints, getState: () => state };

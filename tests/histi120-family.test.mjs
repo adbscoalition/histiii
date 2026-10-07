@@ -82,12 +82,14 @@ test('new routes use the Full UI and separate saved answers for every format and
   assert.match(app,/histi\.120-families\.\$\{group\}\.v1/);
   assert.match(app,/histi\.four-groups\.\$\{group\}\.v1/);
   assert.match(app,/makeSlides\(FAMILIES\)/);
+  assert.match(app,/\$\('start-btn'\)\.disabled = false/);
   assert.match(app,/calculateFamilies\(answers, FAMILIES\)/);
   assert.match(app,/variants\[Number\(group\.slice\(1\)\) - 1\]/);
   assert.match(app,/\$\{routeBase\}-\$\{key\.toLowerCase\(\)\}/);
   for (let group=1;group<=4;group++) {
     const html=read(`checkin-120-g${group}.html`);
     assert.match(html,new RegExp(`data-test="120" data-recipient="G${group}"`));
+    assert.match(html,/id="start-btn"[^>]+disabled/,'Start cannot accept an unbound early click');
     for (const text of ['120 questions','20–25 minutes','histi120-family.css','app-histi4.js','histi4-results.css','histi4-privacy.js','has not yet been revalidated','The score is not fully accurate to true privacy and openness values.']) assert.ok(html.includes(text),text);
     assert.doesNotMatch(html,/245 questions|55–70|app-histi120\.js|<textarea|type="text"|A1-001/);
   }
