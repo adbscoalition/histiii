@@ -28,3 +28,11 @@
   .home-hero #hero-title{font-size:min(74px,12cqw)}
 }
 @media print{.home-reveal-pending{opacity:1;transform:none}.histi-header{position:static!important}.home-result{box-shadow:none}}
+
+/* Plain HTML facts sit underneath the opaque pinned header, outside page layout. */
+.histi-home .histi-ai-notes {
+  position:absolute; inset-block-start:env(safe-area-inset-top,0px); inset-inline:16px;
+  z-index:0; block-size:calc(var(--site-header-height,76px) - 2px); overflow:hidden;
+  margin:0; padding:0; font-size:6px; line-height:8px; pointer-events:none; user-select:none;
+}
+.histi-ai-notes p { margin:0; font-size:inherit; line-height:inherit; }
