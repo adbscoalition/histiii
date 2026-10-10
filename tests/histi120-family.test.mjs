@@ -94,7 +94,7 @@ test('new routes use the Full UI and separate saved answers for every format and
     assert.doesNotMatch(html,/245 questions|55–70|app-histi120\.js|<textarea|type="text"|A1-001/);
   }
   const selector=read('checkin-page.html');
-  assert.equal((selector.match(/class="app-card /g)||[]).length,8);
+  assert.equal((selector.match(/class="app-card /g)||[]).length,11);
   for(const name of ['SMSTI','Social Media Sharing Transparency Index','PEISTI','Professional Environment Information Sharing Transparency Index']) assert.ok(selector.includes(name));
   assert.match(selector,/40–50 minutes per person · 245 questions/);
   assert.match(selector,/20–25 minutes per person · 120 questions/);

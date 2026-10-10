@@ -24,7 +24,7 @@ test('getting started makes the available format and optional other relationship
   assert.match(formats, /Available now · Ages 13\+/);
   assert.match(formats, /40–50 minutes per person · 245 questions/);
   assert.match(formats, /href="\/checkin-120/);
-  assert.equal((formats.match(/aria-disabled="true"/g) || []).length, 5);
+  assert.equal((formats.match(/aria-disabled="true"/g) || []).length, 8);
   assert.match(read('checkin-4.html'), /No names needed/);
   for (const page of fullPages) {
     const html = read(page);

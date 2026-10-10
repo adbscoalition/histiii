@@ -89,3 +89,16 @@ test('all four routes share the accessible result card and no animation or score
   assert.doesNotMatch(read('histi4-results.css'),/infinite|filter:|will-change|backdrop-filter/);
   assert.match(read('histi4-results.css'),/grid-template-columns:1fr/);
 });
+
+test('120 and 60 tint only rounded result tracks, leaving scale labels on a clear background', () => {
+  for (const [variant,midpoint,endpoint] of [['120','#d9eaff','#8ed7fa'],['60','#eceaff','#a9c7fa']]) {
+    const css=read(`histi${variant}-family.css`);
+    const rule=css.match(new RegExp(`body\\.histi-${variant} #results-screen :is\\(\\.spectrum-track,\\.category-track\\) \\{([^}]+)\\}`));
+    assert.ok(rule, 'the format color targets both actual rounded tracks');
+    assert.ok(rule[1].includes(`linear-gradient(90deg,#7180ce,${midpoint} 50%,${endpoint})!important`));
+    assert.doesNotMatch(css,/\.result-spectrum\s*\{[^}]*background:/);
+    for (const suffix of ['', '-g1', '-g2', '-g3', '-g4']) {
+      assert.ok(read(`checkin-${variant}${suffix}.html`).includes(`/histi${variant}-family.css?v=2`));
+    }
+  }
+});
