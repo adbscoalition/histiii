@@ -19,7 +19,9 @@ test('descriptions cover both endpoints, the midpoint, and absent scores without
     const empty = describeTopic(key, {score:null});
     assert.match(empty.description, /not the same as a neutral result/);
     assert.ok(empty.scope && empty.prompt);
-    assert.match(describeTopic(key, {score:100}).description, /not a recommendation to share/);
+    const topic = describeTopic(key, {score:100});
+    assert.ok(topic.description.length > 150 && topic.detail.length > 150);
+    if (['B','C','D'].includes(key)) assert.match(topic.detail, /not a recommendation to share/);
   }
   assert.match(describeTopic('D', {score:100}).prompt, /Never share real passwords or codes/);
 });
@@ -76,7 +78,7 @@ test('all four routes share the accessible result card and no animation or score
     const html=read(`checkin-4-${group}.html`);
     for(const id of ['result-recipient','result-state','result-description','result-context','result-score-meaning','result-early-note','result-explain-btn','result-read-dialog','result-replay-btn'])assert.equal(html.split(`id="${id}"`).length,2);
     assert.match(html,/aria-haspopup="dialog" aria-controls="result-read-dialog"/);
-    assert.match(html,/histi4-results\.css\?v=references-1/);
+    assert.match(html,/histi4-results\.css\?v=editorial-1/);
     assert.match(html,/not a percentage of your privacy/);
     assert.match(html,/The score is not fully accurate to true privacy and openness values\./);
   }

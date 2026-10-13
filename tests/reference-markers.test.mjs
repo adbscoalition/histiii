@@ -42,11 +42,11 @@ test('school, unknown recipients, and unsupported categories have no reference',
 });
 
 test('comparisons distinguish direction, equality, and unscored answers', () => {
-  assert.equal(compareReference(50, 50), 'At the reference score');
-  assert.equal(compareReference(-100, 50), '150 points toward private from the reference');
-  assert.equal(compareReference(100, -90), '190 points toward open from the reference');
-  assert.equal(compareReference(1, 0), '1 point toward open from the reference');
-  assert.equal(compareReference(35.4, 35), '0.4 points toward open from the reference');
+  assert.equal(compareReference(50, 50), 'Your result lines up with this reference.');
+  assert.equal(compareReference(-100, 50), '150 points more private than this reference.');
+  assert.equal(compareReference(100, -90), '190 points more open than this reference.');
+  assert.equal(compareReference(1, 0), '1 point more open than this reference.');
+  assert.equal(compareReference(35.4, 35), '0.4 points more open than this reference.');
   assert.equal(compareReference(null, 0), null);
   assert.equal(compareReference(0, null), null);
   assert.equal(compareReference(NaN, 0), null);
@@ -75,9 +75,9 @@ test('result references are accessible, separated from user markers, and never a
   const app = read('app-histi4.js');
   assert.match(app, /referenceScore\(document\.body\.dataset\.test \|\| 'full', group, key\)/);
   assert.match(app, /marker.hidden = bucket.score === null/);
-  assert.match(app, /if \(reference !== null\) card.append\(comparison\)/);
+  assert.match(app, /if \(reference !== null\) spectrum.append\(comparison\)/);
   assert.match(app, /if \(!school && !\$\('result-reference-note'\)\)/);
-  assert.match(app, /not verified population averages or targets/);
+  assert.match(app, /not a verified population average or a target/);
   assert.match(app, /Reference: \$\{displayScore\(reference\)\}/);
   assert.match(app, /category-results'\)\.replaceChildren\(fragment\)/);
   const css = read('histi4-results.css');
@@ -88,8 +88,8 @@ test('result references are accessible, separated from user markers, and never a
   for (const variant of ['4','120','60','school']) {
     for (const group of ['g1','g2','g3','g4']) {
       const html = read(`checkin-${variant}-${group}.html`);
-      assert.match(html, /histi4-results\.css\?v=references-1/);
-      assert.match(html, /app-histi4\.js\?v=references-1/);
+      assert.match(html, /histi4-results\.css\?v=editorial-1/);
+      assert.match(html, /app-histi4\.js\?v=editorial-1/);
     }
   }
 });

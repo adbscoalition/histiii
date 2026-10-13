@@ -34,7 +34,7 @@ test('getting started makes the available format and optional other relationship
     assert.match(intro, /<strong>40–50 minutes<\/strong>/);
     for (const id of ['intro-recipient','intro-description','slide-count','start-btn','intro-group-links']) assert.ok(intro.includes(`id="${id}"`));
     assert.doesNotMatch(intro, /10–12 level questions|Full assessment/);
-    assert.match(html, /A SNAPSHOT, NOT A LABEL/);
+    assert.match(html, /About this result/);
     assert.match(html, /The score is not fully accurate to true privacy and openness values\./);
   }
 });

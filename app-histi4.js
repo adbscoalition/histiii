@@ -1,7 +1,7 @@
 import { resetTransition } from './reset-transition.js?v=1';
 import { openDialog, closeDialog, confirmReset } from './site-dialogs.js?v=motion-1';
 import { makeSlides, remapLegacySlideIndex, calculate as calculateFamilies, rubricPoints, displayScore } from './histi4-core.js?v=school-1';
-import { describeScore, describeTopic, coverageText, referenceScore, compareReference, createResultReveal } from './histi4-results.js?v=references-1';
+import { describeRelationship, describeTopic, describePattern, coverageText, referenceScore, compareReference, createResultReveal } from './histi4-results.js?v=editorial-1';
 
 const school = document.body.dataset.test === 'school';
 const shortForm = document.body.dataset.test === '60';
@@ -405,16 +405,16 @@ function renderSlide(scroll = true) {
 function resultCategory(key, result) {
   const meta = CATEGORY_META[key];
   const bucket = result.categories[key];
-  const reading = describeTopic(key, bucket);
+  const reading = describeTopic(key, bucket, { group, school });
   if (school) { reading.scope = meta.scope; reading.prompt = meta.prompt; }
   const card = el('article', 'category-card');
   card.setAttribute('aria-labelledby', `result-topic-${key}`);
   card.style.setProperty('--score-position', `${bucket.score === null ? 50 : (bucket.score + 100) / 2}%`);
   const top = el('div', 'category-card-top');
   const title = el('h3', 'category-name', meta.label); title.id = `result-topic-${key}`;
-  const score = el('strong', '', displayScore(bucket.score));
+  const score = el('strong', 'category-score', displayScore(bucket.score));
   score.setAttribute('aria-label', bucket.score === null ? 'Not scored yet' : `${displayScore(bucket.score)}: ${reading.label}`);
-  top.append(el('span', 'category-letter h4-category-letter', key), title, score);
+  top.append(el('span', 'category-letter h4-category-letter', key), title);
   const track = el('div', 'category-track'); track.setAttribute('aria-hidden', 'true');
   const marker = el('span', 'category-user-marker'); marker.hidden = bucket.score === null; track.append(marker);
   const reference = referenceScore(document.body.dataset.test || 'full', group, key);
@@ -424,7 +424,7 @@ function resultCategory(key, result) {
     track.style.setProperty('--reference-position', `${(reference + 100) / 2}%`);
     track.append(el('span', 'category-reference-stem'), el('span', 'category-reference-marker'));
     const yours = el('p', 'result-comparison-yours');
-    yours.append(el('span', 'comparison-symbol comparison-symbol-user'), document.createTextNode(`Your score: ${bucket.score === null ? 'Not scored' : displayScore(bucket.score)}`));
+    yours.append(el('span', 'comparison-symbol comparison-symbol-user'), document.createTextNode(`You: ${bucket.score === null ? 'Not scored' : displayScore(bucket.score)}`));
     const guide = el('p', 'result-comparison-reference');
     guide.append(el('span', 'comparison-symbol comparison-symbol-reference'), document.createTextNode(`Reference: ${displayScore(reference)}`));
     comparison.append(yours, guide);
@@ -434,37 +434,42 @@ function resultCategory(key, result) {
   }
   const labels = el('div', 'v3-topic-labels'); labels.append(el('span', '', 'P100'), el('span', '', 'N0'), el('span', '', 'O100'));
   labels.setAttribute('aria-hidden', 'true');
-  const prompt = el('p', 'result-topic-prompt'); prompt.append(el('span', '', 'A moment to reflect'), document.createTextNode(reading.prompt));
-  card.append(top, el('p', 'result-topic-scope', reading.scope), track, labels);
-  if (reference !== null) card.append(comparison);
-  card.append(
-    el('p', 'result-topic-label', reading.label), el('p', 'result-topic-description', reading.description), prompt,
-    el('small', 'h4-category-summary', `${bucket.answered} of ${bucket.total} questions scored`));
+  const prompt = el('p', 'result-topic-prompt'); prompt.append(el('span', '', 'Something to think about'), document.createTextNode(reading.prompt));
+  const spectrum = el('div', 'result-topic-spectrum');
+  spectrum.append(score, el('p', 'result-topic-label', reading.label), track, labels);
+  if (reference !== null) spectrum.append(comparison);
+  spectrum.append(el('small', 'h4-category-summary', `${bucket.answered} of ${bucket.total} questions scored`));
+  const story = el('div', 'result-topic-story');
+  story.append(el('p', 'result-topic-description', reading.description));
+  if (reading.detail) story.append(el('p', 'result-topic-detail', reading.detail));
+  story.append(prompt);
+  const layout = el('div', 'result-topic-layout'); layout.append(spectrum, story);
+  card.append(top, el('p', 'result-topic-scope', reading.scope), layout);
   return card;
 }
 function renderResults(completed = false) {
   if (completed) state.completed = true;
   const result = calculate(state.answers);
-  const reading = describeScore(result.score);
+  const reading = describeRelationship(result.score, group, { school });
   show('results');
   $('result-recipient').textContent = `Sharing with ${sharingWith}`;
-  $('result-state').textContent = completed ? 'End-of-check-in snapshot' : 'Current snapshot · You can keep going';
+  $('result-state').textContent = completed ? 'Your check-in result' : 'Still in progress · You can come back';
   $('result-heading').textContent = reading.title;
   $('result-description').textContent = reading.description;
-  $('result-context').textContent = `Read this in the context of sharing with ${sharingWith}. It describes this set of answers—not who you are.`;
+  $('result-context').textContent = reading.context;
   $('result-score').textContent = displayScore(result.score);
   $('result-score').setAttribute('aria-label', result.score === null ? 'No score yet' : `${displayScore(result.score)}: ${reading.label}`);
   $('result-score-meaning').textContent = reading.label;
   $('result-marker').hidden = result.score === null;
   $('result-marker').parentElement.style.setProperty('--score-position', `${result.score === null ? 50 : (result.score + 100) / 2}%`);
   $('result-coverage').textContent = coverageText(result);
-  $('result-early-note').textContent = result.answered === 0 ? 'No scored answers yet. Missing answers are not treated as neutral.'
-    : result.answered < result.total ? 'An incomplete snapshot. The score can change as more questions or areas are included.' : 'All questions are scored. This is still a reflection, not a precise measurement.';
+  $('result-early-note').textContent = result.answered === 0 ? 'No scored answers yet. Leaving something blank does not count as a middle answer.'
+    : result.answered < result.total ? 'Only scored answers are included. This number can change if you add or revise answers.' : 'All your answers are included. Think of this as a starting point for reflection, not an exact measurement.';
   if (school) $('result-early-note').textContent += result.answered < result.total ? ' Scores are not directly comparable when questions or areas are missing. This is not a grade.' : ' Your score is not a grade, a sign of honesty, or advice to share.';
   const unknown = FAMILIES.filter(row => state.answers[row[0]]?.status === 'unknown').length;
   const na = FAMILIES.filter(row => state.answers[row[0]]?.status === 'na').length;
   const pna = FAMILIES.filter(row => state.answers[row[0]]?.status === 'pna').length;
-  $('result-scoring-detail').textContent = `This snapshot scores ${result.answered} of ${result.total} questions, including ${pna} “Prefer not to answer” response${pna === 1 ? '' : 's'}. ${unknown} “I don’t know” and ${na} “Not applicable” responses are excluded; ${result.total - result.answered - unknown - na} other questions are not scored.`;
+  $('result-scoring-detail').textContent = `This result scores ${result.answered} of ${result.total} questions, including ${pna} “Prefer not to answer” response${pna === 1 ? '' : 's'}. ${unknown} “I don’t know” and ${na} “Not applicable” responses are excluded; ${result.total - result.answered - unknown - na} other questions are not scored.`;
   if (school) {
     const skipped = FAMILIES.filter(row => ['skip','pna'].includes(state.answers[row[0]]?.status)).length;
     $('result-scoring-detail').textContent = `${result.answered} of ${result.total} questions are scored. ${skipped} skipped / prefer-not-to-answer, ${unknown} “I don’t know,” and ${na} “Not applicable” responses are excluded from both earned and available points. Other unanswered questions are also excluded. The four category weights are A1 23, A2 25, B 25, C 20; Category D is not included.`;
@@ -472,10 +477,23 @@ function renderResults(completed = false) {
   const fragment = document.createDocumentFragment();
   Object.keys(CATEGORY_META).forEach(key => fragment.append(resultCategory(key, result)));
   $('category-results').replaceChildren(fragment);
+  const pattern = describePattern(result, CATEGORY_META);
+  const perspective = document.querySelector('#results-screen .result-perspective');
+  const patternHeading = el('h2', '', pattern.title); patternHeading.id = 'result-pattern-heading';
+  perspective.setAttribute('aria-labelledby', patternHeading.id);
+  perspective.replaceChildren(el('p', 'result-story-kicker', 'Looking at the topics'), patternHeading,
+    el('p', 'result-pattern-description', pattern.description), el('p', 'result-pattern-note', pattern.note));
   if (!school && !$('result-reference-note')) {
-    const note = el('p', 'result-reference-note', `Compare with the reference for ${sharingWith}: a solid circle is your score; an outlined diamond is the reference. These are comparison guides, not verified population averages or targets.`);
+    const note = el('p', 'result-reference-note', `The dot is your result; the diamond is a reference for ${sharingWith}. The reference is a guide, not a verified population average or a target.`);
     note.id = 'result-reference-note';
     $('category-results').before(note);
+  }
+  if (!$('result-next-copy')) {
+    const followup = el('div', 'result-next-copy'); followup.id = 'result-next-copy';
+    followup.append(el('h2', '', 'Want to look at it again?'), el('p', '', school
+      ? 'You can revisit a question, think about a different person, or stop here. You don’t need to show anyone your answers. This is not a grade.'
+      : 'Look back at a question that gave you pause, or try thinking of someone else. You don’t need to share this result with anyone.'));
+    document.querySelector('#results-screen .result-next-steps').prepend(followup);
   }
   $('resume-btn').textContent = completed ? 'Review questions' : 'Resume questions';
   document.title = `Result · ${recipient.label} | ${testName}`;
