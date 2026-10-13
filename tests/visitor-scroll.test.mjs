@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { wheelDistance, glidePosition, initVisitorScroll } from '../visitor-scroll.js';
 const read = file => readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
 class Events {
@@ -12,14 +12,15 @@ class Node extends Events {
   constructor() { super();this.dataset={};this.attributes={};this.nodeType=1;this.scrollHeight=100;this.clientHeight=100;this.parentElement=null;this.label={textContent:''};this.hidden=true; }
   querySelector() { return this.label; }
   setAttribute(name,value) { this.attributes[name]=value; }
-  closest(selector) { return selector==='[data-scroll-glide]'&&this.isToggle ? this : selector.includes('input,')&&this.isInput ? this : selector==='[data-visitor-motion]'&&this.isMotion ? this : null; }
+  closest(selector) { return selector==='[data-scroll-glide]'&&this.isToggle ? this : selector.includes('input,')&&(this.isInput||this.isSlider) ? this : selector.includes('data-visitor-motion')&&this.isMotion ? this : null; }
 }
 const fixture = () => {
   const root=new Events(),host=new Events(),button=new Node(),element=new Node(),motion=new Events(),pointer=new Events();
-  root.body=new Node();root.body.dataset.page='formats';root.body.paused=false;root.body.classList={contains:()=>root.body.paused};
+  root.body=new Node();root.body.dataset.page='formats';root.body.paused=false;root.body.classList={contains:name=>name==='reduce-motion'?root.body.reduced:root.body.paused};
   root.documentElement=new Node();root.scrollingElement={scrollHeight:5000};root.hidden=false;
   button.isToggle=true;element.parentElement=root.body;
-  root.querySelectorAll=()=>[button];root.querySelector=()=>root.dialog?{}:null;
+  root.querySelectorAll=()=>[button];root.querySelector=()=>root.dialog||root.dragging?{}:null;
+  root.documentElement.matches=()=>Boolean(root.covered);
   motion.matches=false;pointer.matches=true;host.matchMedia=query=>query.includes('reduced-motion')?motion:pointer;
   let now=0,id=0,peak=0;const pending=new Map(),requests=new Set(),positions=[];
   host.scrollY=0;host.scrollX=0;host.innerHeight=800;host.performance={now:()=>now};
@@ -73,13 +74,33 @@ test('opt-out, reduced motion, coarse pointers, controls, dialogs, nested scroll
   f.root.emit('click',{target:f.button});f.wheel();assert.equal(f.pending.size,1);
   f.motion.matches=true;f.motion.emit('change');assert.equal(f.pending.size,0);assert.equal(f.button.disabled,true);assert.equal(f.wheel().prevented,false);
   f.motion.matches=false;f.pointer.matches=false;f.pointer.emit('change');assert.equal(f.button.hidden,true);assert.equal(f.wheel().prevented,false);
-  const other=fixture();other.root.body.dataset.page='checkin';initVisitorScroll(other.root,other.host);assert.equal(other.host.listeners.wheel,undefined);
+  const other=fixture();other.root.body.dataset.page='unknown';initVisitorScroll(other.root,other.host);assert.equal(other.host.listeners.wheel,undefined);
 });
 
-test('scroll physics is visitor-only, bounded, and has no timers, storage, generated nodes, or assessment changes',()=>{
+test('every page identity glides, including restored pages that start partway down',()=>{
+  for(const page of ['home','formats','people','checkin','privacy','terms']) {
+    const f=fixture();f.root.body.dataset.page=page;f.host.scrollY=1700;initVisitorScroll(f.root,f.host);
+    assert.equal(f.wheel().prevented,true,page);f.finish();assert.equal(f.host.scrollY,2100,page);
+    f.host.emit('pagehide');initVisitorScroll(f.root,f.host);assert.equal(f.host.listeners.wheel.length,1);
+    f.wheel({deltaY:-400});f.finish();assert.equal(f.host.scrollY,1700,page);
+  }
+});
+
+test('slider drags, URL covers, app reduced-motion settings, and programmatic card changes cancel the glide',()=>{
+  const f=fixture();f.root.body.dataset.page='checkin';initVisitorScroll(f.root,f.host);
+  f.element.isSlider=true;assert.equal(f.wheel().prevented,false);f.element.isSlider=false;
+  for(const flag of ['dragging','covered']) {f.wheel();assert.equal(f.pending.size,1);f.root[flag]=true;assert.equal(f.wheel().prevented,false);assert.equal(f.pending.size,0);f.root[flag]=false;}
+  f.wheel();f.root.body.reduced=true;f.step();assert.equal(f.pending.size,0);assert.equal(f.wheel().prevented,false);f.root.body.reduced=false;
+  f.wheel();f.step();f.host.scrollY=0;f.host.emit('scroll');assert.equal(f.pending.size,0);
+  f.wheel();f.finish();assert.equal(f.host.scrollY,400);
+});
+
+test('site-wide scroll physics is bounded and has no timers, storage, generated nodes, or scoring changes',()=>{
   const js=read('visitor-scroll.js');
   assert.match(js,/now - lastInput >= 650/);assert.match(js,/if \(!frame\)/);assert.match(js,/host\.cancelAnimationFrame\(frame\)/);
   assert.doesNotMatch(js,/setInterval|setTimeout|localStorage|sessionStorage|fetch\(|createElement|innerHTML|MutationObserver/);
-  for(const page of ['index.html','checkin-page.html']) {const html=read(page);assert.match(html,/visitor-scroll\.js\?v=1/);assert.match(html,/visitor-scroll\.css\?v=1/);assert.match(html,/data-scroll-glide hidden aria-label="Use soft scroll glide"/);}
-  for(const variant of ['4','120','60']) for(const suffix of ['', '-g1','-g2','-g3','-g4']) assert.doesNotMatch(read(`checkin-${variant}${suffix}.html`),/visitor-scroll|data-scroll-glide/);
+  const pages=readdirSync(new URL('..',import.meta.url)).filter(file=>file.endsWith('.html'));
+  assert.equal(pages.length,21);
+  for(const page of pages) {const html=read(page);assert.match(html,/visitor-scroll\.js\?v=2/);assert.match(html,/visitor-scroll\.css\?v=2/);assert.match(html,/data-scroll-glide hidden aria-label="Use soft scroll glide"/);assert.equal((html.match(/data-scroll-glide/g)||[]).length,1,page);assert.match(html,/<div class="histi-header-actions">\s+<button class="histi-scroll-toggle"/);}
+  const css=read('visitor-scroll.css');assert.match(css,/body\[data-page="checkin"\]\) \{ scroll-behavior:auto/);assert.match(css,/histi-scroll-toggle\[hidden\]/);assert.match(css,/prefers-reduced-motion:reduce/);
 });

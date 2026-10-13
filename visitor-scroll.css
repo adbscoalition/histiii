@@ -1,5 +1,17 @@
-html:has(body:is([data-page="home"],[data-page="formats"])) { scroll-behavior:smooth; }
+/* The wheel glide is shared; question changes still jump to the top immediately. */
+html:has(body:is([data-page="home"],[data-page="formats"],[data-page="people"],[data-page="privacy"],[data-page="terms"])) { scroll-behavior:smooth; }
+html:has(body[data-page="checkin"]) { scroll-behavior:auto; }
 .pace-settings { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
-.pace-motion[hidden] { display:none!important; }
-html:has(body.visitor-motion-paused) { scroll-behavior:auto; }
-@media(prefers-reduced-motion:reduce) { html:has(body:is([data-page="home"],[data-page="formats"])) { scroll-behavior:auto; } }
+.pace-motion[hidden],.histi-scroll-toggle[hidden] { display:none!important; }
+.histi-header .histi-scroll-toggle { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:36px; padding:0 9px; border:1px solid var(--palette-line); border-radius:999px; background:var(--palette-card); color:var(--palette-muted); font-size:11px; line-height:1.3; font-weight:500; white-space:nowrap; cursor:pointer; box-shadow:none; }
+.histi-header .histi-scroll-toggle[aria-pressed="true"] { background:var(--palette-blue-soft); color:var(--palette-blue-ink); border-color:#b9d6e5; }
+.histi-header .histi-scroll-toggle:disabled { opacity:.65; cursor:default; }
+.histi-scroll-toggle svg { width:14px; height:14px; flex:none; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+@media(max-width:1280px) { .histi-header-inner { grid-template-columns:1fr auto!important; } .histi-header .histi-nav { display:none!important; } }
+@media(max-width:680px) {
+  .histi-header .histi-scroll-toggle { width:30px; min-height:30px; padding:0; flex:none; }
+  .histi-scroll-toggle [data-scroll-label] { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+}
+@media(max-width:420px) and (pointer:fine) { .histi-header-inner { gap:8px!important; } .histi-header-actions { gap:7px; } .histi-header .histi-brand img { width:68px!important; } }
+html:has(body:is(.visitor-motion-paused,.reduce-motion)) { scroll-behavior:auto; }
+@media(prefers-reduced-motion:reduce) { html:has(body[data-page]) { scroll-behavior:auto; } }

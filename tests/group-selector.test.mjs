@@ -6,7 +6,7 @@ const read = file => readFileSync(new URL(`../${file}`, import.meta.url), 'utf8'
 
 test('the facelift keeps all four recipient links and existing privacy controls', () => {
   const html = read('checkin-4.html');
-  assert.match(html, /group-selector\.css\?v=facelift-2/);
+  assert.match(html, /group-selector\.css\?v=facelift-3/);
   assert.match(html, /40–50 minutes per person/);
   assert.equal((html.match(/class="h4-choice"/g) || []).length, 4);
   for (let group=1; group<=4; group++) assert.match(html, new RegExp(`href="/checkin-4-g${group}"`));
@@ -14,7 +14,31 @@ test('the facelift keeps all four recipient links and existing privacy controls'
   assert.match(html, /Your choices and progress stay in this browser/);
   assert.match(html, /The score is not fully accurate to true privacy and openness values\./);
   assert.equal((html.match(/class="group-choice-icon" aria-hidden="true"/g) || []).length, 4);
+  assert.doesNotMatch(html, /group-choice-number/);
   assert.doesNotMatch(html, /01 · G1|02 · G2|03 · G3|04 · G4/);
+});
+
+test('all versions have matching recipient cards and a themed welcome without changing questions',()=>{
+  const icons=['stranger','acquaintance','friends','partner'];
+  for(const variant of ['4','120','60']) {
+    const selector=read(`checkin-${variant}.html`);
+    assert.match(selector,/group-selector\.css\?v=facelift-3/);
+    assert.equal((selector.match(/class="h4-choice"/g)||[]).length,4);
+    assert.doesNotMatch(selector,/group-choice-number/);
+    for(let group=1;group<=4;group++) {
+      const html=read(`checkin-${variant}-g${group}.html`);
+      assert.match(html,/checkin-welcome\.css\?v=1/);
+      assert.match(html,/<div class="intro-heading">/);
+      assert.match(html,new RegExp(`visitor-icons\\.svg#${icons[group-1]}`));
+      for(const id of ['intro-title','intro-recipient','intro-description','slide-count','start-btn','question-list','results-screen']) assert.match(html,new RegExp(`id="${id}"`));
+      assert.match(html,/No names, passwords, codes, or real private details/);
+      assert.match(html,/The score is not fully accurate to true privacy and openness values\./);
+    }
+  }
+  const css=read('checkin-welcome.css');
+  assert.doesNotMatch(css,/assessment-screen|results-screen|@keyframes|will-change|backdrop-filter|animation:/);
+  assert.match(css,/grid-template-columns:minmax\(0,1fr\) 130px/);
+  assert.match(css,/max-width:680px/);
 });
 
 test('selector styles are scoped, responsive, and preserve the stationary entrance', () => {

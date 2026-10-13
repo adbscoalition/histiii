@@ -55,6 +55,8 @@
   <link rel="stylesheet" href="/page-identities.css?v=pages-1">
   <link rel="stylesheet" href="/visitor-guide.css?v=welcome-1">
   <link rel="stylesheet" href="/histi4-results.css?v=1">
+  <link rel="stylesheet" href="/visitor-scroll.css?v=2">
+  <link rel="stylesheet" href="/checkin-welcome.css?v=1">
   <link rel="stylesheet" href="/site-typography.css?v=1">
 </head>
 <body data-recipient="G1" data-page="checkin">
@@ -70,6 +72,7 @@
           <a href="/#formats">Check-ins</a><a href="/#about">How it works</a><a href="/#privacy">Privacy</a><a href="/#rights">Your control</a>
         </nav>
         <div class="histi-header-actions">
+          <button class="histi-scroll-toggle" type="button" data-scroll-glide hidden aria-label="Use soft scroll glide" aria-pressed="true" title="Switch between soft glide and native scrolling"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 5h10M3 8h7M3 11h4"></path></svg><span data-scroll-label>Glide on</span></button>
           <button id="privacy-live-btn" class="histi-proof privacy-live-badge" type="button" aria-label="Open privacy proof"><span class="privacy-live-dot" aria-hidden="true"></span><span id="privacy-live-label">Privacy proof</span></button>
           <a class="histi-start" href="/checkin-page" aria-label="Choose a check-in"><span class="histi-start-label">Choose a check-in</span><span aria-hidden="true">↗</span></a>
         </div>
@@ -80,10 +83,15 @@
     <main id="intro-screen" class="screen landing-screen">
       <section class="start-card" aria-labelledby="intro-title">
         <a class="visitor-back" href="/checkin-4">← Think of someone else</a>
-        <p class="eyebrow">HISTI Full · A moment for you</p>
-        <h1 id="intro-title">Sharing with <span id="intro-recipient"></span>.</h1>
-        <p id="intro-description" class="start-lede"></p>
-        <p class="visitor-time"><strong>40–50 minutes</strong><span>245 questions</span><span id="slide-count"></span></p>
+        <div class="intro-heading">
+          <div class="intro-copy">
+            <p class="eyebrow">HISTI Full · A moment for you</p>
+            <h1 id="intro-title">Sharing with a <span id="intro-recipient"></span>.</h1>
+            <p id="intro-description" class="start-lede"></p>
+            <p class="visitor-time"><strong>40–50 minutes</strong><span>245 questions</span><span id="slide-count"></span></p>
+          </div>
+          <span class="intro-recipient-mark" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#stranger"></use></svg></span>
+        </div>
         <div class="start-rights-card" role="note"><strong>Before you begin</strong><div class="start-rights-grid">
           <span>Keep this person in mind as you answer.</span><span>Choose the level that feels closest to you.</span>
           <span>Leave a question blank if you need to.</span><span>Take breaks; return in this same browser.</span>
@@ -150,5 +158,6 @@
   </div>
     <script type="module" src="/app-histi4.js?v=results-1"></script>
   <script type="module" src="/histi4-privacy.js?v=motion-1"></script>
+  <script type="module" src="/visitor-scroll.js?v=2"></script>
 </body>
 </html>

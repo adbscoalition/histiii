@@ -13,7 +13,7 @@ export function glidePosition(position, target, elapsed) {
 }
 
 export function initVisitorScroll(root, host = root.defaultView) {
-  if (!['home','formats'].includes(root.body?.dataset.page) || root.documentElement.dataset.visitorScrollReady || typeof host?.requestAnimationFrame !== 'function') return;
+  if (!['home','formats','people','checkin','privacy','terms'].includes(root.body?.dataset.page) || root.documentElement.dataset.visitorScrollReady || typeof host?.requestAnimationFrame !== 'function') return;
   root.documentElement.dataset.visitorScrollReady = 'true';
   const motion = host.matchMedia('(prefers-reduced-motion: reduce)');
   const pointer = host.matchMedia('(hover: hover) and (pointer: fine)');
@@ -29,7 +29,8 @@ export function initVisitorScroll(root, host = root.defaultView) {
     const text = String(value);
     if (root.documentElement.dataset.scrollGlideActive !== text) root.documentElement.dataset.scrollGlideActive = text;
   };
-  const available = () => enabled && !motion.matches && pointer.matches && !root.hidden && !root.body.classList.contains('visitor-motion-paused');
+  const paused = () => root.body.classList.contains('visitor-motion-paused') || root.body.classList.contains('reduce-motion');
+  const available = () => enabled && !motion.matches && pointer.matches && !root.hidden && !paused();
   const maximum = () => Math.max(0, root.scrollingElement.scrollHeight - host.innerHeight);
   const stop = () => {
     if (frame) host.cancelAnimationFrame(frame);
@@ -41,7 +42,7 @@ export function initVisitorScroll(root, host = root.defaultView) {
     stop();
     for (const button of buttons) {
       button.hidden = !pointer.matches;
-      button.disabled = motion.matches || root.body.classList.contains('visitor-motion-paused');
+      button.disabled = motion.matches || paused();
       button.setAttribute('aria-pressed', String(available()));
       button.querySelector('[data-scroll-label]').textContent = available() ? 'Glide on' : 'Native scroll';
     }
@@ -73,7 +74,7 @@ export function initVisitorScroll(root, host = root.defaultView) {
   const onWheel = event => {
     if (!available() || event.defaultPrevented || !event.cancelable || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) { stop(); return; }
     const element = event.target?.nodeType === 1 ? event.target : event.target?.parentElement;
-    if (element?.closest('input,textarea,select,button,[contenteditable],[data-native-scroll]') || root.querySelector('dialog[open],main[inert]') || nestedScroll(element)) { stop(); return; }
+    if (element?.closest('input,textarea,select,button,[role="slider"],.h4-control,[contenteditable],[data-native-scroll]') || root.querySelector('dialog[open],main[inert],.h4-segment-control.is-dragging') || root.documentElement.matches?.('.histi-url-covered,.histi-intro-active,.histi-intro-pending') || nestedScroll(element)) { stop(); return; }
     const delta = wheelDistance(event, host.innerHeight);
     const max = maximum();
     if (!delta || !max || (delta < 0 && host.scrollY <= 0) || (delta > 0 && host.scrollY >= max)) { stop(); return; }
@@ -97,9 +98,10 @@ export function initVisitorScroll(root, host = root.defaultView) {
   root.addEventListener('focusin', stop);
   root.addEventListener('visibilitychange', () => { if (root.hidden) stop(); });
   root.addEventListener('click', event => {
-    const button = event.target.closest('[data-scroll-glide]');
+    const element = event.target?.nodeType === 1 ? event.target : event.target?.parentElement;
+    const button = element?.closest('[data-scroll-glide]');
     if (buttons.includes(button)) { enabled = !enabled; sync(); }
-    else if (event.target.closest('[data-visitor-motion]')) sync();
+    else if (element?.closest('[data-visitor-motion],[data-a11y="motion"]')) sync();
   });
   motion.addEventListener('change', sync);
   pointer.addEventListener('change', sync);

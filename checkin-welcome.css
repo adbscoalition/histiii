@@ -1,0 +1,36 @@
+/* The twelve welcome pages only. Questions and scores keep their existing UI. */
+body[data-page="checkin"][data-recipient] #intro-screen { width:min(calc(100% - 64px),1040px)!important; padding:32px 0 100px!important; }
+body[data-page="checkin"][data-recipient] #intro-screen .start-card { padding:30px!important; border:1px solid var(--palette-line)!important; border-radius:28px!important; background:var(--palette-card)!important; box-shadow:none!important; }
+#intro-screen .intro-heading { display:grid; grid-template-columns:minmax(0,1fr) 130px; gap:26px; align-items:center; margin-bottom:28px; padding:26px; border:1px solid var(--page-cue-line); border-radius:22px; background:var(--page-cue-soft); }
+#intro-screen .intro-copy { min-width:0; }
+#intro-screen .intro-heading .eyebrow { margin:0; padding:0; color:var(--page-cue)!important; font-size:11px; letter-spacing:.06em; }
+body[data-page="checkin"][data-recipient] #intro-screen #intro-title { margin:16px 0 12px; font-size:clamp(34px,4vw,48px)!important; line-height:1.15; text-wrap:balance; }
+#intro-screen .intro-heading .start-lede { margin:0; font-size:15px; line-height:1.6; color:var(--palette-ink); }
+#intro-screen .intro-recipient-mark { display:grid; place-items:center; width:130px; height:130px; border:1px solid var(--page-cue-line); border-radius:50%; background:#ffffffa8; color:var(--page-cue); }
+#intro-screen .intro-recipient-mark svg { width:54px; height:54px; display:block; overflow:visible; fill:none; stroke:currentColor; stroke-width:1.4; stroke-linecap:round; stroke-linejoin:round; }
+#intro-screen .visitor-time { margin-top:20px; font-size:13px; gap:7px 12px; }
+body[data-page="checkin"][data-recipient] #intro-screen .start-rights-card { margin-top:24px; padding:24px; border:1px solid var(--palette-line); border-radius:20px; background:var(--palette-paper); }
+#intro-screen .start-rights-card>strong { color:var(--palette-ink)!important; font-size:15px; font-weight:600; }
+body[data-page="checkin"][data-recipient] #intro-screen .start-rights-grid { margin:18px 0; gap:16px 24px; font-size:14px; line-height:1.65; }
+body[data-page="checkin"][data-recipient] #intro-screen .start-safety-note { margin-bottom:0; padding-top:16px; border-top:1px solid var(--palette-line); font-size:13px; }
+body[data-page="checkin"][data-recipient] #intro-screen .suite-privacy-reminder { border:0; border-left:3px solid var(--page-cue-line); border-radius:0 14px 14px 0; background:var(--page-cue-soft); padding:18px 20px; margin:22px 0; }
+body[data-page="checkin"][data-recipient] #intro-screen .suite-privacy-reminder>span { color:var(--page-cue); letter-spacing:.04em; }
+#intro-screen .start-disclaimer { font-size:13px; }
+body[data-page="checkin"][data-recipient] #intro-screen #start-btn { min-height:52px; padding:15px 26px; margin-top:12px; border-radius:999px; }
+#intro-screen .h4-switch { margin-top:26px; padding-top:22px; }
+#intro-screen .h4-switch nav { gap:10px; margin-top:12px; }
+#intro-screen .h4-switch a { padding:10px 15px; border-radius:999px; font-size:13px; font-weight:500; }
+@media(max-width:680px) {
+  body[data-page="checkin"][data-recipient] #intro-screen { width:calc(100% - 32px)!important; padding-top:22px!important; }
+  body[data-page="checkin"][data-recipient] #intro-screen .start-card { padding:20px!important; border-radius:24px!important; }
+  #intro-screen .intro-heading { grid-template-columns:minmax(0,1fr); padding:20px; gap:18px; border-radius:18px; }
+  #intro-screen .intro-recipient-mark { grid-row:1; width:56px; height:56px; }
+  #intro-screen .intro-recipient-mark svg { width:28px; height:28px; }
+  body[data-page="checkin"][data-recipient] #intro-screen #intro-title { font-size:clamp(30px,7.5vw,40px)!important; }
+  body[data-page="checkin"][data-recipient] #intro-screen .start-rights-card { padding:18px; }
+  body[data-page="checkin"][data-recipient] #intro-screen .start-rights-grid { grid-template-columns:1fr; gap:12px; }
+  #intro-screen .visitor-time { align-items:start; flex-direction:column; gap:4px; }
+  #intro-screen .visitor-time>span+span { padding:0; border:0; }
+  body[data-page="checkin"][data-recipient] #intro-screen #start-btn { width:100%; }
+  #intro-screen .h4-switch a { width:auto; }
+}
