@@ -53,6 +53,8 @@
   <link rel="stylesheet" href="/page-identities.css?v=pages-1">
   <link rel="stylesheet" href="/visitor-guide.css?v=welcome-1">
   <link rel="stylesheet" href="/site-licensing.css?v=1">
+  <link rel="stylesheet" href="/visitor-play.css?v=play-3">
+  <link rel="stylesheet" href="/visitor-calm.css?v=1">
   <link rel="stylesheet" href="/site-typography.css?v=1">
 </head>
 <body data-page="formats">
@@ -81,7 +83,20 @@
         <p class="visitor-description">A little space to understand your sharing boundaries. HISTI Full, HISTI-120, and HISTI-60 are ready now. More ways to reflect are on the way.</p>
       </div>
       <ol class="visitor-path" aria-label="Getting started"><li aria-current="step"><span>1</span>Choose a check-in</li><li><span>2</span>Think of someone</li><li><span>3</span>Go at your pace</li></ol>
-      <div class="app-grid">
+      <section class="pace-guide" data-pace-guide data-calm-reveal aria-labelledby="selector-pace-title">
+        <div class="pace-copy"><p class="pace-eyebrow">No need to rush</p><h2 id="selector-pace-title">Find a little room.</h2><p>How much time would you like to set aside? Choose an estimate for one person. You can take breaks in any version.</p></div>
+        <div class="pace-play">
+          <div class="pace-choices" role="group" aria-label="Choose an estimated check-in time">
+            <button type="button" data-pace-choice="60" aria-pressed="false"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#leaf"></use></svg><strong>10–15 <span>minutes</span></strong><small>A little moment</small></button>
+            <button type="button" data-pace-choice="120" aria-pressed="false"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#clock"></use></svg><strong>20–25 <span>minutes</span></strong><small>Breathing room</small></button>
+            <button type="button" data-pace-choice="full" aria-pressed="false"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#spark"></use></svg><strong>40–50 <span>minutes</span></strong><small>The whole picture</small></button>
+          </div>
+          <output class="pace-output" data-pace-output aria-live="polite">A little help choosing. All three check-ins are still yours to explore.</output>
+          <a class="pace-link" data-pace-link href="#checkin-options"><span data-pace-link-label>See the check-ins</span><span aria-hidden="true">→</span></a>
+        </div>
+        <div class="pace-footer"><span>Your pace is allowed to change.</span><button class="pace-motion" type="button" data-visitor-motion aria-label="Pause decorative motion" aria-pressed="false"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#spark"></use></svg><span data-motion-label>Pause motion</span></button></div>
+      </section>
+      <div class="app-grid" id="checkin-options">
         <a class="app-card available full" href="/checkin-4" aria-describedby="histi-description">
           <span class="status">Available now · Ages 13+</span>
           <span class="card-number">01</span>
@@ -176,5 +191,6 @@
     <nav aria-label="Legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/terms#licensing">Licensing</a></nav>
   </footer>
   <script type="module" src="/histi4-privacy.js?v=motion-1"></script>
+  <script type="module" src="/visitor-calm.js?v=1"></script>
 </body>
 </html>
