@@ -51,6 +51,29 @@ export function coverageText(result) {
   return `${result.answered} of ${result.total} questions scored · ${areas} of ${Object.keys(result.categories).length} areas represented`;
 }
 
+// Supplied relationship references, not population norms or scoring inputs.
+// Signed values use the existing P100 (-100) → N0 (0) → O100 (+100) scale.
+export const REFERENCE_SCORES = Object.freeze({
+  G1: Object.freeze({ A1: 30, A2: 0, B: -40, C: -90, D: -90 }),
+  G2: Object.freeze({ A1: 50, A2: 20, B: 0, C: -20, D: -70 }),
+  G3: Object.freeze({ A1: 60, A2: 35, B: 50, C: 50, D: -70 }),
+  G4: Object.freeze({ A1: 70, A2: 60, B: 75, C: 50, D: 0 })
+});
+
+export function referenceScore(test, group, key) {
+  if (!['full', '120', '60'].includes(test)) return null;
+  const value = REFERENCE_SCORES[group]?.[key];
+  return Number.isFinite(value) ? value : null;
+}
+
+export function compareReference(score, reference) {
+  if (!Number.isFinite(score) || !Number.isFinite(reference)) return null;
+  const difference = Math.round((score - reference) * 10) / 10;
+  if (difference === 0) return 'At the reference score';
+  const distance = Math.abs(difference);
+  return `${distance} point${distance === 1 ? '' : 's'} ${difference < 0 ? 'toward private' : 'toward open'} from the reference`;
+}
+
 // At most one small set of native animations. Replaying, leaving, or resetting
 // cancels the previous set; no frame loop, number-counting loop, or exit timer.
 export function createResultReveal(isReduced) {

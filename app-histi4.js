@@ -1,7 +1,7 @@
 import { resetTransition } from './reset-transition.js?v=1';
 import { openDialog, closeDialog, confirmReset } from './site-dialogs.js?v=motion-1';
 import { makeSlides, remapLegacySlideIndex, calculate as calculateFamilies, rubricPoints, displayScore } from './histi4-core.js?v=school-1';
-import { describeScore, describeTopic, coverageText, createResultReveal } from './histi4-results.js?v=2';
+import { describeScore, describeTopic, coverageText, referenceScore, compareReference, createResultReveal } from './histi4-results.js?v=references-1';
 
 const school = document.body.dataset.test === 'school';
 const shortForm = document.body.dataset.test === '60';
@@ -416,11 +416,28 @@ function resultCategory(key, result) {
   score.setAttribute('aria-label', bucket.score === null ? 'Not scored yet' : `${displayScore(bucket.score)}: ${reading.label}`);
   top.append(el('span', 'category-letter h4-category-letter', key), title, score);
   const track = el('div', 'category-track'); track.setAttribute('aria-hidden', 'true');
-  const marker = el('span'); marker.hidden = bucket.score === null; track.append(marker);
+  const marker = el('span', 'category-user-marker'); marker.hidden = bucket.score === null; track.append(marker);
+  const reference = referenceScore(document.body.dataset.test || 'full', group, key);
+  const comparison = el('div', 'result-comparison');
+  if (reference !== null) {
+    track.classList.add('has-reference');
+    track.style.setProperty('--reference-position', `${(reference + 100) / 2}%`);
+    track.append(el('span', 'category-reference-stem'), el('span', 'category-reference-marker'));
+    const yours = el('p', 'result-comparison-yours');
+    yours.append(el('span', 'comparison-symbol comparison-symbol-user'), document.createTextNode(`Your score: ${bucket.score === null ? 'Not scored' : displayScore(bucket.score)}`));
+    const guide = el('p', 'result-comparison-reference');
+    guide.append(el('span', 'comparison-symbol comparison-symbol-reference'), document.createTextNode(`Reference: ${displayScore(reference)}`));
+    comparison.append(yours, guide);
+    comparison.querySelectorAll('.comparison-symbol').forEach(symbol => symbol.setAttribute('aria-hidden', 'true'));
+    const distance = compareReference(bucket.score, reference);
+    if (distance) comparison.append(el('p', 'result-comparison-distance', distance));
+  }
   const labels = el('div', 'v3-topic-labels'); labels.append(el('span', '', 'P100'), el('span', '', 'N0'), el('span', '', 'O100'));
   labels.setAttribute('aria-hidden', 'true');
   const prompt = el('p', 'result-topic-prompt'); prompt.append(el('span', '', 'A moment to reflect'), document.createTextNode(reading.prompt));
-  card.append(top, el('p', 'result-topic-scope', reading.scope), track, labels,
+  card.append(top, el('p', 'result-topic-scope', reading.scope), track, labels);
+  if (reference !== null) card.append(comparison);
+  card.append(
     el('p', 'result-topic-label', reading.label), el('p', 'result-topic-description', reading.description), prompt,
     el('small', 'h4-category-summary', `${bucket.answered} of ${bucket.total} questions scored`));
   return card;
@@ -455,6 +472,11 @@ function renderResults(completed = false) {
   const fragment = document.createDocumentFragment();
   Object.keys(CATEGORY_META).forEach(key => fragment.append(resultCategory(key, result)));
   $('category-results').replaceChildren(fragment);
+  if (!school && !$('result-reference-note')) {
+    const note = el('p', 'result-reference-note', `Compare with the reference for ${sharingWith}: a solid circle is your score; an outlined diamond is the reference. These are comparison guides, not verified population averages or targets.`);
+    note.id = 'result-reference-note';
+    $('category-results').before(note);
+  }
   $('resume-btn').textContent = completed ? 'Review questions' : 'Resume questions';
   document.title = `Result · ${recipient.label} | ${testName}`;
   if (!transitionBusy) revealResult();

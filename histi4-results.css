@@ -45,6 +45,17 @@ body[data-page="checkin"] #results-screen .result-score-line { display:flex; fle
 .result-topic-scope { max-width:70ch; margin:14px 0 0; color:var(--palette-muted); font-size:13px; line-height:1.65; }
 #results-screen .category-track { flex:none; height:6px; margin:22px 7px 10px; background:linear-gradient(90deg,#b2bef2,#dbe4f4 50%,#eabda5)!important; }
 #results-screen .category-track span { width:14px; height:14px; background:var(--area-ink); }
+#results-screen .category-track.has-reference { margin-bottom:26px; }
+#results-screen .category-track .category-user-marker { z-index:1; }
+#results-screen .category-track .category-reference-stem { left:var(--reference-position); top:3px; width:2px; height:13px; border:0; border-radius:0; background:var(--area-ink); transform:translateX(-50%); }
+#results-screen .category-track .category-reference-marker { left:var(--reference-position); top:16px; width:10px; height:10px; border:2px solid var(--area-ink); border-radius:2px; background:var(--palette-card); transform:translate(-50%,-50%) rotate(45deg); }
+.result-reference-note { max-width:76ch; margin:0 0 22px; padding:14px 18px; border-left:3px solid var(--palette-iris-ink); border-radius:0 12px 12px 0; background:var(--palette-blue-soft); color:var(--palette-muted); font-size:13px; line-height:1.7; }
+.result-comparison { display:flex; flex-wrap:wrap; gap:8px 18px; margin:16px 0 0; }
+.result-comparison p { display:flex; align-items:center; gap:8px; margin:0; color:var(--palette-ink); font-size:12px; line-height:1.6; }
+.comparison-symbol { display:inline-block; flex:none; width:10px; height:10px; }
+.comparison-symbol-user { border-radius:50%; background:var(--area-ink); }
+.comparison-symbol-reference { width:9px; height:9px; margin-inline:1px; border:2px solid var(--area-ink); border-radius:1px; background:var(--palette-card); transform:rotate(45deg); }
+.result-comparison .result-comparison-distance { flex-basis:100%; color:var(--palette-muted); }
 #results-screen .v3-topic-labels { display:flex; justify-content:space-between; font-size:10px; }
 .result-topic-label { margin:20px 0 7px; color:var(--area-ink); font-size:13px; font-weight:650; }
 .result-topic-description { max-width:70ch; margin:0 0 20px; color:var(--palette-ink); font-size:14px; line-height:1.7; }

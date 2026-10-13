@@ -76,7 +76,7 @@ test('all four routes share the accessible result card and no animation or score
     const html=read(`checkin-4-${group}.html`);
     for(const id of ['result-recipient','result-state','result-description','result-context','result-score-meaning','result-early-note','result-explain-btn','result-read-dialog','result-replay-btn'])assert.equal(html.split(`id="${id}"`).length,2);
     assert.match(html,/aria-haspopup="dialog" aria-controls="result-read-dialog"/);
-    assert.match(html,/histi4-results\.css\?v=1/);
+    assert.match(html,/histi4-results\.css\?v=references-1/);
     assert.match(html,/not a percentage of your privacy/);
     assert.match(html,/The score is not fully accurate to true privacy and openness values\./);
   }
