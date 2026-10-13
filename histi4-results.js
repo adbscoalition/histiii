@@ -48,7 +48,7 @@ export function describeTopic(key, bucket) {
 
 export function coverageText(result) {
   const areas = Object.values(result.categories).filter(bucket => bucket.score !== null).length;
-  return `${result.answered} of ${result.total} questions scored · ${areas} of 5 areas represented`;
+  return `${result.answered} of ${result.total} questions scored · ${areas} of ${Object.keys(result.categories).length} areas represented`;
 }
 
 // At most one small set of native animations. Replaying, leaving, or resetting

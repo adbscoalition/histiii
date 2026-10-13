@@ -1,27 +1,28 @@
 import { resetTransition } from './reset-transition.js?v=1';
 import { openDialog, closeDialog, confirmReset } from './site-dialogs.js?v=motion-1';
-import { makeSlides, remapLegacySlideIndex, calculate as calculateFamilies, rubricPoints, displayScore } from './histi4-core.js?v=pna-1';
-import { describeScore, describeTopic, coverageText, createResultReveal } from './histi4-results.js?v=1';
+import { makeSlides, remapLegacySlideIndex, calculate as calculateFamilies, rubricPoints, displayScore } from './histi4-core.js?v=school-1';
+import { describeScore, describeTopic, coverageText, createResultReveal } from './histi4-results.js?v=2';
 
+const school = document.body.dataset.test === 'school';
 const shortForm = document.body.dataset.test === '60';
 const abridged = shortForm || document.body.dataset.test === '120';
-const { FAMILIES, CATEGORY_META, RECIPIENTS } = await import(shortForm ? './histi60-family-data.js?v=1' : abridged ? './histi120-family-data.js?v=1' : './histi4-data.js');
-const testName = shortForm ? 'HISTI-60' : abridged ? 'HISTI-120' : 'HISTI Full';
-const routeBase = shortForm ? '/checkin-60' : abridged ? '/checkin-120' : '/checkin-4';
-const calculate = answers => calculateFamilies(answers, FAMILIES);
+const { FAMILIES, CATEGORY_META, RECIPIENTS, makeSchoolSlides } = await import(school ? './histi-school-data.js?v=1' : shortForm ? './histi60-family-data.js?v=1' : abridged ? './histi120-family-data.js?v=1' : './histi4-data.js');
+const testName = school ? 'HISTI for Schools' : shortForm ? 'HISTI-60' : abridged ? 'HISTI-120' : 'HISTI Full';
+const routeBase = school ? '/checkin-school' : shortForm ? '/checkin-60' : abridged ? '/checkin-120' : '/checkin-4';
+const calculate = answers => calculateFamilies(answers, FAMILIES, CATEGORY_META, { pnaPoints: school ? null : 1 });
 const group = document.body.dataset.recipient;
 const recipient = RECIPIENTS[group];
 if (!recipient) throw new Error('Unknown HISTI recipient group');
 const debugMode = new URLSearchParams(window.location.search).get('debug') === '1';
-const sharingWith = {
+const sharingWith = school ? { G1:'an unfamiliar student', G2:'a classmate', G3:'a friend', G4:'a trusted adult' }[group] : {
   G1: 'a stranger or regular person',
   G2: 'an acquaintance',
   G3: 'a friend',
   G4: 'a spouse or partner'
 }[group];
-const slides = makeSlides(FAMILIES);
+const slides = school ? makeSchoolSlides(FAMILIES) : makeSlides(FAMILIES);
 const familyByCode = new Map(FAMILIES.map(row => [row[0], row]));
-const storageKey = shortForm ? `histi.60-families.${group}.v1` : abridged ? `histi.120-families.${group}.v1` : `histi.four-groups.${group}.v1`;
+const storageKey = school ? `histi.school.${group}.v1` : shortForm ? `histi.60-families.${group}.v1` : abridged ? `histi.120-families.${group}.v1` : `histi.four-groups.${group}.v1`;
 const $ = id => document.getElementById(id);
 const el = (tag, className, text) => {
   const node = document.createElement(tag);
@@ -36,7 +37,7 @@ function loadState() {
     const stored = JSON.parse(localStorage.getItem(storageKey) || 'null');
     if (!stored || typeof stored !== 'object') return freshState();
     const state = { ...freshState(), ...stored, answers: stored.answers && typeof stored.answers === 'object' ? stored.answers : {} };
-    if (stored.layoutVersion !== 2) state.index = remapLegacySlideIndex(stored.index, FAMILIES);
+    if (!school && stored.layoutVersion !== 2) state.index = remapLegacySlideIndex(stored.index, FAMILIES);
     state.layoutVersion = 2;
     // Existing freeform answers are snapped to the nearest documented rubric stop.
     for (const [code, answer] of Object.entries(state.answers)) {
@@ -116,7 +117,7 @@ async function transitionPage(kicker, title, detail, render, focusId) {
 function transitionSlide(index) {
   const slide = slides[index];
   const category = CATEGORY_META[slide.category];
-  return transitionPage(`Slide ${index + 1} of ${slides.length}`, category.label, `${recipient.label} · ${slide.type === 'yn' ? 'Quick yes or no choices' : 'Choose the closest levels'}`, () => {
+  return transitionPage(`${school ? 'Part' : 'Slide'} ${index + 1} of ${slides.length}`, slide.label || category.label, `${recipient.label} · ${slide.type === 'yn' ? 'Quick yes or no choices' : 'Choose the closest levels'}`, () => {
     state.index = index;
     renderSlide(false);
   }, 'slide-title');
@@ -133,11 +134,11 @@ function setAnswer(code, status, value = null) {
 }
 function questionCard(row, animate = false) {
   const [code, , defaultPrompt, type, , anchors, variants] = row;
-  const prompt = abridged ? variants[Number(group.slice(1)) - 1] : defaultPrompt;
+  const prompt = school || abridged ? variants[Number(group.slice(1)) - 1] : defaultPrompt;
   const answer = state.answers[code];
   const card = el('article', 'h4-question');
   if (animate) card.classList.add('h4-reveal');
-  card.classList.toggle('is-answered', answer?.status === 'score' || answer?.status === 'pna');
+  card.classList.toggle('is-answered', answer?.status === 'score' || (!school && answer?.status === 'pna'));
   const top = el('div', 'h4-question-top');
   top.append(el('p', 'h4-question-context', `Sharing with ${sharingWith}`), el('h2', '', prompt));
   card.append(top);
@@ -356,7 +357,8 @@ function questionCard(row, animate = false) {
   }
   card.append(control);
   const statuses = el('div', 'h4-status');
-  for (const [status, label] of [['unknown', "I don't know"], ['pna', 'Prefer not to answer'], ['na', 'Not applicable']]) {
+  const statusChoices = school ? [['unknown', "I don't know"], ['skip', 'Skip / prefer not to answer'], ['na', 'Not applicable']] : [['unknown', "I don't know"], ['pna', 'Prefer not to answer'], ['na', 'Not applicable']];
+  for (const [status, label] of statusChoices) {
     const button = el('button', '', label); button.type = 'button';
     button.setAttribute('aria-label', label);
     button.setAttribute('aria-pressed', String(answer?.status === status));
@@ -379,11 +381,11 @@ function renderSlide(scroll = true) {
   const meta = CATEGORY_META[slide.category];
   const result = calculate(state.answers);
   $('progress-label').textContent = `${state.index + 1} / ${slides.length}`;
-  $('progress-label').setAttribute('aria-label', `Card ${state.index + 1} of ${slides.length}`);
+  $('progress-label').setAttribute('aria-label', `${school ? 'Part' : 'Card'} ${state.index + 1} of ${slides.length}`);
   const pct = Math.round(((state.index + 1) / slides.length) * 100);
   $('progress-fill').style.width = `${pct}%`;
   $('category-label').textContent = `Sharing with ${sharingWith}`;
-  $('slide-title').textContent = meta.label;
+  $('slide-title').textContent = slide.label || meta.label;
   $('slide-help').textContent = slide.type === 'yn' ? 'Choose yes or no for each question. It’s okay to leave one blank.' : slide.type === 'multi' ? 'Select everything that fits. It’s okay to leave one blank.' : 'Choose what feels closest. It’s okay to leave a question blank.';
   const header = document.querySelector('.question-top');
   header.classList.remove('h4-header-reveal');
@@ -391,6 +393,7 @@ function renderSlide(scroll = true) {
   const warning = slide.category === 'C' || slide.category === 'D';
   $('caution').hidden = !warning;
   if (warning) $('caution').textContent = slide.category === 'D' ? 'Very sensitive: never enter a real password, PIN, ID number, account number, code, key, or document content. Choose a level only.' : 'Sensitive information: choose a level only. Do not enter real location, financial, medical, or other private details.';
+  if (school && warning) $('caution').textContent = 'Imagine the situation only. Do not show private messages, photos, exact schedules, or other real details. You can skip any question; no answer is good or bad.';
   const fragment = document.createDocumentFragment();
   slide.questions.forEach(row => fragment.append(questionCard(row, scroll)));
   $('question-list').replaceChildren(fragment);
@@ -403,6 +406,7 @@ function resultCategory(key, result) {
   const meta = CATEGORY_META[key];
   const bucket = result.categories[key];
   const reading = describeTopic(key, bucket);
+  if (school) { reading.scope = meta.scope; reading.prompt = meta.prompt; }
   const card = el('article', 'category-card');
   card.setAttribute('aria-labelledby', `result-topic-${key}`);
   card.style.setProperty('--score-position', `${bucket.score === null ? 50 : (bucket.score + 100) / 2}%`);
@@ -439,10 +443,15 @@ function renderResults(completed = false) {
   $('result-coverage').textContent = coverageText(result);
   $('result-early-note').textContent = result.answered === 0 ? 'No scored answers yet. Missing answers are not treated as neutral.'
     : result.answered < result.total ? 'An incomplete snapshot. The score can change as more questions or areas are included.' : 'All questions are scored. This is still a reflection, not a precise measurement.';
+  if (school) $('result-early-note').textContent += result.answered < result.total ? ' Scores are not directly comparable when questions or areas are missing. This is not a grade.' : ' Your score is not a grade, a sign of honesty, or advice to share.';
   const unknown = FAMILIES.filter(row => state.answers[row[0]]?.status === 'unknown').length;
   const na = FAMILIES.filter(row => state.answers[row[0]]?.status === 'na').length;
   const pna = FAMILIES.filter(row => state.answers[row[0]]?.status === 'pna').length;
   $('result-scoring-detail').textContent = `This snapshot scores ${result.answered} of ${result.total} questions, including ${pna} “Prefer not to answer” response${pna === 1 ? '' : 's'}. ${unknown} “I don’t know” and ${na} “Not applicable” responses are excluded; ${result.total - result.answered - unknown - na} other questions are not scored.`;
+  if (school) {
+    const skipped = FAMILIES.filter(row => ['skip','pna'].includes(state.answers[row[0]]?.status)).length;
+    $('result-scoring-detail').textContent = `${result.answered} of ${result.total} questions are scored. ${skipped} skipped / prefer-not-to-answer, ${unknown} “I don’t know,” and ${na} “Not applicable” responses are excluded from both earned and available points. Other unanswered questions are also excluded. The four category weights are A1 23, A2 25, B 25, C 20; Category D is not included.`;
+  }
   const fragment = document.createDocumentFragment();
   Object.keys(CATEGORY_META).forEach(key => fragment.append(resultCategory(key, result)));
   $('category-results').replaceChildren(fragment);
@@ -542,7 +551,7 @@ function setupDebug() {
     for (const row of FAMILIES) {
       const answer = state.answers[row[0]];
       if (!answer) continue;
-      const points = answer.status === 'pna' ? 1 : answer.status === 'score' ? rubricPoints(row, answer.value) : null;
+      const points = !school && answer.status === 'pna' ? 1 : answer.status === 'score' ? rubricPoints(row, answer.value) : null;
       const item = el('li');
       item.append(el('span', '', `${row[0]} · ${row[1]}`), el('strong', '', points === null ? 'Excluded' : `${points} / ${row[4]}`));
       fragment.append(item);
@@ -572,7 +581,7 @@ syncDebugWatermark();
 
 $('intro-recipient').textContent = recipient.label.toLowerCase();
 $('intro-description').textContent = recipient.description;
-$('slide-count').textContent = `${slides.length} cards.`;
+$('slide-count').textContent = `${slides.length} ${school ? 'parts' : 'cards'}.`;
 const groupLinks = document.createDocumentFragment();
 for (const [key, info] of Object.entries(RECIPIENTS)) {
   if (key === group) continue;

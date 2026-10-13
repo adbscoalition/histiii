@@ -84,8 +84,9 @@ export function displayScore(score) {
   return rounded < 0 ? `P${Math.abs(rounded)}` : rounded > 0 ? `O${rounded}` : 'N0';
 }
 
-export function calculate(answers, families = FAMILIES) {
-  const categories = Object.fromEntries(CATEGORIES.map(key => [key, { earned: 0, available: 0, answered: 0, total: 0, score: null }]));
+export function calculate(answers, families = FAMILIES, metadata = CATEGORY_META, { pnaPoints = 1 } = {}) {
+  const keys = Object.keys(metadata);
+  const categories = Object.fromEntries(keys.map(key => [key, { earned: 0, available: 0, answered: 0, total: 0, score: null }]));
   let answered = 0;
   for (const row of families) {
     const category = row[0].split('-')[0];
@@ -94,7 +95,8 @@ export function calculate(answers, families = FAMILIES) {
     bucket.total++;
     const answer = answers[row[0]];
     if (answer?.status !== 'score' && answer?.status !== 'pna') continue;
-    const points = answer.status === 'pna' ? 1 : rubricPoints(row, answer.value);
+    if (answer.status === 'pna' && pnaPoints === null) continue;
+    const points = answer.status === 'pna' ? pnaPoints : rubricPoints(row, answer.value);
     if (points === null) continue;
     bucket.earned += points;
     bucket.available += row[4];
@@ -102,12 +104,12 @@ export function calculate(answers, families = FAMILIES) {
     answered++;
   }
   let weighted = 0, activeWeights = 0;
-  for (const key of CATEGORIES) {
+  for (const key of keys) {
     const bucket = categories[key];
     bucket.score = signedScore(bucket.earned, bucket.available);
     if (bucket.score === null) continue;
-    weighted += bucket.score * CATEGORY_META[key].weight;
-    activeWeights += CATEGORY_META[key].weight;
+    weighted += bucket.score * metadata[key].weight;
+    activeWeights += metadata[key].weight;
   }
   return { score: activeWeights ? Math.round(weighted / activeWeights) : null, categories, answered, total: families.length, coverage: families.length ? answered / families.length : 0 };
 }

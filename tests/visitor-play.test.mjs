@@ -80,7 +80,7 @@ test('play controls are explicitly illustrative and absent from assessment pages
 
 test('new icons are self-hosted vectors with labelled controls and no generated images', () => {
   const svg=read('visitor-icons.svg');
-  assert.equal((svg.match(/<symbol /g)||[]).length,15);
+  assert.equal((svg.match(/<symbol /g)||[]).length,17);
   assert.match(svg, /id="friends"[^\n]*M3 20v-2a4 4 0 0 1 8 0v2M13 20v-2a4 4 0 0 1 8 0v2/);
   assert.match(read('visitor-play.css'), /overflow:visible/);
   assert.match(read('group-selector.css'), /overflow:visible/);

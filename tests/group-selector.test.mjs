@@ -63,6 +63,6 @@ test('the detailed variants are upcoming cards, not links or active tests', () =
     assert.doesNotMatch(card, /<a\b|<button\b|card-time|Start with/);
     assert.ok(read('index.html').includes(name));
   }
-  assert.equal((html.match(/class="app-card available /g) || []).length, 3);
+  assert.equal((html.match(/class="app-card available /g) || []).length, 4);
   assert.match(read('styles-checkin-page.css'), /grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
 });

@@ -83,7 +83,7 @@ test('new routes use the Full UI and separate saved answers for every format and
   assert.match(app,/histi\.four-groups\.\$\{group\}\.v1/);
   assert.match(app,/makeSlides\(FAMILIES\)/);
   assert.match(app,/\$\('start-btn'\)\.disabled = false/);
-  assert.match(app,/calculateFamilies\(answers, FAMILIES\)/);
+  assert.match(app,/calculateFamilies\(answers, FAMILIES, CATEGORY_META/);
   assert.match(app,/variants\[Number\(group\.slice\(1\)\) - 1\]/);
   assert.match(app,/\$\{routeBase\}-\$\{key\.toLowerCase\(\)\}/);
   for (let group=1;group<=4;group++) {

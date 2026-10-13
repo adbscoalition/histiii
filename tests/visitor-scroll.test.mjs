@@ -64,16 +64,16 @@ test('reversing the gesture replaces momentum; keyboard, pointer, and external s
   f.wheel();f.root.hidden=true;f.root.emit('visibilitychange');assert.equal(f.pending.size,0);
 });
 
-test('opt-out, reduced motion, coarse pointers, controls, dialogs, nested scrolling, zoom, and horizontal gestures stay native',()=>{
+test('reduced motion, coarse pointers, controls, dialogs, nested scrolling, zoom, and horizontal gestures stay native',()=>{
   const f=fixture();initVisitorScroll(f.root,f.host);
   for(const overrides of [{ctrlKey:true},{metaKey:true},{shiftKey:true},{altKey:true},{cancelable:false},{defaultPrevented:true},{deltaX:500}]) assert.equal(f.wheel(overrides).prevented,false);
   f.element.isInput=true;assert.equal(f.wheel().prevented,false);f.element.isInput=false;
   f.root.dialog=true;assert.equal(f.wheel().prevented,false);f.root.dialog=false;
   f.element.scrollHeight=400;f.element.overflow='auto';assert.equal(f.wheel().prevented,false);f.element.scrollHeight=100;
-  f.root.emit('click',{target:f.button});assert.equal(f.button.attributes['aria-pressed'],'false');assert.equal(f.button.label.textContent,'Native scroll');assert.equal(f.wheel().prevented,false);
-  f.root.emit('click',{target:f.button});f.wheel();assert.equal(f.pending.size,1);
-  f.motion.matches=true;f.motion.emit('change');assert.equal(f.pending.size,0);assert.equal(f.button.disabled,true);assert.equal(f.wheel().prevented,false);
-  f.motion.matches=false;f.pointer.matches=false;f.pointer.emit('change');assert.equal(f.button.hidden,true);assert.equal(f.wheel().prevented,false);
+  f.root.body.paused=true;assert.equal(f.wheel().prevented,false);f.root.body.paused=false;
+  f.wheel();assert.equal(f.pending.size,1);
+  f.motion.matches=true;f.motion.emit('change');assert.equal(f.pending.size,0);assert.equal(f.wheel().prevented,false);
+  f.motion.matches=false;f.pointer.matches=false;f.pointer.emit('change');assert.equal(f.wheel().prevented,false);
   const other=fixture();other.root.body.dataset.page='unknown';initVisitorScroll(other.root,other.host);assert.equal(other.host.listeners.wheel,undefined);
 });
 
@@ -100,7 +100,7 @@ test('site-wide scroll physics is bounded and has no timers, storage, generated 
   assert.match(js,/now - lastInput >= 650/);assert.match(js,/if \(!frame\)/);assert.match(js,/host\.cancelAnimationFrame\(frame\)/);
   assert.doesNotMatch(js,/setInterval|setTimeout|localStorage|sessionStorage|fetch\(|createElement|innerHTML|MutationObserver/);
   const pages=readdirSync(new URL('..',import.meta.url)).filter(file=>file.endsWith('.html'));
-  assert.equal(pages.length,21);
-  for(const page of pages) {const html=read(page);assert.match(html,/visitor-scroll\.js\?v=2/);assert.match(html,/visitor-scroll\.css\?v=2/);assert.match(html,/data-scroll-glide hidden aria-label="Use soft scroll glide"/);assert.equal((html.match(/data-scroll-glide/g)||[]).length,1,page);assert.match(html,/<div class="histi-header-actions">\s+<button class="histi-scroll-toggle"/);}
-  const css=read('visitor-scroll.css');assert.match(css,/body\[data-page="checkin"\]\) \{ scroll-behavior:auto/);assert.match(css,/histi-scroll-toggle\[hidden\]/);assert.match(css,/prefers-reduced-motion:reduce/);
+  assert.equal(pages.length,26);
+  for(const page of pages) {const html=read(page);assert.match(html,/visitor-scroll\.js\?v=3/);assert.match(html,/visitor-scroll\.css\?v=3/);assert.doesNotMatch(html,/data-scroll-glide|data-scroll-label|histi-scroll-toggle/,page);}
+  const css=read('visitor-scroll.css');assert.match(css,/body\[data-page="checkin"\]\) \{ scroll-behavior:auto/);assert.doesNotMatch(css,/histi-scroll-toggle/);assert.match(css,/prefers-reduced-motion:reduce/);
 });

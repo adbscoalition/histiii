@@ -6,7 +6,7 @@ import { makeSlides, displayScore } from '../histi4-core.js';
 
 const read = file => readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
 const origin = 'https://www.histi.org';
-const pages = ['index', 'checkin-page', 'checkin-4', ...[1, 2, 3, 4].map(n => `checkin-4-g${n}`), 'checkin-120', ...[1,2,3,4].map(n=>`checkin-120-g${n}`), 'checkin-60', ...[1,2,3,4].map(n=>`checkin-60-g${n}`)];
+const pages = ['index', 'checkin-page', 'checkin-4', ...[1, 2, 3, 4].map(n => `checkin-4-g${n}`), 'checkin-120', ...[1,2,3,4].map(n=>`checkin-120-g${n}`), 'checkin-60', ...[1,2,3,4].map(n=>`checkin-60-g${n}`), 'checkin-school', ...[1,2,3,4].map(n=>`checkin-school-g${n}`)];
 const urlFor = page => `${origin}/${page === 'index' ? '' : page}`;
 const metadata = html => {
   const blocks = [...html.matchAll(/<script type="application\/ld\+json" id="[^"]+">([\s\S]*?)<\/script>/g)];
@@ -40,7 +40,7 @@ test('public pages have unique, consistent canonical and social metadata', () =>
     assert.equal(webpage.url, urlFor(page));
     assert.equal(webpage.name, title);
     assert.equal(webpage.isPartOf['@id'], `${origin}/#website`);
-    assert.equal(webpage.about['@id'], `${origin}/#${page.startsWith('checkin-60')?'histi-60':page.startsWith('checkin-120')?'histi-120':'full-test'}`);
+    assert.equal(webpage.about['@id'], `${origin}/#${page.startsWith('checkin-school')?'histi-school':page.startsWith('checkin-60')?'histi-60':page.startsWith('checkin-120')?'histi-120':'full-test'}`);
   }
 });
 
@@ -142,7 +142,7 @@ test('AI notes are factual plain HTML at the front of the page, beneath the pinn
   assert.match(aiNotes, /245 questions across 29 cards.*40–50 minutes/);
   assert.match(aiNotes, /120 questions across 15 cards.*20–25 minutes/);
   assert.match(aiNotes, /60 questions across 7 cards.*10–15 minutes/);
-  assert.match(aiNotes, /Counts and times are per recipient/);
+  assert.match(aiNotes, /Counts and times above are per recipient/);
   assert.match(aiNotes, /not yet been revalidated/);
   assert.match(aiNotes, /coming soon, not available tests/);
   ['P100', 'N0', 'O100', 'A1', 'A2', 'B basic', 'C sensitive', 'D very sensitive'].forEach(term => assert.ok(aiNotes.includes(term)));

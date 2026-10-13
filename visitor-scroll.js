@@ -17,9 +17,7 @@ export function initVisitorScroll(root, host = root.defaultView) {
   root.documentElement.dataset.visitorScrollReady = 'true';
   const motion = host.matchMedia('(prefers-reduced-motion: reduce)');
   const pointer = host.matchMedia('(hover: hover) and (pointer: fine)');
-  const buttons = [...root.querySelectorAll('[data-scroll-glide]')];
   const request = { left:0, top:0, behavior:'instant' };
-  let enabled = true;
   let frame = 0;
   let target = host.scrollY;
   let written = host.scrollY;
@@ -30,7 +28,7 @@ export function initVisitorScroll(root, host = root.defaultView) {
     if (root.documentElement.dataset.scrollGlideActive !== text) root.documentElement.dataset.scrollGlideActive = text;
   };
   const paused = () => root.body.classList.contains('visitor-motion-paused') || root.body.classList.contains('reduce-motion');
-  const available = () => enabled && !motion.matches && pointer.matches && !root.hidden && !paused();
+  const available = () => !motion.matches && pointer.matches && !root.hidden && !paused();
   const maximum = () => Math.max(0, root.scrollingElement.scrollHeight - host.innerHeight);
   const stop = () => {
     if (frame) host.cancelAnimationFrame(frame);
@@ -38,15 +36,7 @@ export function initVisitorScroll(root, host = root.defaultView) {
     target = written = host.scrollY;
     activeState(false);
   };
-  const sync = () => {
-    stop();
-    for (const button of buttons) {
-      button.hidden = !pointer.matches;
-      button.disabled = motion.matches || paused();
-      button.setAttribute('aria-pressed', String(available()));
-      button.querySelector('[data-scroll-label]').textContent = available() ? 'Glide on' : 'Native scroll';
-    }
-  };
+  const sync = stop;
   const write = value => {
     request.left = host.scrollX;
     request.top = written = value;
@@ -99,9 +89,7 @@ export function initVisitorScroll(root, host = root.defaultView) {
   root.addEventListener('visibilitychange', () => { if (root.hidden) stop(); });
   root.addEventListener('click', event => {
     const element = event.target?.nodeType === 1 ? event.target : event.target?.parentElement;
-    const button = element?.closest('[data-scroll-glide]');
-    if (buttons.includes(button)) { enabled = !enabled; sync(); }
-    else if (element?.closest('[data-visitor-motion],[data-a11y="motion"]')) sync();
+    if (element?.closest('[data-visitor-motion],[data-a11y="motion"]')) sync();
   });
   motion.addEventListener('change', sync);
   pointer.addEventListener('change', sync);
