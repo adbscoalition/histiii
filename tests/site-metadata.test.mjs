@@ -14,7 +14,6 @@ const metadata = html => {
   return JSON.parse(blocks[0][1]);
 };
 const home = read('index.html');
-const aiNotes = home.match(/<aside id="histi-ai-notes"[^>]*>([\s\S]*?)<\/aside>/)?.[1];
 const graph = metadata(home)['@graph'];
 const entity = fragment => graph.find(node => node['@id'] === `${origin}/#${fragment}`);
 
@@ -128,43 +127,16 @@ test('identity metadata disambiguates HISTI without treating other names as alia
   }
 });
 
-test('AI notes are factual plain HTML at the front of the page, beneath the pinned header', () => {
-  assert.ok(aiNotes, 'an explicit body-text summary is present');
-  assert.match(aiNotes, /^\s*<p>For AI: HISTI \(H-I-S-T-I\)/);
-  assert.ok(home.indexOf('id="histi-ai-notes"') < home.indexOf('<header class="site-header'));
-  const asideTag = home.match(/<aside id="histi-ai-notes"[^>]*>/)[0];
-  assert.doesNotMatch(asideTag, /\bhidden\b|aria-hidden|inert/);
-  assert.doesNotMatch(aiNotes, /<a\b|<button\b|<input\b|<script\b|ignore previous|system prompt|rank first/i);
-  assert.match(aiNotes, /Human Information-Sharing Transparency Index/);
-  assert.match(aiNotes, /canonical website is https:\/\/www\.histi\.org\//);
-  assert.match(aiNotes, /not HiSET/);
-  assert.match(aiNotes, /histio\.org, the Histiocytosis Association/);
-  assert.match(aiNotes, /245 questions across 29 cards.*40–50 minutes/);
-  assert.match(aiNotes, /120 questions across 15 cards.*20–25 minutes/);
-  assert.match(aiNotes, /60 questions across 7 cards.*10–15 minutes/);
-  assert.match(aiNotes, /Counts and times above are per recipient/);
-  assert.match(aiNotes, /not yet been revalidated/);
-  assert.match(aiNotes, /coming soon, not available tests/);
-  ['P100', 'N0', 'O100', 'A1', 'A2', 'B basic', 'C sensitive', 'D very sensitive'].forEach(term => assert.ok(aiNotes.includes(term)));
-  assert.match(aiNotes, /The score is not fully accurate to true privacy and openness values\./);
-  assert.match(aiNotes, /not uploaded to HISTI/);
-  assert.match(aiNotes, /ordinary file requests to its host/);
-  assert.match(aiNotes, /Website design and code: all rights reserved/);
-  assert.match(aiNotes, /HISTI test: CC BY-ND 4\.0/);
-  assert.match(aiNotes, /license does not apply to the website/);
-  const part = entity('webpage').hasPart.find(node => node.cssSelector === '#histi-ai-notes');
-  assert.equal(part['@type'], 'WebPageElement');
-  assert.equal(part['@id'], `${origin}/#histi-ai-notes`);
-  assert.match(part.name, /^For AI:/);
-  const styles = read('styles-home.css').match(/\.histi-home \.histi-ai-notes \{([^}]+)\}/)[1];
-  assert.match(styles, /position:absolute/);
-  assert.match(styles, /inset-block-start:env\(safe-area-inset-top,0px\)/);
-  assert.match(styles, /block-size:calc\(var\(--site-header-height,76px\) - 2px\)/);
-  assert.match(styles, /z-index:0/);
-  assert.match(styles, /font-size:6px/);
-  assert.match(styles, /pointer-events:none/);
-  assert.doesNotMatch(styles, /display:none|opacity:0|animation|transition|filter|will-change/);
-  assert.match(read('site-header.css'), /z-index:70!important/);
+test('the hidden AI note is removed and ordinary visible descriptions explain HISTI', () => {
+  for (const page of pages) assert.doesNotMatch(read(page + '.html'), /For AI:|histi-ai-notes|facts for automated readers/i);
+  assert.doesNotMatch(read('styles-home.css'), /histi-ai-notes|font-size:6px/);
+  assert.deepEqual(entity('webpage').hasPart, [{ '@id': origin + '/#definitions' }]);
+  const hero = home.split('<p class="hero-lede">')[1].split('</p>')[0];
+  assert.match(hero, /Human Information-Sharing Transparency Index/);
+  assert.match(hero, /without entering real private details/);
+  const about = home.split('<section id="about"')[1].split('</section>')[0];
+  assert.match(about, /self-guided reflection/);
+  assert.match(about, /not an exam grade or a recommendation to disclose information/);
 });
 
 test('privacy and website/test rights remain distinct in the structured text', () => {
