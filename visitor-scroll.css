@@ -1,0 +1,5 @@
+html:has(body:is([data-page="home"],[data-page="formats"])) { scroll-behavior:smooth; }
+.pace-settings { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
+.pace-motion[hidden] { display:none!important; }
+html:has(body.visitor-motion-paused) { scroll-behavior:auto; }
+@media(prefers-reduced-motion:reduce) { html:has(body:is([data-page="home"],[data-page="formats"])) { scroll-behavior:auto; } }

@@ -55,6 +55,8 @@
   <link rel="stylesheet" href="/site-licensing.css?v=1">
   <link rel="stylesheet" href="/visitor-play.css?v=play-3">
   <link rel="stylesheet" href="/visitor-calm.css?v=1">
+  <link rel="stylesheet" href="/visitor-scroll.css?v=1">
+  <link rel="stylesheet" href="/selector-cards.css?v=1">
   <link rel="stylesheet" href="/site-typography.css?v=1">
 </head>
 <body data-page="formats">
@@ -83,6 +85,35 @@
         <p class="visitor-description">A little space to understand your sharing boundaries. HISTI Full, HISTI-120, and HISTI-60 are ready now. More ways to reflect are on the way.</p>
       </div>
       <ol class="visitor-path" aria-label="Getting started"><li aria-current="step"><span>1</span>Choose a check-in</li><li><span>2</span>Think of someone</li><li><span>3</span>Go at your pace</li></ol>
+      <section class="selector-library" id="checkin-options" aria-labelledby="ready-checkins-title">
+        <div class="selector-library-heading"><div><p>Ready now</p><h2 id="ready-checkins-title">Start where you are.</h2></div><span>One person in mind. Your own pace.</span></div>
+        <div class="app-grid">
+          <a class="app-card available full" href="/checkin-4" aria-describedby="histi-description">
+            <span class="status">Available now · Ages 13+</span>
+            <span class="selector-card-art" aria-hidden="true"><svg class="visitor-icon" viewBox="0 0 24 24" focusable="false"><use href="/visitor-icons.svg#spark"></use></svg><span>A fuller reflection</span><i></i><i></i><i></i></span>
+            <h3 class="card-name">HISTI Full</h3>
+            <span class="card-description" id="histi-description">Explore your sharing boundaries in more detail, with one person in mind.</span>
+            <span class="card-time">40–50 minutes per person · 245 questions</span>
+            <span class="card-action">Start with HISTI Full <b aria-hidden="true">↗</b></span>
+          </a>
+          <a class="app-card available condensed" href="/checkin-120" aria-describedby="histi-120-description">
+            <span class="status">Available now · Ages 13+</span>
+            <span class="selector-card-art" aria-hidden="true"><svg class="visitor-icon" viewBox="0 0 24 24" focusable="false"><use href="/visitor-icons.svg#levels"></use></svg><span>A little more space</span><i></i><i></i><i></i></span>
+            <h3 class="card-name">HISTI-120</h3>
+            <span class="card-description" id="histi-120-description">A shorter reflection with the same four relationships and five result areas.</span>
+            <span class="card-time">20–25 minutes per person · 120 questions</span>
+            <span class="card-action">Start with HISTI-120 <b aria-hidden="true">↗</b></span>
+          </a>
+          <a class="app-card available short" href="/checkin-60" aria-describedby="histi-60-description">
+            <span class="status">Available now · Ages 13+</span>
+            <span class="selector-card-art" aria-hidden="true"><svg class="visitor-icon" viewBox="0 0 24 24" focusable="false"><use href="/visitor-icons.svg#leaf"></use></svg><span>A small beginning</span><i></i><i></i><i></i></span>
+            <h3 class="card-name">HISTI-60</h3>
+            <span class="card-description" id="histi-60-description">A compact reflection with broader topics. Start small, with one person in mind.</span>
+            <span class="card-time">10–15 minutes per person · 60 questions</span>
+            <span class="card-action">Start with HISTI-60 <b aria-hidden="true">↗</b></span>
+          </a>
+        </div>
+      </section>
       <section class="pace-guide" data-pace-guide data-calm-reveal aria-labelledby="selector-pace-title">
         <div class="pace-copy"><p class="pace-eyebrow">No need to rush</p><h2 id="selector-pace-title">Find a little room.</h2><p>How much time would you like to set aside? Choose an estimate for one person. You can take breaks in any version.</p></div>
         <div class="pace-play">
@@ -94,93 +125,21 @@
           <output class="pace-output" data-pace-output aria-live="polite">A little help choosing. All three check-ins are still yours to explore.</output>
           <a class="pace-link" data-pace-link href="#checkin-options"><span data-pace-link-label>See the check-ins</span><span aria-hidden="true">→</span></a>
         </div>
-        <div class="pace-footer"><span>Your pace is allowed to change.</span><button class="pace-motion" type="button" data-visitor-motion aria-label="Pause decorative motion" aria-pressed="false"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#spark"></use></svg><span data-motion-label>Pause motion</span></button></div>
+        <div class="pace-footer"><span>Your pace is allowed to change.</span><div class="pace-settings"><button class="pace-motion" type="button" data-scroll-glide hidden aria-label="Use soft scroll glide" aria-pressed="true"><span data-scroll-label>Glide on</span></button><button class="pace-motion" type="button" data-visitor-motion aria-label="Pause decorative motion" aria-pressed="false"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#spark"></use></svg><span data-motion-label>Pause motion</span></button></div></div>
       </section>
-      <div class="app-grid" id="checkin-options">
-        <a class="app-card available full" href="/checkin-4" aria-describedby="histi-description">
-          <span class="status">Available now · Ages 13+</span>
-          <span class="card-number">01</span>
-          <span class="card-name">HISTI Full</span>
-          <span class="card-description" id="histi-description">Explore what you feel comfortable sharing with one person. You can try other relationships later.</span>
-          <span class="card-time">40–50 minutes per person · 245 questions</span>
-          <span class="card-action">Start with HISTI Full <b aria-hidden="true">→</b></span>
-        </a>
-
-        <a class="app-card available condensed" href="/checkin-120" aria-describedby="histi-120-description">
-          <span class="status">Available now · Ages 13+</span>
-          <span class="card-number">02</span>
-          <span class="card-name">HISTI-120</span>
-          <span class="card-description" id="histi-120-description">A shorter reflection with the same four relationships and five result areas. Start with one person.</span>
-          <span class="card-time">20–25 minutes per person · 120 questions</span>
-          <span class="card-action">Start with HISTI-120 <b aria-hidden="true">→</b></span>
-        </a>
-
-        <a class="app-card available short" href="/checkin-60" aria-describedby="histi-60-description">
-          <span class="status">Available now · Ages 13+</span>
-          <span class="card-number">03</span>
-          <span class="card-name">HISTI-60</span>
-          <span class="card-description" id="histi-60-description">A compact reflection with the same four relationships and five result areas. Start with one person.</span>
-          <span class="card-time">10–15 minutes per person · 60 questions</span>
-          <span class="card-action">Start with HISTI-60 <b aria-hidden="true">→</b></span>
-        </a>
-
-        <article class="app-card soon" aria-disabled="true">
-          <span class="status">Coming soon</span>
-          <span class="card-number">04</span>
-          <span class="card-name">HISTI-Children</span>
-          <span class="card-description">For younger participants</span>
-        </article>
-
-        <article class="app-card soon" aria-disabled="true">
-          <span class="status">Coming soon</span>
-          <span class="card-number">05</span>
-          <span class="card-name">HISTI-Children-Extended</span>
-          <span class="card-description">Extended children’s version</span>
-        </article>
-
-        <article class="app-card soon" aria-disabled="true">
-          <span class="status">Coming soon</span>
-          <span class="card-number">06</span>
-          <span class="card-name">HISTI For Schools</span>
-          <span class="card-description">Designed for school settings</span>
-        </article>
-        <article class="app-card soon social" aria-disabled="true">
-          <span class="status">Coming soon</span>
-          <span class="card-number">07</span>
-          <span class="card-name">SMSTI</span>
-          <span class="card-expansion">Social Media Sharing Transparency Index</span>
-          <span class="card-description">How comfortable do you feel sharing information on social media?</span>
-        </article>
-
-        <article class="app-card soon professional" aria-disabled="true">
-          <span class="status">Coming soon</span>
-          <span class="card-number">08</span>
-          <span class="card-name">PEISTI</span>
-          <span class="card-expansion">Professional Environment Information Sharing Transparency Index</span>
-          <span class="card-description">How comfortable do you feel sharing information with co-workers or students?</span>
-        </article>
-
-        <article class="app-card soon" aria-disabled="true">
-          <span class="status">Coming soon</span>
-          <span class="card-number">09</span>
-          <span class="card-name">HISTI-Detailed</span>
-          <span class="card-description">An upcoming detailed check-in.</span>
-        </article>
-
-        <article class="app-card soon" aria-disabled="true">
-          <span class="status">Coming soon</span>
-          <span class="card-number">10</span>
-          <span class="card-name">HISTI-Detailed B</span>
-          <span class="card-description">The upcoming B variant of HISTI-Detailed.</span>
-        </article>
-
-        <article class="app-card soon" aria-disabled="true">
-          <span class="status">Coming soon</span>
-          <span class="card-number">11</span>
-          <span class="card-name">HISTI-Detailed 120</span>
-          <span class="card-description">The upcoming 120 variant of HISTI-Detailed.</span>
-        </article>
-      </div>
+      <section class="selector-library selector-upcoming" aria-labelledby="upcoming-checkins-title">
+        <div class="selector-library-heading"><div><p>More ways to reflect</p><h2 id="upcoming-checkins-title">On the horizon.</h2></div><span>Coming soon. Not available to start yet.</span></div>
+        <div class="app-grid">
+          <article class="app-card soon detailed" aria-disabled="true"><span class="status">Coming soon</span><h3 class="card-name">HISTI-Detailed</h3><span class="card-description">An upcoming detailed check-in.</span></article>
+          <article class="app-card soon detailed" aria-disabled="true"><span class="status">Coming soon</span><h3 class="card-name">HISTI-Detailed B</h3><span class="card-description">The upcoming B variant of HISTI-Detailed.</span></article>
+          <article class="app-card soon detailed" aria-disabled="true"><span class="status">Coming soon</span><h3 class="card-name">HISTI-Detailed 120</h3><span class="card-description">The upcoming 120 variant of HISTI-Detailed.</span></article>
+          <article class="app-card soon" aria-disabled="true"><span class="status">Coming soon</span><h3 class="card-name">HISTI-Children</h3><span class="card-description">For younger participants</span></article>
+          <article class="app-card soon" aria-disabled="true"><span class="status">Coming soon</span><h3 class="card-name">HISTI-Children-Extended</h3><span class="card-description">Extended children’s version</span></article>
+          <article class="app-card soon" aria-disabled="true"><span class="status">Coming soon</span><h3 class="card-name">HISTI For Schools</h3><span class="card-description">Designed for school settings</span></article>
+          <article class="app-card soon social" aria-disabled="true"><span class="status">Coming soon</span><h3 class="card-name">SMSTI</h3><span class="card-expansion">Social Media Sharing Transparency Index</span><span class="card-description">How comfortable do you feel sharing information on social media?</span></article>
+          <article class="app-card soon professional" aria-disabled="true"><span class="status">Coming soon</span><h3 class="card-name">PEISTI</h3><span class="card-expansion">Professional Environment Information Sharing Transparency Index</span><span class="card-description">How comfortable do you feel sharing information with co-workers or students?</span></article>
+        </div>
+      </section>
       <p class="visitor-help">Not sure yet? <a href="/#about">See how it works</a> or <a href="/#rights">find answers to common questions</a>.</p>
       <div class="suite-privacy-reminder" role="note"><span>Your pace. Your choice.</span><p>No account needed, and no real private details to type. Your choices and progress stay in this browser. You can skip, stop, or reset.</p><a href="/privacy">How your privacy is protected →</a></div>
     </section>
@@ -192,5 +151,6 @@
   </footer>
   <script type="module" src="/histi4-privacy.js?v=motion-1"></script>
   <script type="module" src="/visitor-calm.js?v=1"></script>
+  <script type="module" src="/visitor-scroll.js?v=1"></script>
 </body>
 </html>
