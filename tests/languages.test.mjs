@@ -82,3 +82,9 @@ test('language UI is bounded, local-only, accessible and pauses for performance/
  assert.match(read('fonts/noto-sans-sc/OFL.txt'),/SIL OPEN FONT LICENSE/);
  assert.match(read('fonts/noto-sans-sc/README.md'),/67bc647ce1910e92f461bcc82aae30f21d21a9cc/);
 });
+test('selector motion and time recommendations are translated without the visitor-page dictionary',()=>{
+ for(const locale of ['zh','es']){
+  const {t}=require('../'+locale+'/ui.js');
+  for(const copy of ["Pause motion","Reduced motion","Motion paused","60 questions · about 10–15 minutes. You can still take breaks.","120 questions · about 20–25 minutes. There’s no need to rush.","245 questions · about 40–50 minutes. You don’t have to finish in one sitting.","Explore HISTI Full","Explore HISTI-120","Explore HISTI-60"])assert.notEqual(t(copy),copy,locale+': '+copy);
+ }
+});
