@@ -1,5 +1,5 @@
 // Apply saved preferences before page/intro scripts run. Only four non-answer
-// preferences are stored; no observers, timers, frame loops, or network requests.
+// preferences are stored; no observers, polling, frame loops, or network requests.
 (() => {
   const STORAGE_KEY = 'histi.preferences.v1';
   const DEFAULTS = Object.freeze({ reading:'standard', contrast:'standard', textSize:'normal', performance:false });
@@ -22,7 +22,38 @@
   try { preferences = normalizePreferences(JSON.parse(window.localStorage.getItem(STORAGE_KEY) || 'null')); }
   catch { preferences = normalizePreferences(null); }
   let trigger, dialog, status, performanceButton;
+  let appliedReading, closeTimer = null;
+  const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const quiet = () => preferences.performance || motion.matches || document.hidden;
   const choices = [];
+
+  function clearMotion() {
+    if (closeTimer !== null) window.clearTimeout(closeTimer);
+    closeTimer = null;
+    if (!dialog) return;
+    delete dialog.dataset.motion;
+    dialog.style.removeProperty('--settings-exit-opacity');
+    dialog.style.removeProperty('--settings-exit-transform');
+  }
+  function finishClose() {
+    clearMotion();
+    if (dialog?.open) dialog.close();
+  }
+  function stopMotion() {
+    if (dialog?.dataset.motion === 'closing') finishClose();
+    else clearMotion();
+  }
+  function requestClose() {
+    if (!dialog?.open || dialog.dataset.motion === 'closing') return;
+    if (quiet()) { finishClose(); return; }
+    // Reverse an interrupted entrance from its current pose, not a new jump.
+    const pose = window.getComputedStyle(dialog);
+    dialog.style.setProperty('--settings-exit-opacity', pose.opacity);
+    dialog.style.setProperty('--settings-exit-transform', pose.transform);
+    dialog.dataset.motion = 'closing';
+    // One bounded fallback; cleared on animation completion/cancellation.
+    closeTimer = window.setTimeout(finishClose, 240);
+  }
 
   function applyReading() {
     for (const node of document.querySelectorAll('[data-reading-simple]')) {
@@ -32,20 +63,30 @@
       if (node.textContent !== text) node.textContent = text;
     }
   }
-  function apply() {
-    root.dataset.reading = preferences.reading;
-    root.dataset.contrast = preferences.contrast;
-    root.dataset.textSize = preferences.textSize;
-    root.dataset.performance = preferences.performance ? 'on' : 'off';
-    if (document.body) applyReading();
-    for (const choice of choices) choice.setAttribute('aria-pressed', String(preferences[choice.dataset.setting] === choice.dataset.value));
-    if (performanceButton) {
-      performanceButton.setAttribute('aria-checked', String(preferences.performance));
-      performanceButton.querySelector('[data-performance-label]').textContent = preferences.performance ? 'On' : 'Off';
+  function apply(initial = false) {
+    const performance = preferences.performance ? 'on' : 'off';
+    const motionChanged = root.dataset.performance !== performance;
+    for (const [key,value] of Object.entries({reading:preferences.reading,contrast:preferences.contrast,textSize:preferences.textSize,performance})) {
+      if (root.dataset[key] !== value) root.dataset[key] = value;
     }
-    // Motion owners clear their own pending work and restore their own UI state.
-    document.dispatchEvent(new CustomEvent('histi:preferences', { detail:{...preferences} }));
-    if (preferences.performance) document.getAnimations?.().forEach(animation => animation.cancel());
+    if (document.body && (initial || appliedReading !== preferences.reading)) { applyReading(); appliedReading = preferences.reading; }
+    for (const choice of choices) {
+      const pressed = String(preferences[choice.dataset.setting] === choice.dataset.value);
+      if (choice.getAttribute('aria-pressed') !== pressed) choice.setAttribute('aria-pressed', pressed);
+    }
+    if (performanceButton) {
+      const checked = String(preferences.performance);
+      if (performanceButton.getAttribute('aria-checked') !== checked) {
+        performanceButton.setAttribute('aria-checked', checked);
+        performanceButton.querySelector('[data-performance-label]').textContent = preferences.performance ? 'On' : 'Off';
+      }
+    }
+    // Text/contrast changes must not restart every motion owner or scan animations.
+    if (motionChanged || initial) {
+      if (preferences.performance) stopMotion();
+      document.dispatchEvent(new CustomEvent('histi:preferences', { detail:{...preferences} }));
+      if (preferences.performance) document.getAnimations?.().forEach(animation => animation.cancel());
+    }
   }
   function change(key, value) {
     const next = normalizePreferences({...preferences, [key]:value});
@@ -91,12 +132,12 @@
     const head = el('div','histi-settings-head');
     const title = el('h2','','Settings'); title.id = 'histi-settings-title';
     const close = el('button','histi-settings-close','Close'); close.type = 'button'; close.setAttribute('aria-label','Close settings');
-    close.addEventListener('click',()=>dialog.close()); head.append(title,close);
+    close.addEventListener('click',requestClose); head.append(title,close);
     const reading = group('reading','Reading level','Plain language uses shorter explanations. Test questions and scoring stay the same.',[['standard','Standard'],['simple','Plain language']]);
     const contrast = group('contrast','Contrast','Make text and boundaries stand out more.',[['standard','Standard'],['high','High contrast']]);
     const text = group('textSize','Text size','Make reading text and question choices larger.',[['normal','Normal'],['large','Larger'],['largest','Largest']]);
     const performance = el('fieldset','histi-settings-field');
-    performance.append(el('legend','','Performance mode'),el('p','histi-settings-help','Stops animations, drifting decorations, page transitions, and scroll glide. Controls still work.'));
+    performance.append(el('legend','','Performance mode'),el('p','histi-settings-help','Stops motion and scroll glide, hides decorative spots, and removes blur, glows, and shadows. Controls still work.'));
     performanceButton = el('button','histi-settings-switch'); performanceButton.type = 'button'; performanceButton.id = 'settings-performance';
     performanceButton.setAttribute('role','switch'); performanceButton.setAttribute('aria-label','Performance mode');
     const switchLabel = el('span','','Off'); switchLabel.dataset.performanceLabel = '';
@@ -114,9 +155,10 @@
     foot.append(reset,status);
     dialog.append(head,reading,contrast,text,performance,foot); document.body.append(trigger,dialog);
     dialog.addEventListener('click',event=>{
+      if (dialog.dataset.motion === 'closing') return;
       if (event.target === dialog) {
         const rect = dialog.getBoundingClientRect();
-        if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close();
+        if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) requestClose();
         return;
       }
       const choice = event.target.closest('button[data-setting]');
@@ -125,10 +167,18 @@
     performanceButton.addEventListener('click',()=>change('performance',!preferences.performance));
     trigger.addEventListener('click',()=>{
       if (document.querySelector('dialog[open]')) return;
+      clearMotion();
       dialog.showModal(); dialog.scrollTop = 0; trigger.setAttribute('aria-expanded','true'); close.focus({preventScroll:true});
+      if (!quiet()) dialog.dataset.motion = 'opening';
     });
-    dialog.addEventListener('close',()=>{ trigger.setAttribute('aria-expanded','false'); if (!document.hidden) trigger.focus({preventScroll:true}); });
-    apply();
+    dialog.addEventListener('cancel',event=>{ event.preventDefault(); requestClose(); });
+    dialog.addEventListener('animationend',event=>{
+      if (event.target !== dialog) return;
+      if (event.animationName === 'settings-depart' && dialog.dataset.motion === 'closing') finishClose();
+      else if (event.animationName === 'settings-arrive' && dialog.dataset.motion === 'opening') clearMotion();
+    });
+    dialog.addEventListener('close',()=>{ clearMotion(); trigger.setAttribute('aria-expanded','false'); if (!document.hidden) trigger.focus({preventScroll:true}); });
+    apply(true);
   }
   apply();
   window.addEventListener('storage',event=>{
@@ -143,6 +193,9 @@
     catch { preferences = normalizePreferences(null); }
     apply();
   });
+  motion.addEventListener('change',()=>{ if (motion.matches) stopMotion(); });
+  document.addEventListener('visibilitychange',()=>{ if (document.hidden) stopMotion(); });
+  window.addEventListener('pagehide',stopMotion);
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',init,{once:true});
   else init();
 })();

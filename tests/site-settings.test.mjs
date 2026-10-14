@@ -19,11 +19,12 @@ test('preferences accept only the four supported fields and reject corrupt value
 });
 
 class Element {
-  constructor(tag,doc) {this.tagName=tag.toUpperCase();this.doc=doc;this.dataset={};this.attributes={};this.children=[];this.listeners={};this.text='';this.open=false;this.classes=new Set();this.classList={add:name=>this.classes.add(name)};}
+  constructor(tag,doc) {this.tagName=tag.toUpperCase();this.doc=doc;this.dataset={};this.attributes={};this.children=[];this.listeners={};this.text='';this.open=false;this.classes=new Set();this.classList={add:name=>this.classes.add(name)};this.style={setProperty:(key,value)=>{this.style[key]=value;},removeProperty:key=>{delete this.style[key];}};}
   set textContent(value) {this.text=value;this.children=[];}
   get textContent() {return this.text+this.children.map(n=>n.textContent).join('');}
   append(...nodes) {for(const n of nodes){n.parentElement=this;this.children.push(n);}}
   setAttribute(name,value) {this.attributes[name]=String(value);}
+  getAttribute(name) {return this.attributes[name]??null;}
   hasAttribute(name) {return name in this.attributes || name==='data-reading-standard'&&'readingStandard' in this.dataset;}
   addEventListener(type,fn) {(this.listeners[type] ||= []).push(fn);}
   emit(type,event={}) {for(const fn of this.listeners[type]||[])fn({target:this,...event});}
@@ -36,22 +37,23 @@ class Element {
   getBoundingClientRect() {return {left:0,right:300,top:0,bottom:600};}
 }
 function fixture({stored=null,blocked=false}={}) {
-  const listeners={},windowListeners={},storage=new Map(),writes=[];let cancelled=0;
+  const listeners={},windowListeners={},storage=new Map(),writes=[],timers=new Map(),motionListeners={};let cancelled=0,timerId=0,readingScans=0;
+  const motion={matches:false,addEventListener:(type,fn)=>{(motionListeners[type] ||= []).push(fn);}};
   if(stored!==null)storage.set(STORAGE_KEY,stored);
   storage.set('histi.four-groups.G1.v1','synthetic check-in progress');
   const doc={readyState:'loading',hidden:false,documentElement:{dataset:{}},addEventListener:(type,fn)=>{(listeners[type] ||= []).push(fn);},dispatchEvent:event=>{for(const fn of listeners[event.type]||[])fn(event);},createElement:tag=>new Element(tag,doc),createElementNS:(_,tag)=>new Element(tag,doc),getAnimations:()=>[{cancel(){cancelled++;}}]};
   doc.body=new Element('body',doc);
   const copy=new Element('p',doc);copy.dataset.readingSimple='Short words.';copy.textContent='A longer explanation.';doc.body.append(copy);
-  doc.querySelectorAll=selector=>selector==='[data-reading-simple]'?doc.body.all().filter(n=>'readingSimple' in n.dataset):[];
+  doc.querySelectorAll=selector=>{if(selector!=='[data-reading-simple]')return [];readingScans++;return doc.body.all().filter(n=>'readingSimple' in n.dataset);};
   doc.querySelector=selector=>selector==='dialog[open]'?doc.body.all().find(n=>n.tagName==='DIALOG'&&n.open)||null:null;
   doc.getElementById=id=>doc.body.all().find(n=>n.id===id)||null;
-  const host={localStorage:{getItem:key=>{if(blocked)throw Error('Blocked');return storage.get(key)||null;},setItem:(key,value)=>{if(blocked)throw Error('Blocked');writes.push([key,value]);storage.set(key,value);},removeItem:key=>{if(blocked)throw Error('Blocked');storage.delete(key);}},addEventListener:(type,fn)=>{(windowListeners[type] ||= []).push(fn);}};
+  const host={matchMedia:()=>motion,getComputedStyle:()=>({opacity:'.6',transform:'matrix(1, 0, 0, 1, 4, 3)'}),setTimeout:(fn,ms)=>{const id=++timerId;timers.set(id,{fn,ms});return id;},clearTimeout:id=>timers.delete(id),localStorage:{getItem:key=>{if(blocked)throw Error('Blocked');return storage.get(key)||null;},setItem:(key,value)=>{if(blocked)throw Error('Blocked');writes.push([key,value]);storage.set(key,value);},removeItem:key=>{if(blocked)throw Error('Blocked');storage.delete(key);}},addEventListener:(type,fn)=>{(windowListeners[type] ||= []).push(fn);}};
   const context={document:doc,window:host,CustomEvent:class {constructor(type,options){this.type=type;this.detail=options.detail;}}};
   const run=()=>runInNewContext(read('site-settings.js'),context);
   const ready=()=>{doc.readyState='complete';doc.dispatchEvent({type:'DOMContentLoaded'});};
   const choose=(key,value)=>{const button=doc.body.all().find(n=>n.dataset.setting===key&&n.dataset.value===value);assert.ok(button);doc.getElementById('histi-settings-dialog').emit('click',{target:button});};
   run();
-  return {doc,host,copy,storage,writes,listeners,windowListeners,run,ready,choose,cancelled:()=>cancelled};
+  return {doc,host,copy,storage,writes,listeners,windowListeners,run,ready,choose,timers,motion,motionListeners,cancelled:()=>cancelled,readingScans:()=>readingScans};
 }
 
 test('saved settings apply before DOM-ready, then the controls mirror them',()=>{
@@ -98,6 +100,41 @@ test('storage failures still allow local changes; cross-tab updates do not write
   assert.equal(f.copy.textContent,'Short words.');assert.equal(f.writes.length,0,'restored history reads current preferences without writes');
 });
 
+test('panel exits finish once, clean up interrupted entrances, and return focus',()=>{
+  const f=fixture();f.ready();const trigger=f.doc.getElementById('histi-settings-btn'),dialog=f.doc.getElementById('histi-settings-dialog');
+  const close=f.doc.body.all().find(n=>n.className==='histi-settings-close');
+  for(let i=0;i<100;i++) {
+    trigger.emit('click');assert.equal(dialog.dataset.motion,'opening');
+    close.emit('click');close.emit('click');assert.equal(dialog.dataset.motion,'closing');assert.equal(f.timers.size,1);
+    assert.equal(dialog.style['--settings-exit-opacity'],'.6');
+    dialog.emit('animationend',{animationName:'settings-arrive'});assert.equal(dialog.open,true);
+    dialog.emit('animationend',{animationName:'settings-depart'});
+    assert.equal(dialog.open,false);assert.equal(f.timers.size,0);assert.equal(dialog.dataset.motion,undefined);
+    assert.equal(dialog.style['--settings-exit-transform'],undefined);assert.equal(f.doc.activeElement,trigger);
+  }
+  trigger.emit('click');close.emit('click');const [id,timer]=[...f.timers][0];assert.equal(timer.ms,240);timer.fn();
+  assert.equal(dialog.open,false);assert.equal(f.timers.has(id),false);
+});
+
+test('Escape animates normally but reduced motion and performance cancel pending exits instantly',()=>{
+  const f=fixture();f.ready();const trigger=f.doc.getElementById('histi-settings-btn'),dialog=f.doc.getElementById('histi-settings-dialog');
+  trigger.emit('click');let prevented=false;dialog.emit('cancel',{preventDefault(){prevented=true;}});
+  assert.equal(prevented,true);assert.equal(dialog.dataset.motion,'closing');
+  f.doc.getElementById('settings-performance').emit('click');assert.equal(dialog.open,false);assert.equal(f.timers.size,0);
+  trigger.emit('click');assert.equal(dialog.dataset.motion,undefined);dialog.emit('cancel',{preventDefault(){}});assert.equal(dialog.open,false);
+  f.doc.getElementById('settings-performance').emit('click');trigger.emit('click');dialog.emit('cancel',{preventDefault(){}});
+  f.motion.matches=true;f.motionListeners.change[0]();assert.equal(dialog.open,false);assert.equal(f.timers.size,0);
+});
+
+test('unrelated preferences avoid whole-document animation scans and motion-owner broadcasts',()=>{
+  const f=fixture();f.ready();let events=0;f.listeners['histi:preferences']=[()=>events++];
+  f.doc.getElementById('settings-performance').emit('click');assert.equal(events,1);const scans=f.readingScans(),cancels=f.cancelled();
+  f.choose('contrast','high');f.choose('textSize','largest');
+  assert.equal(events,1);assert.equal(f.cancelled(),cancels);assert.equal(f.readingScans(),scans);
+  f.choose('reading','simple');assert.equal(f.readingScans(),scans+1);assert.equal(events,1);
+  f.doc.getElementById('settings-performance').emit('click');assert.equal(events,2);
+});
+
 test('plain copy preserves the scale, missing answers, school safeguards, and scoring inputs',()=>{
   const answers={[FAMILIES[0][0]]:{status:'score',value:100},[FAMILIES[1][0]]:{status:'pna'}};
   const before=structuredClone(answers),result=calculate(answers),snapshot=structuredClone(result);
@@ -130,6 +167,7 @@ test('high-contrast text pairs pass AA and enlarged text does not zoom the point
   assert.match(css,/--settings-read-size:21px/);assert.match(css,/\.h4-status button/);
   assert.match(css,/html\[data-performance="on"\] \*/);
   assert.match(css,/animation:none!important; transition:none!important/);
+  assert.match(css,/will-change:auto!important/);assert.match(css,/-webkit-backdrop-filter:none!important/);
 });
 
 test('all 26 pages load preferences before animation scripts and keep privacy and typography',()=>{
@@ -137,13 +175,14 @@ test('all 26 pages load preferences before animation scripts and keep privacy an
   assert.equal(pages.length,26);
   for(const file of pages) {
     const html=read(file);
-    assert.equal((html.match(/site-settings\.js\?v=1/g)||[]).length,1,file);
-    assert.equal((html.match(/site-settings\.css\?v=1/g)||[]).length,1,file);
+    assert.equal((html.match(/site-settings\.js\?v=2/g)||[]).length,1,file);
+    assert.equal((html.match(/site-settings\.css\?v=2/g)||[]).length,1,file);
     assert.ok(html.indexOf('/site-settings.js')<html.indexOf('/page-transitions.js'),file);
     assert.ok(html.indexOf('/site-settings.css')<html.indexOf('/site-typography.css'),file);
     assert.match(html,/connect-src 'none'/);assert.doesNotMatch(html,/For AI:|histi-ai-notes/);
   }
-  const js=read('site-settings.js');assert.doesNotMatch(js,/setInterval|setTimeout|requestAnimationFrame|MutationObserver|fetch\(|XMLHttpRequest|document\.cookie|innerHTML/);
+  const js=read('site-settings.js');assert.doesNotMatch(js,/setInterval|requestAnimationFrame|MutationObserver|fetch\(|XMLHttpRequest|document\.cookie|innerHTML/);
+  assert.equal((js.match(/window\.setTimeout\(/g)||[]).length,1);assert.match(js,/window\.clearTimeout\(closeTimer\)/);
   assert.match(js,/if \(root\.dataset\.settingsReady\) return/);
   assert.match(js,/aria-haspopup/);assert.match(js,/aria-checked/);assert.match(js,/aria-pressed/);
   assert.match(read('privacy.html'),/histi\.preferences\.v1/);

@@ -5,8 +5,16 @@ body.histi-has-fixed-footer { --settings-bottom:88px; }
 .histi-settings-trigger svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
 .histi-settings-dialog { position:fixed; inset:auto; right:18px; bottom:calc(16px + env(safe-area-inset-bottom)); width:min(370px,calc(100vw - 32px)); max-height:calc(100svh - 32px - env(safe-area-inset-bottom)); margin:0; padding:22px; overflow-y:auto; overscroll-behavior:contain; border:1px solid #8ea7bb; border-radius:24px; background:var(--palette-card,#fffdf8); color:var(--palette-ink,#25323b); box-shadow:0 16px 52px #23394c24; }
 .histi-settings-dialog::backdrop { background:#182b4030; }
-.histi-settings-dialog[open] { animation:settings-arrive 180ms ease-out both; }
-@keyframes settings-arrive { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+.histi-settings-dialog { transform-origin:bottom right; }
+.histi-settings-dialog[open][data-motion="opening"] { animation:settings-arrive 300ms cubic-bezier(.16,1,.3,1) both; }
+.histi-settings-dialog[open][data-motion="closing"] { animation:settings-depart 200ms cubic-bezier(.4,0,1,1) both; pointer-events:none; }
+.histi-settings-dialog[data-motion="opening"]::backdrop { animation:settings-shade-in 240ms ease-out both; }
+.histi-settings-dialog[data-motion="closing"]::backdrop { animation:settings-shade-out 200ms ease-in both; }
+@keyframes settings-arrive { from { opacity:0; transform:translate(12px,10px) scale(.985); } to { opacity:1; transform:none; } }
+@keyframes settings-depart { from { opacity:var(--settings-exit-opacity,1); transform:var(--settings-exit-transform,none); } to { opacity:0; transform:translate(8px,6px) scale(.99); } }
+@keyframes settings-shade-in { from { opacity:0; } to { opacity:1; } }
+@keyframes settings-shade-out { from { opacity:1; } to { opacity:0; } }
+.histi-settings-options button,.histi-settings-switch,.histi-switch-track { transition:background-color 160ms ease,border-color 160ms ease,color 160ms ease; }
 .histi-settings-head { position:sticky; top:-22px; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:16px; margin:-22px -22px 18px; padding:18px 22px 14px; background:var(--palette-card,#fffdf8); border-bottom:1px solid var(--palette-line,#c6d0d9); }
 .histi-settings-head h2 { margin:0; font-size:30px; }
 .histi-settings-close { min-height:40px; padding:8px 12px; border:1px solid var(--palette-line,#a9b5bf); border-radius:999px; background:transparent; color:inherit; font-size:13px; cursor:pointer; }
@@ -18,7 +26,7 @@ body.histi-has-fixed-footer { --settings-bottom:88px; }
 .histi-settings-options button[aria-pressed="true"] { border-color:#376687; background:#dcecf8; color:#183c5a; box-shadow:inset 0 0 0 1px #376687; }
 .histi-settings-switch { display:flex; align-items:center; justify-content:space-between; width:100%; min-height:46px; padding:10px 12px; border:1px solid #a1b3c3; border-radius:12px; background:transparent; color:inherit; font-size:14px; cursor:pointer; }
 .histi-switch-track { width:40px; padding:3px; border-radius:999px; background:#c5d0d9; }
-.histi-switch-track>span { display:block; width:16px; height:16px; border-radius:50%; background:#fff; transition:transform 160ms ease; }
+.histi-switch-track>span { display:block; width:16px; height:16px; border-radius:50%; background:#fff; transition:transform 220ms cubic-bezier(.16,1,.3,1); }
 .histi-settings-switch[aria-checked="true"] .histi-switch-track { background:#294e70; }
 .histi-settings-switch[aria-checked="true"] .histi-switch-track>span { transform:translateX(18px); }
 .histi-settings-foot { padding-top:12px; border-top:1px solid var(--palette-line,#c6d0d9); }
@@ -46,13 +54,15 @@ html[data-contrast="high"] :is(.histi-settings-options button,.histi-settings-sw
 
 /* Performance mode is a persistent, site-wide override, including pseudo-elements. */
 html[data-performance="on"] *,html[data-performance="on"] *::before,html[data-performance="on"] *::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; }
+html[data-performance="on"] *,html[data-performance="on"] *::before,html[data-performance="on"] *::after,html[data-performance="on"] dialog::backdrop { filter:none!important; backdrop-filter:none!important; -webkit-backdrop-filter:none!important; box-shadow:none!important; will-change:auto!important; }
+html[data-performance="on"] dialog::backdrop { animation:none!important; transition:none!important; }
 html[data-performance="on"],html[data-performance="on"] body { scroll-behavior:auto!important; }
 html[data-performance="on"] :is(.suite-color-field,#histi-intro,.histi-card-morph,.histi-history-veil) { display:none!important; }
 html[data-performance="on"]::before,html[data-performance="on"]::after { display:none!important; }
 html[data-performance="on"] :is(.home-reveal-pending,.visitor-awaiting) { opacity:1!important; transform:none!important; }
 html[data-performance="on"] :is(.result-card,.start-card,.app-card,.histi-settings-dialog,.histi-settings-trigger) { box-shadow:none!important; backdrop-filter:none!important; }
 html[data-performance="on"]::view-transition-old(root),html[data-performance="on"]::view-transition-new(root) { animation:none!important; }
-@media(prefers-reduced-motion:reduce) { .histi-settings-dialog[open],.histi-switch-track>span { animation:none!important; transition:none!important; } }
+@media(prefers-reduced-motion:reduce) { .histi-settings-dialog[open],.histi-settings-dialog::backdrop,.histi-settings-dialog button,.histi-switch-track,.histi-switch-track>span { animation:none!important; transition:none!important; } }
 @media(max-width:600px) {
   :root { --settings-bottom:14px; }
   body.histi-has-fixed-footer { --settings-bottom:16px; }
