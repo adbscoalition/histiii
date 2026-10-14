@@ -137,7 +137,7 @@
     const contrast = group('contrast','Contrast','Make text and boundaries stand out more.',[['standard','Standard'],['high','High contrast']]);
     const text = group('textSize','Text size','Make reading text and question choices larger.',[['normal','Normal'],['large','Larger'],['largest','Largest']]);
     const performance = el('fieldset','histi-settings-field');
-    performance.append(el('legend','','Performance mode'),el('p','histi-settings-help','Stops motion and scroll glide, hides decorative spots, and removes blur, glows, and shadows. Controls still work.'));
+    performance.append(el('legend','','Performance mode'),el('p','histi-settings-help','No motion, scroll glide, decorative spots, blur, or shadows. Controls still work.'));
     performanceButton = el('button','histi-settings-switch'); performanceButton.type = 'button'; performanceButton.id = 'settings-performance';
     performanceButton.setAttribute('role','switch'); performanceButton.setAttribute('aria-label','Performance mode');
     const switchLabel = el('span','','Off'); switchLabel.dataset.performanceLabel = '';

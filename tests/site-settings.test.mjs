@@ -175,8 +175,8 @@ test('all 26 pages load preferences before animation scripts and keep privacy an
   assert.equal(pages.length,26);
   for(const file of pages) {
     const html=read(file);
-    assert.equal((html.match(/site-settings\.js\?v=2/g)||[]).length,1,file);
-    assert.equal((html.match(/site-settings\.css\?v=2/g)||[]).length,1,file);
+    assert.equal((html.match(/site-settings\.js\?v=3/g)||[]).length,1,file);
+    assert.equal((html.match(/site-settings\.css\?v=3/g)||[]).length,1,file);
     assert.ok(html.indexOf('/site-settings.js')<html.indexOf('/page-transitions.js'),file);
     assert.ok(html.indexOf('/site-settings.css')<html.indexOf('/site-typography.css'),file);
     assert.match(html,/connect-src 'none'/);assert.doesNotMatch(html,/For AI:|histi-ai-notes/);
