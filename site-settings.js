@@ -15,6 +15,7 @@
   // The static browser loads a classic script; Node tests can import validation.
   if (typeof module !== 'undefined' && module.exports) module.exports = { DEFAULTS, STORAGE_KEY, normalizePreferences };
   if (typeof document === 'undefined' || typeof window === 'undefined') return;
+  const t = value => window.HISTI_LOCALE?.t(value) ?? value;
   const root = document.documentElement;
   if (root.dataset.settingsReady) return;
   root.dataset.settingsReady = 'true';
@@ -40,6 +41,7 @@
   function cancelStatusMotion() { statusAnimation?.cancel(); statusAnimation = null; }
   function notify(message) {
     if (!status) return;
+    message = t(message);
     if (status.textContent !== message) status.textContent = message;
     cancelStatusMotion();
     if (quiet() || !dialog?.open || typeof status.animate !== 'function') return;
@@ -93,7 +95,7 @@
       const checked = String(preferences.performance);
       if (performanceButton.getAttribute('aria-checked') !== checked) {
         performanceButton.setAttribute('aria-checked', checked);
-        performanceButton.querySelector('[data-performance-label]').textContent = preferences.performance ? 'On' : 'Off';
+        performanceButton.querySelector('[data-performance-label]').textContent = t(preferences.performance ? 'On' : 'Off');
       }
     }
     // Text/contrast changes must not restart every motion owner or scan animations.
@@ -115,7 +117,7 @@
   const el = (tag, className, text) => {
     const node = document.createElement(tag);
     if (className) node.className = className;
-    if (text !== undefined) node.textContent = text;
+    if (text !== undefined) node.textContent = t(text);
     return node;
   };
   function group(key, title, help, options) {
@@ -194,6 +196,8 @@
     });
     dialog.addEventListener('close',()=>{ cancelStatusMotion(); clearMotion(); trigger.setAttribute('aria-expanded','false'); if (!document.hidden) trigger.focus({preventScroll:true}); });
     apply(true);
+    window.HISTI_LOCALE?.translate(dialog);
+    window.HISTI_LOCALE?.translate(trigger);
   }
   apply();
   window.addEventListener('storage',event=>{

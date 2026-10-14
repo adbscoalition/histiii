@@ -1,0 +1,15 @@
+/* Chinese glyphs only; Latin UI text keeps the existing self-hosted font. */
+@font-face { font-family:"HISTI KaiTi"; src:url('/fonts/kaiti/zh-subset.woff2') format('woff2'); font-weight:400; font-style:normal; font-display:swap; unicode-range:U+3000-303F,U+3400-9FFF,U+FF00-FFEF; }
+html:lang(zh-CN) :is(h1,h2,h3,h4,h5,h6,.card-name,.h4-choice strong,.featured-art-note) { font-family:"HISTI KaiTi","Tiro Gurmukhi","PingFang SC","Microsoft YaHei",serif!important; font-weight:400!important; font-style:normal!important; letter-spacing:0!important; line-height:1.45; }
+html:lang(zh-CN),html:lang(zh-CN) :is(body,button,input,textarea,select,a,dialog,code,pre) { font-family:"Instrument Sans","PingFang SC","Microsoft YaHei",sans-serif!important; }
+html:lang(zh-CN) .h4-question h2 { font-size:clamp(22px,2.3vw,27px); line-height:1.65; }
+html:lang(zh-CN) .histi-nav { gap:20px; }
+html:lang(zh-CN) :is(.selector-heading h1,.start-card>h1) { text-wrap:balance; }
+html:lang(zh-CN) .translation-note { max-width:1200px; margin:14px auto; padding:10px 16px; color:var(--palette-muted); font-size:13px; line-height:1.75; }
+html:lang(zh-CN) .h4-status button { white-space:normal; }
+html:lang(zh-CN) .footer-links a { white-space:nowrap; }
+.language-link { display:inline-flex; align-items:center; justify-content:center; flex:none; padding:8px 10px; border:1px solid var(--palette-line); border-radius:999px; color:var(--palette-blue-ink); background:var(--palette-card); font-size:13px; line-height:1.4; text-decoration:none; }
+.language-link:focus-visible { outline:2px solid currentColor; outline-offset:3px; }
+html:lang(zh-CN)::after { content:'留一点空间，给自己。'; }
+@media(max-width:680px) { html:lang(zh-CN) .histi-start-label { font-size:11px; } html:lang(zh-CN) .histi-start-label::after { content:none; } }
+@media(max-width:620px) { html:lang(zh-CN) .histi-header-actions { gap:6px; } html:lang(zh-CN) .language-link { padding:7px 8px; font-size:12px; } html:lang(zh-CN) .translation-note { margin-inline:16px; } }

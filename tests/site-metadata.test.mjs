@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { FAMILIES, CATEGORY_META, RECIPIENTS } from '../histi4-data.js';
 import { makeSlides, displayScore } from '../histi4-core.js';
+import { ZH_PAGES } from '../scripts/build-zh-pages.mjs';
 
 const read = file => readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
 const origin = 'https://www.histi.org';
@@ -163,7 +164,7 @@ test('search discovery lists only current public destinations', () => {
   const sitemap = read('sitemap.xml');
   assert.match(sitemap, /xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9"/);
   const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
-  assert.deepEqual(urls, [...pages, 'privacy', 'terms'].map(urlFor));
+  assert.deepEqual(urls, [...pages, 'privacy', 'terms',...ZH_PAGES.map(page=>'zh/'+page)].map(urlFor));
   assert.equal(new Set(urls).size, urls.length);
   urls.forEach(url => assert.doesNotMatch(url, /checkin-v3|[?#]/));
   for (const page of ['privacy', 'terms']) {

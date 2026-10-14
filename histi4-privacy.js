@@ -1,4 +1,4 @@
-import { openDialog, closeDialog } from './site-dialogs.js?v=settings-1';
+import { openDialog, closeDialog } from './site-dialogs.js?v=locale-1';
 
 const trigger = document.getElementById('privacy-live-btn');
 
@@ -64,6 +64,8 @@ if (trigger) {
       : 'One or more checks need attention. Inspect the values above and the browser Network panel before relying on a local-only claim.';
     trigger.dataset.state = passed ? 'pass' : 'fail';
     trigger.querySelector('#privacy-live-label').textContent = 'Privacy proof';
+    window.HISTI_LOCALE?.translate(panel);
+    window.HISTI_LOCALE?.translate(trigger);
   };
   const openProof = event => { openDialog(panel, event?.currentTarget || trigger); run(); };
   trigger.addEventListener('click', openProof);

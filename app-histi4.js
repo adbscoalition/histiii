@@ -1,5 +1,5 @@
-import { resetTransition } from './reset-transition.js?v=settings-1';
-import { openDialog, closeDialog, confirmReset } from './site-dialogs.js?v=settings-1';
+import { resetTransition } from './reset-transition.js?v=locale-1';
+import { openDialog, closeDialog, confirmReset } from './site-dialogs.js?v=locale-1';
 import { makeSlides, remapLegacySlideIndex, calculate as calculateFamilies, rubricPoints, displayScore } from './histi4-core.js?v=school-editions-1';
 import { describeRelationship, describeTopic, describePattern, coverageText, referenceScore, compareReference, createResultReveal } from './histi4-results.js?v=editorial-1';
 import { plainOverall, plainTopic, plainPattern, plainRecipient } from './histi-plain-reading.js?v=1';
@@ -9,15 +9,21 @@ const schoolEdition = document.body.dataset.schoolEdition;
 if (school && !['middle','high'].includes(schoolEdition)) throw new Error('Choose a school edition first');
 const shortForm = document.body.dataset.test === '60';
 const abridged = shortForm || document.body.dataset.test === '120';
-const { FAMILIES, CATEGORY_META, RECIPIENTS, makeSchoolSlides, SCHOOL_INFO } = await import(school ? `./histi-school-${schoolEdition}-data.js?v=1` : shortForm ? './histi60-family-data.js?v=1' : abridged ? './histi120-family-data.js?v=1' : './histi4-data.js');
-const testName = school ? SCHOOL_INFO.testName : shortForm ? 'HISTI-60' : abridged ? 'HISTI-120' : 'HISTI Full';
-const routeBase = school ? SCHOOL_INFO.routeBase : shortForm ? '/checkin-60' : abridged ? '/checkin-120' : '/checkin-4';
+const chinese = document.documentElement.lang === 'zh-CN';
+const t = value => window.HISTI_LOCALE?.t(value) ?? value;
+const translate = node => window.HISTI_LOCALE?.translate(node);
+const sourceData = await import(school ? `./histi-school-${schoolEdition}-data.js?v=1` : shortForm ? './histi60-family-data.js?v=1' : abridged ? './histi120-family-data.js?v=1' : './histi4-data.js');
+const zh = chinese ? await import('./zh/data.js') : null;
+const zhResults = chinese ? await import('./zh/results.js') : null;
+const { FAMILIES, CATEGORY_META, RECIPIENTS, makeSchoolSlides, SCHOOL_INFO } = chinese ? zh.localizeDataset(sourceData,shortForm?'60':abridged?'120':'full') : sourceData;
+const testName = t(school ? SCHOOL_INFO.testName : shortForm ? 'HISTI-60' : abridged ? 'HISTI-120' : 'HISTI Full');
+const routeBase = (chinese ? '/zh' : '') + (school ? SCHOOL_INFO.routeBase : shortForm ? '/checkin-60' : abridged ? '/checkin-120' : '/checkin-4');
 const calculate = answers => calculateFamilies(answers, FAMILIES, CATEGORY_META, { pnaPoints: school ? null : 1, roundSliderPoints:!school });
 const group = document.body.dataset.recipient;
 const recipient = RECIPIENTS[group];
 if (!recipient) throw new Error('Unknown HISTI recipient group');
 const debugMode = new URLSearchParams(window.location.search).get('debug') === '1';
-const sharingWith = school ? recipient.phrase : {
+const sharingWith = chinese ? zh.SHARING_ZH[group] : school ? recipient.phrase : {
   G1: 'a stranger or regular person',
   G2: 'an acquaintance',
   G3: 'a friend',
@@ -25,15 +31,16 @@ const sharingWith = school ? recipient.phrase : {
 }[group];
 const slides = school ? makeSchoolSlides(FAMILIES) : makeSlides(FAMILIES);
 const familyByCode = new Map(FAMILIES.map(row => [row[0], row]));
-const storageKey = school ? `${SCHOOL_INFO.storagePrefix}.${group}.v1` : shortForm ? `histi.60-families.${group}.v1` : abridged ? `histi.120-families.${group}.v1` : `histi.four-groups.${group}.v1`;
+const storageKey = chinese ? `histi.zh-CN.${shortForm?'60':abridged?'120':'full'}.${group}.v1` : school ? `${SCHOOL_INFO.storagePrefix}.${group}.v1` : shortForm ? `histi.60-families.${group}.v1` : abridged ? `histi.120-families.${group}.v1` : `histi.four-groups.${group}.v1`;
 const $ = id => document.getElementById(id);
 const el = (tag, className, text) => {
   const node = document.createElement(tag);
   if (className) node.className = className;
-  if (text !== undefined) node.textContent = text;
+  if (text !== undefined) node.textContent = t(text);
   return node;
 };
 function readingCopy(node, standard, simple) {
+  if (chinese) { standard = t(standard); simple = /[\u3400-\u9fff]/.test(simple) ? simple : standard; }
   node.dataset.readingStandard = standard;
   node.dataset.readingSimple = simple;
   node.textContent = document.documentElement.dataset.reading === 'simple' ? simple : standard;
@@ -100,9 +107,9 @@ async function transitionPage(kicker, title, detail, render, focusId) {
   transitionBusy = true;
   const overlay = $('page-transition');
   const screens = [$('intro-screen'), $('assessment-screen'), $('results-screen')];
-  $('transition-kicker').textContent = kicker;
-  $('transition-title').textContent = title;
-  $('transition-detail').textContent = detail;
+  $('transition-kicker').textContent = t(kicker);
+  $('transition-title').textContent = t(title);
+  $('transition-detail').textContent = t(detail);
   overlay.hidden = false;
   screens.forEach(screen => { screen.inert = true; });
   void overlay.offsetWidth;
@@ -235,6 +242,7 @@ function questionCard(row, animate = false) {
         segment.setAttribute('aria-pressed', String(active && n === index));
         segment.tabIndex = n === (active ? index : 0) ? 0 : -1;
       });
+      translate(readout);
     };
     const choose = index => {
       update(index);
@@ -418,12 +426,13 @@ function renderSlide(scroll = true) {
   $('next-btn').textContent = state.index === slides.length - 1 ? 'See result' : 'Next';
   $('partial-btn').hidden = result.answered === 0;
   document.title = `${state.index + 1} / ${slides.length} · ${recipient.label} | ${testName}`;
+  translate($('assessment-screen'));
 }
 function resultCategory(key, result) {
   const meta = CATEGORY_META[key];
   const bucket = result.categories[key];
-  const reading = describeTopic(key, bucket, { group, school });
-  const plain = plainTopic(key, bucket, group, school);
+  const reading = chinese ? zhResults.topic(key,bucket,group) : describeTopic(key, bucket, { group, school });
+  const plain = chinese ? zhResults.plain(reading) : plainTopic(key, bucket, group, school);
   if (school) { reading.scope = meta.scope; reading.prompt = meta.prompt; }
   const card = el('article', 'category-card');
   card.setAttribute('aria-labelledby', `result-topic-${key}`);
@@ -468,8 +477,8 @@ function resultCategory(key, result) {
 function renderResults(completed = false) {
   if (completed) state.completed = true;
   const result = calculate(state.answers);
-  const reading = describeRelationship(result.score, group, { school });
-  const plain = plainOverall(reading, group, school);
+  const reading = chinese ? zhResults.relationship(result.score,group) : describeRelationship(result.score, group, { school });
+  const plain = chinese ? zhResults.plain(reading) : plainOverall(reading, group, school);
   show('results');
   $('result-recipient').textContent = `Sharing with ${sharingWith}`;
   $('result-state').textContent = completed ? 'Your check-in result' : 'Still in progress · You can come back';
@@ -481,7 +490,7 @@ function renderResults(completed = false) {
   $('result-score-meaning').textContent = reading.label;
   $('result-marker').hidden = result.score === null;
   $('result-marker').parentElement.style.setProperty('--score-position', `${result.score === null ? 50 : (result.score + 100) / 2}%`);
-  $('result-coverage').textContent = coverageText(result);
+  $('result-coverage').textContent = chinese ? zhResults.coverage(result) : coverageText(result);
   $('result-early-note').textContent = result.answered === 0 ? 'No scored answers yet. Leaving something blank does not count as a middle answer.'
     : result.answered < result.total ? 'Only scored answers are included. This number can change if you add or revise answers.' : 'All your answers are included. Think of this as a starting point for reflection, not an exact measurement.';
   if (school) $('result-early-note').textContent += result.answered < result.total ? ' Scores are not directly comparable when questions or areas are missing. This is not a grade.' : ' Your score is not a grade, a sign of honesty, or advice to share.';
@@ -493,15 +502,16 @@ function renderResults(completed = false) {
     const skipped = FAMILIES.filter(row => ['skip','pna'].includes(state.answers[row[0]]?.status)).length;
     $('result-scoring-detail').textContent = `${result.answered} of ${result.total} questions are scored. ${skipped} skipped / prefer-not-to-answer, ${unknown} “I don’t know,” and ${na} “Not applicable” responses are excluded from both earned and available points. Other unanswered questions are also excluded. The four category weights are A1 23, A2 25, B 25, C 20; Category D is not included.`;
   }
+  if (chinese) $('result-scoring-detail').textContent = `本结果计入 ${result.answered}／${result.total} 题，包括 ${pna} 个“不愿回答”答案（每题计 1 分）。${unknown} 个“我不知道”和 ${na} 个“不适用”答案不计分；另有 ${result.total-result.answered-unknown-na} 题未计分。`;
   const fragment = document.createDocumentFragment();
   Object.keys(CATEGORY_META).forEach(key => fragment.append(resultCategory(key, result)));
   $('category-results').replaceChildren(fragment);
-  const pattern = describePattern(result, CATEGORY_META);
+  const pattern = chinese ? zhResults.pattern(result,CATEGORY_META) : describePattern(result, CATEGORY_META);
   const perspective = document.querySelector('#results-screen .result-perspective');
   const patternHeading = el('h2', '', pattern.title); patternHeading.id = 'result-pattern-heading';
   perspective.setAttribute('aria-labelledby', patternHeading.id);
   perspective.replaceChildren(el('p', 'result-story-kicker', 'Looking at the topics'), patternHeading,
-    readingCopy(el('p', 'result-pattern-description'), pattern.description, plainPattern(result, CATEGORY_META)), el('p', 'result-pattern-note', pattern.note));
+    readingCopy(el('p', 'result-pattern-description'), pattern.description, chinese ? pattern.description.split('。')[0]+'。' : plainPattern(result, CATEGORY_META)), el('p', 'result-pattern-note', pattern.note));
   if (!school && !$('result-reference-note')) {
     const note = el('p', 'result-reference-note', `The dot is your result; the diamond is a reference for ${sharingWith}. The reference is a guide, not a verified population average or a target.`);
     note.id = 'result-reference-note';
@@ -526,6 +536,8 @@ function renderResults(completed = false) {
   }
   $('resume-btn').textContent = completed ? 'Review questions' : 'Resume questions';
   document.title = `Result · ${recipient.label} | ${testName}`;
+  if (chinese) document.title = `结果 · ${recipient.label} | ${t(testName)}`;
+  translate($('results-screen'));
   if (!transitionBusy) revealResult();
 }
 async function reset() {
@@ -676,4 +688,5 @@ if (state.completed) renderResults(true);
 else if (state.started && state.screen !== 'intro') renderSlide();
 else show('intro');
 $('start-btn').disabled = false;
+translate($('intro-screen'));
 window.__HISTI4__ = { group, slides, calculate, rubricPoints, getState: () => state };

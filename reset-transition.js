@@ -24,7 +24,7 @@ export function resetTransition(render, focusTarget) {
     const regions = [...document.querySelectorAll('main, .site-header, footer')].map(node => [node, node.inert]);
     const timers = new Set(); let committed = false;
     pending = true;
-    function commit() { if (!committed) { committed = true; render(); detail.textContent = 'Your check-in is ready to begin again.'; } }
+    function commit() { if (!committed) { committed = true; render(); detail.textContent = 'Your check-in is ready to begin again.'; window.HISTI_LOCALE?.translate(overlay); } }
     function finish(error) {
       if (!pending) return;
       try { if (!error) commit(); } catch (failure) { error = failure; }
@@ -48,6 +48,7 @@ export function resetTransition(render, focusTarget) {
     document.addEventListener('histi:preferences', onMotion);
     regions.forEach(([node]) => { node.inert = true; });
     detail.textContent = 'Making space for a fresh start.';
+    window.HISTI_LOCALE?.translate(overlay);
     overlay.hidden = false; void overlay.offsetWidth; overlay.classList.add('is-visible');
     schedule(() => { commit(); schedule(() => { overlay.classList.remove('is-visible'); schedule(finish, 380); }, 440); }, 320);
     schedule(finish, 1800);

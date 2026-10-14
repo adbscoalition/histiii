@@ -106,6 +106,7 @@ function dismiss(popup, native, value = '') {
 }
 
 export function openDialog(popup, trigger = document.activeElement) {
+  window.HISTI_LOCALE?.translate(popup);
   const record = prepare(popup, true);
   if (record.pending) settle(popup);
   if (!popup.open) {
