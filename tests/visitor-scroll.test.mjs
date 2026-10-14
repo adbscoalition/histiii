@@ -100,7 +100,7 @@ test('site-wide scroll physics is bounded and has no timers, storage, generated 
   assert.match(js,/now - lastInput >= 650/);assert.match(js,/if \(!frame\)/);assert.match(js,/host\.cancelAnimationFrame\(frame\)/);
   assert.doesNotMatch(js,/setInterval|setTimeout|localStorage|sessionStorage|fetch\(|createElement|innerHTML|MutationObserver/);
   const pages=readdirSync(new URL('..',import.meta.url)).filter(file=>file.endsWith('.html'));
-  assert.equal(pages.length,26);
+  assert.equal(pages.length,32);
   for(const page of pages) {const html=read(page);assert.match(html,/visitor-scroll\.js\?v=settings-1/);assert.match(html,/visitor-scroll\.css\?v=3/);assert.doesNotMatch(html,/data-scroll-glide|data-scroll-label|histi-scroll-toggle/,page);}
   const css=read('visitor-scroll.css');assert.match(css,/body\[data-page="checkin"\]\) \{ scroll-behavior:auto/);assert.doesNotMatch(css,/histi-scroll-toggle/);assert.match(css,/prefers-reduced-motion:reduce/);
 });

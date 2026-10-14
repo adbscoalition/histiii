@@ -6,7 +6,7 @@ import { makeSlides, displayScore } from '../histi4-core.js';
 
 const read = file => readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
 const origin = 'https://www.histi.org';
-const pages = ['index', 'checkin-page', 'checkin-4', ...[1, 2, 3, 4].map(n => `checkin-4-g${n}`), 'checkin-120', ...[1,2,3,4].map(n=>`checkin-120-g${n}`), 'checkin-60', ...[1,2,3,4].map(n=>`checkin-60-g${n}`), 'checkin-school', ...[1,2,3,4].map(n=>`checkin-school-g${n}`)];
+const pages = ['index', 'checkin-page', 'checkin-4', ...[1, 2, 3, 4].map(n => `checkin-4-g${n}`), 'checkin-120', ...[1,2,3,4].map(n=>`checkin-120-g${n}`), 'checkin-60', ...[1,2,3,4].map(n=>`checkin-60-g${n}`), 'checkin-school', ...['middle','high'].flatMap(edition=>['checkin-school-'+edition,...[1,2,3,4].map(n=>'checkin-school-'+edition+'-g'+n)])];
 const urlFor = page => `${origin}/${page === 'index' ? '' : page}`;
 const metadata = html => {
   const blocks = [...html.matchAll(/<script type="application\/ld\+json" id="[^"]+">([\s\S]*?)<\/script>/g)];

@@ -1,21 +1,23 @@
 import { resetTransition } from './reset-transition.js?v=settings-1';
 import { openDialog, closeDialog, confirmReset } from './site-dialogs.js?v=settings-1';
-import { makeSlides, remapLegacySlideIndex, calculate as calculateFamilies, rubricPoints, displayScore } from './histi4-core.js?v=school-1';
+import { makeSlides, remapLegacySlideIndex, calculate as calculateFamilies, rubricPoints, displayScore } from './histi4-core.js?v=school-editions-1';
 import { describeRelationship, describeTopic, describePattern, coverageText, referenceScore, compareReference, createResultReveal } from './histi4-results.js?v=editorial-1';
 import { plainOverall, plainTopic, plainPattern, plainRecipient } from './histi-plain-reading.js?v=1';
 
 const school = document.body.dataset.test === 'school';
+const schoolEdition = document.body.dataset.schoolEdition;
+if (school && !['middle','high'].includes(schoolEdition)) throw new Error('Choose a school edition first');
 const shortForm = document.body.dataset.test === '60';
 const abridged = shortForm || document.body.dataset.test === '120';
-const { FAMILIES, CATEGORY_META, RECIPIENTS, makeSchoolSlides } = await import(school ? './histi-school-data.js?v=1' : shortForm ? './histi60-family-data.js?v=1' : abridged ? './histi120-family-data.js?v=1' : './histi4-data.js');
-const testName = school ? 'HISTI for Schools' : shortForm ? 'HISTI-60' : abridged ? 'HISTI-120' : 'HISTI Full';
-const routeBase = school ? '/checkin-school' : shortForm ? '/checkin-60' : abridged ? '/checkin-120' : '/checkin-4';
-const calculate = answers => calculateFamilies(answers, FAMILIES, CATEGORY_META, { pnaPoints: school ? null : 1 });
+const { FAMILIES, CATEGORY_META, RECIPIENTS, makeSchoolSlides, SCHOOL_INFO } = await import(school ? `./histi-school-${schoolEdition}-data.js?v=1` : shortForm ? './histi60-family-data.js?v=1' : abridged ? './histi120-family-data.js?v=1' : './histi4-data.js');
+const testName = school ? SCHOOL_INFO.testName : shortForm ? 'HISTI-60' : abridged ? 'HISTI-120' : 'HISTI Full';
+const routeBase = school ? SCHOOL_INFO.routeBase : shortForm ? '/checkin-60' : abridged ? '/checkin-120' : '/checkin-4';
+const calculate = answers => calculateFamilies(answers, FAMILIES, CATEGORY_META, { pnaPoints: school ? null : 1, roundSliderPoints:!school });
 const group = document.body.dataset.recipient;
 const recipient = RECIPIENTS[group];
 if (!recipient) throw new Error('Unknown HISTI recipient group');
 const debugMode = new URLSearchParams(window.location.search).get('debug') === '1';
-const sharingWith = school ? { G1:'an unfamiliar student', G2:'a classmate', G3:'a friend', G4:'a trusted adult' }[group] : {
+const sharingWith = school ? recipient.phrase : {
   G1: 'a stranger or regular person',
   G2: 'an acquaintance',
   G3: 'a friend',
@@ -23,7 +25,7 @@ const sharingWith = school ? { G1:'an unfamiliar student', G2:'a classmate', G3:
 }[group];
 const slides = school ? makeSchoolSlides(FAMILIES) : makeSlides(FAMILIES);
 const familyByCode = new Map(FAMILIES.map(row => [row[0], row]));
-const storageKey = school ? `histi.school.${group}.v1` : shortForm ? `histi.60-families.${group}.v1` : abridged ? `histi.120-families.${group}.v1` : `histi.four-groups.${group}.v1`;
+const storageKey = school ? `${SCHOOL_INFO.storagePrefix}.${group}.v1` : shortForm ? `histi.60-families.${group}.v1` : abridged ? `histi.120-families.${group}.v1` : `histi.four-groups.${group}.v1`;
 const $ = id => document.getElementById(id);
 const el = (tag, className, text) => {
   const node = document.createElement(tag);
@@ -505,6 +507,16 @@ function renderResults(completed = false) {
     note.id = 'result-reference-note';
     $('category-results').before(note);
   }
+  if (school && !$('result-school-reflection')) {
+    const reflection = el('section','result-next-copy school-reflection'); reflection.id = 'result-school-reflection';
+    const heading = el('h2','','A little reflection'); heading.id = 'school-reflection-title';
+    reflection.setAttribute('aria-labelledby',heading.id);
+    const prompts = el('ol');
+    SCHOOL_INFO.reflectionQuestions.forEach(prompt=>prompts.append(el('li','',prompt)));
+    reflection.append(heading,el('p','','Use made-up examples, if you like. You do not have to explain any of your own ratings or enter an answer here.'),prompts,
+      el('p','','Middle and High edition scores should not be treated as interchangeable or compared across ages without validation.'));
+    $('category-results').after(reflection);
+  }
   if (!$('result-next-copy')) {
     const followup = el('div', 'result-next-copy'); followup.id = 'result-next-copy';
     followup.append(el('h2', '', 'Want to look at it again?'), el('p', '', school
@@ -608,7 +620,7 @@ function setupDebug() {
     for (const row of FAMILIES) {
       const answer = state.answers[row[0]];
       if (!answer) continue;
-      const points = !school && answer.status === 'pna' ? 1 : answer.status === 'score' ? rubricPoints(row, answer.value) : null;
+      const points = !school && answer.status === 'pna' ? 1 : answer.status === 'score' ? rubricPoints(row, answer.value, { round:!school }) : null;
       const item = el('li');
       item.append(el('span', '', `${row[0]} · ${row[1]}`), el('strong', '', points === null ? 'Excluded' : `${points} / ${row[4]}`));
       fragment.append(item);

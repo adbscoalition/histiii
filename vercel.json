@@ -1,6 +1,27 @@
 {
   "cleanUrls": true,
-  "redirects": [],
+  "redirects": [
+    {
+      "source": "/checkin-school-g1",
+      "destination": "/checkin-school",
+      "permanent": false
+    },
+    {
+      "source": "/checkin-school-g2",
+      "destination": "/checkin-school",
+      "permanent": false
+    },
+    {
+      "source": "/checkin-school-g3",
+      "destination": "/checkin-school",
+      "permanent": false
+    },
+    {
+      "source": "/checkin-school-g4",
+      "destination": "/checkin-school",
+      "permanent": false
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

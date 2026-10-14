@@ -85,11 +85,11 @@ test('result references are accessible, separated from user markers, and never a
   assert.match(css, /\.category-user-marker \{ z-index:1/);
   assert.match(css, /\.result-comparison \{ display:flex; flex-wrap:wrap/);
   assert.doesNotMatch(css, /infinite|will-change|filter:|backdrop-filter/);
-  for (const variant of ['4','120','60','school']) {
+  for (const variant of ['4','120','60','school-middle','school-high']) {
     for (const group of ['g1','g2','g3','g4']) {
       const html = read(`checkin-${variant}-${group}.html`);
       assert.match(html, /histi4-results\.css\?v=editorial-1/);
-      assert.match(html, /app-histi4\.js\?v=settings-1/);
+      assert.match(html, /app-histi4\.js\?v=school-editions-1/);
     }
   }
 });

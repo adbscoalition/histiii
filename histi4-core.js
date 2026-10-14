@@ -51,7 +51,7 @@ export function remapLegacySlideIndex(index, families = FAMILIES) {
   return Math.max(0, newSlides.findIndex(slide => slide.questions.some(row => unseen.has(row[0]))));
 }
 
-export function rubricPoints(row, value) {
+export function rubricPoints(row, value, { round = true } = {}) {
   const anchors = row[5];
   if (row[3] === 'multi' && Array.isArray(value)) {
     return Math.min(row[4], value.reduce((sum, index) => sum + (anchors[index]?.[2] || 0), 0));
@@ -66,7 +66,8 @@ export function rubricPoints(row, value) {
       if (numeric <= positions[i + 1]) {
         const span = positions[i + 1] - positions[i];
         const fraction = span ? (numeric - positions[i]) / span : 0;
-        return Math.round(anchors[i][2] + fraction * (anchors[i + 1][2] - anchors[i][2]));
+        const points = anchors[i][2] + fraction * (anchors[i + 1][2] - anchors[i][2]);
+        return round ? Math.round(points) : points;
       }
     }
     return anchors.at(-1)[2];
@@ -84,7 +85,7 @@ export function displayScore(score) {
   return rounded < 0 ? `P${Math.abs(rounded)}` : rounded > 0 ? `O${rounded}` : 'N0';
 }
 
-export function calculate(answers, families = FAMILIES, metadata = CATEGORY_META, { pnaPoints = 1 } = {}) {
+export function calculate(answers, families = FAMILIES, metadata = CATEGORY_META, { pnaPoints = 1, roundSliderPoints = true } = {}) {
   const keys = Object.keys(metadata);
   const categories = Object.fromEntries(keys.map(key => [key, { earned: 0, available: 0, answered: 0, total: 0, score: null }]));
   let answered = 0;
@@ -96,7 +97,7 @@ export function calculate(answers, families = FAMILIES, metadata = CATEGORY_META
     const answer = answers[row[0]];
     if (answer?.status !== 'score' && answer?.status !== 'pna') continue;
     if (answer.status === 'pna' && pnaPoints === null) continue;
-    const points = answer.status === 'pna' ? pnaPoints : rubricPoints(row, answer.value);
+    const points = answer.status === 'pna' ? pnaPoints : rubricPoints(row, answer.value, { round:roundSliderPoints });
     if (points === null) continue;
     bucket.earned += points;
     bucket.available += row[4];

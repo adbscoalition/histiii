@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { describeScore, describeRelationship, describeTopic, describePattern, referenceScore } from '../histi4-results.js';
 import { calculate } from '../histi4-core.js';
 import { FAMILIES, CATEGORY_META } from '../histi4-data.js';
-import { CATEGORY_META as SCHOOL_META } from '../histi-school-data.js';
+import { CATEGORY_META as SCHOOL_META } from '../histi-school-high-data.js';
 
 const read = file => readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
 
@@ -83,7 +83,7 @@ test('pattern summaries handle absent topics, single areas, gaps, close scores, 
   assert.match(allOpen.description,/fairly close together/);
   assert.doesNotMatch(allOpen.note,/partial/);
   const school = describePattern(patternResult({A1:100,A2:null,B:0,C:-100},48,48),SCHOOL_META);
-  assert.match(school.description,/everyday life and preferences.*personal and sensitive information/);
+  assert.match(school.description,/interests & everyday life.*personal & sensitive information/);
   assert.doesNotMatch(school.description,/very sensitive|\bD\b/);
 });
 
@@ -105,8 +105,8 @@ test('additional readings do not change stored answers or scoring and create no 
   assert.match(app,/describeTopic\(key, bucket, \{ group, school \}\)/);
 });
 
-test('all sixteen current check-ins share the editorial results without changing question markup', () => {
-  for (const variant of ['4','120','60','school']) {
+test('all twenty current check-ins share the editorial results without changing question markup', () => {
+  for (const variant of ['4','120','60','school-middle','school-high']) {
     for (const group of ['g1','g2','g3','g4']) {
       const html=read(`checkin-${variant}-${group}.html`);
       for (const id of ['result-heading','result-score','category-results','result-read-dialog','resume-btn']) assert.equal(html.split(`id="${id}"`).length,2);

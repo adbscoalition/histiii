@@ -7,7 +7,7 @@ import { plainOverall, plainTopic, plainPattern, plainRecipient } from '../histi
 import { describeRelationship } from '../histi4-results.js';
 import { calculate } from '../histi4-core.js';
 import { CATEGORY_META, FAMILIES } from '../histi4-data.js';
-import { CATEGORY_META as SCHOOL_META } from '../histi-school-data.js';
+import { CATEGORY_META as SCHOOL_META } from '../histi-school-high-data.js';
 const { DEFAULTS, STORAGE_KEY, normalizePreferences } = settings;
 const read = file => readFileSync(new URL(`../${file}`,import.meta.url),'utf8');
 
@@ -204,9 +204,9 @@ test('high-contrast text pairs pass AA and enlarged text does not zoom the point
   assert.match(css,/will-change:auto!important/);assert.match(css,/-webkit-backdrop-filter:none!important/);
 });
 
-test('all 26 pages load preferences before animation scripts and keep privacy and typography',()=>{
+test('all 32 pages load preferences before animation scripts and keep privacy and typography',()=>{
   const pages=readdirSync(new URL('..',import.meta.url)).filter(file=>file.endsWith('.html'));
-  assert.equal(pages.length,26);
+  assert.equal(pages.length,32);
   for(const file of pages) {
     const html=read(file);
     assert.equal((html.match(/site-settings\.js\?v=4/g)||[]).length,1,file);
