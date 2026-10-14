@@ -99,7 +99,10 @@ test('school routes retain shared controls, isolated local progress, school safe
     assert.doesNotMatch(html,/<textarea|type="text"|spouse|partner|35–50 minutes per person|histi60/i);
     assert.match(html,/No names, passwords, codes, or real private details/);
   }
-  assert.match(selector,/Do not collect named responses/);assert.match(selector,/not individual scores/);
+  assert.doesNotMatch(selector,/For teachers and caregivers|school-teacher-notes/);
+  assert.doesNotMatch(read('histi-school.css'),/school-teacher-notes/);
+  assert.match(selector,/Participation is optional/);assert.match(selector,/Private by design/);
+  assert.match(read('terms.html'),/Do not collect named student responses or grade individual scores/);
   assert.match(read('app-histi4.js'),/histi\.school\.\$\{group\}\.v1/);
   assert.match(read('app-histi4.js'),/school \? makeSchoolSlides\(FAMILIES\)/);
   const metadata=JSON.parse(read('index.html').match(/id="histi-site-definitions">([\s\S]*?)<\/script>/)[1]);

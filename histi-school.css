@@ -4,13 +4,8 @@ body.histi-school #intro-screen .school-class-time { margin:0 0 22px; color:var(
 .school-principle { margin:24px 0; padding:18px 20px; border:1px solid #bbc8e4; border-radius:18px; background:var(--palette-iris-soft); color:var(--palette-ink); font-size:14px; line-height:1.65; }
 .school-principle strong { display:block; margin-bottom:6px; font-weight:600; }
 .school-principle p { margin:0; }
-.school-teacher-notes { margin-top:24px; border:1px solid var(--palette-line); border-radius:18px; background:var(--palette-card); }
-.school-teacher-notes summary { padding:18px 20px; color:var(--palette-blue-ink); font-size:15px; font-weight:600; cursor:pointer; }
-.school-teacher-notes>div { padding:0 20px 18px; color:var(--palette-muted); font-size:14px; line-height:1.75; }
-.school-teacher-notes li { margin:10px 0; }
-.school-teacher-notes summary:focus-visible { outline:2px solid var(--palette-blue-ink); outline-offset:4px; border-radius:14px; }
 body[data-page="formats"] .app-card.school { --card-wash:var(--palette-blue-soft); --card-edge:#a9cadf; --card-ink:var(--palette-blue-ink); }
 .home-format.school { --recipient-color:var(--palette-blue-soft); }
 body.histi-school #intro-screen .school-principle { margin-top:0; }
 body.histi-school #results-screen .school-principle { margin-top:22px; }
-@media(max-width:680px) { .school-principle { padding:16px; } .school-teacher-notes summary { padding:16px; } .school-teacher-notes>div { padding:0 16px 16px; } }
+@media(max-width:680px) { .school-principle { padding:16px; } }
