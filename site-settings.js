@@ -22,7 +22,7 @@
   try { preferences = normalizePreferences(JSON.parse(window.localStorage.getItem(STORAGE_KEY) || 'null')); }
   catch { preferences = normalizePreferences(null); }
   let trigger, dialog, status, performanceButton;
-  let appliedReading, closeTimer = null;
+  let appliedReading, closeTimer = null, statusAnimation = null;
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const quiet = () => preferences.performance || motion.matches || document.hidden;
   const choices = [];
@@ -32,14 +32,28 @@
     closeTimer = null;
     if (!dialog) return;
     delete dialog.dataset.motion;
+    delete dialog.dataset.contentMotion;
     dialog.style.removeProperty('--settings-exit-opacity');
     dialog.style.removeProperty('--settings-exit-transform');
+    dialog.style.removeProperty('--settings-shade-exit-opacity');
+  }
+  function cancelStatusMotion() { statusAnimation?.cancel(); statusAnimation = null; }
+  function notify(message) {
+    if (!status) return;
+    if (status.textContent !== message) status.textContent = message;
+    cancelStatusMotion();
+    if (quiet() || !dialog?.open || typeof status.animate !== 'function') return;
+    const animation = status.animate([{opacity:.35,transform:'translateY(3px)'},{opacity:1,transform:'none'}],{duration:220,easing:'cubic-bezier(.16,1,.3,1)'});
+    statusAnimation = animation;
+    animation.finished.then(()=>{ if (statusAnimation === animation) statusAnimation = null; animation.cancel(); },()=>{ if (statusAnimation === animation) statusAnimation = null; });
   }
   function finishClose() {
+    cancelStatusMotion();
     clearMotion();
     if (dialog?.open) dialog.close();
   }
   function stopMotion() {
+    cancelStatusMotion();
     if (dialog?.dataset.motion === 'closing') finishClose();
     else clearMotion();
   }
@@ -50,6 +64,7 @@
     const pose = window.getComputedStyle(dialog);
     dialog.style.setProperty('--settings-exit-opacity', pose.opacity);
     dialog.style.setProperty('--settings-exit-transform', pose.transform);
+    dialog.style.setProperty('--settings-shade-exit-opacity', window.getComputedStyle(dialog,'::backdrop').opacity);
     dialog.dataset.motion = 'closing';
     // One bounded fallback; cleared on animation completion/cancellation.
     closeTimer = window.setTimeout(finishClose, 240);
@@ -95,7 +110,7 @@
     let saved = true;
     try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences)); } catch { saved = false; }
     apply();
-    if (status) status.textContent = saved ? 'Saved only in this browser.' : 'Applied here. This browser did not allow saving.';
+    notify(saved ? 'Saved only in this browser.' : 'Applied here. This browser did not allow saving.');
   }
   const el = (tag, className, text) => {
     const node = document.createElement(tag);
@@ -150,7 +165,7 @@
       preferences = normalizePreferences(null);
       let saved = true;
       try { window.localStorage.removeItem(STORAGE_KEY); } catch { saved = false; }
-      apply(); status.textContent = saved ? 'Settings reset. Your check-in answers are unchanged.' : 'Reset for this page. This browser did not allow saving.';
+      apply(); notify(saved ? 'Settings reset. Your check-in answers are unchanged.' : 'Reset for this page. This browser did not allow saving.');
     });
     foot.append(reset,status);
     dialog.append(head,reading,contrast,text,performance,foot); document.body.append(trigger,dialog);
@@ -169,7 +184,7 @@
       if (document.querySelector('dialog[open]')) return;
       clearMotion();
       dialog.showModal(); dialog.scrollTop = 0; trigger.setAttribute('aria-expanded','true'); close.focus({preventScroll:true});
-      if (!quiet()) dialog.dataset.motion = 'opening';
+      if (!quiet()) { dialog.dataset.motion = 'opening'; dialog.dataset.contentMotion = 'true'; }
     });
     dialog.addEventListener('cancel',event=>{ event.preventDefault(); requestClose(); });
     dialog.addEventListener('animationend',event=>{
@@ -177,7 +192,7 @@
       if (event.animationName === 'settings-depart' && dialog.dataset.motion === 'closing') finishClose();
       else if (event.animationName === 'settings-arrive' && dialog.dataset.motion === 'opening') clearMotion();
     });
-    dialog.addEventListener('close',()=>{ clearMotion(); trigger.setAttribute('aria-expanded','false'); if (!document.hidden) trigger.focus({preventScroll:true}); });
+    dialog.addEventListener('close',()=>{ cancelStatusMotion(); clearMotion(); trigger.setAttribute('aria-expanded','false'); if (!document.hidden) trigger.focus({preventScroll:true}); });
     apply(true);
   }
   apply();
@@ -185,7 +200,7 @@
     if (event.key !== STORAGE_KEY && event.key !== null) return;
     try { preferences = normalizePreferences(JSON.parse(event.newValue || 'null')); } catch { preferences = normalizePreferences(null); }
     apply();
-    if (status) status.textContent = 'Preferences updated in this browser.';
+    notify('Preferences updated in this browser.');
   });
   window.addEventListener('pageshow',event=>{
     if (!event.persisted) return;

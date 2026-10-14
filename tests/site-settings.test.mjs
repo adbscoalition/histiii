@@ -105,11 +105,14 @@ test('panel exits finish once, clean up interrupted entrances, and return focus'
   const close=f.doc.body.all().find(n=>n.className==='histi-settings-close');
   for(let i=0;i<100;i++) {
     trigger.emit('click');assert.equal(dialog.dataset.motion,'opening');
+    assert.equal(dialog.dataset.contentMotion,'true');
     close.emit('click');close.emit('click');assert.equal(dialog.dataset.motion,'closing');assert.equal(f.timers.size,1);
     assert.equal(dialog.style['--settings-exit-opacity'],'.6');
+    assert.equal(dialog.style['--settings-shade-exit-opacity'],'.6');
     dialog.emit('animationend',{animationName:'settings-arrive'});assert.equal(dialog.open,true);
     dialog.emit('animationend',{animationName:'settings-depart'});
     assert.equal(dialog.open,false);assert.equal(f.timers.size,0);assert.equal(dialog.dataset.motion,undefined);
+    assert.equal(dialog.dataset.contentMotion,undefined);assert.equal(dialog.style['--settings-shade-exit-opacity'],undefined);
     assert.equal(dialog.style['--settings-exit-transform'],undefined);assert.equal(f.doc.activeElement,trigger);
   }
   trigger.emit('click');close.emit('click');const [id,timer]=[...f.timers][0];assert.equal(timer.ms,240);timer.fn();
@@ -133,6 +136,37 @@ test('unrelated preferences avoid whole-document animation scans and motion-owne
   assert.equal(events,1);assert.equal(f.cancelled(),cancels);assert.equal(f.readingScans(),scans);
   f.choose('reading','simple');assert.equal(f.readingScans(),scans+1);assert.equal(events,1);
   f.doc.getElementById('settings-performance').emit('click');assert.equal(events,2);
+});
+
+test('save feedback has one finite animation, replaced on rapid changes and cancelled for quiet modes',()=>{
+  const f=fixture();f.ready();const active=new Set();let peak=0;
+  const status=f.doc.body.all().find(n=>n.className==='histi-settings-status');
+  status.animate=(frames,options)=>{
+    assert.equal(options.duration,220);assert.equal(options.iterations,undefined);assert.equal(frames.at(-1).opacity,1);
+    let done,failed;const animation={finished:{then(resolve,reject){done=resolve;failed=reject;}},cancel(){active.delete(animation);failed?.();},finish(){active.delete(animation);done?.();}};
+    active.add(animation);peak=Math.max(peak,active.size);return animation;
+  };
+  const dialog=f.doc.getElementById('histi-settings-dialog');f.doc.getElementById('histi-settings-btn').emit('click');
+  for(let i=0;i<100;i++)f.choose('contrast',i%2?'standard':'high');
+  assert.equal(peak,1);assert.equal(active.size,1);
+  dialog.emit('animationend',{animationName:'settings-arrive'});assert.equal(active.size,1,'finishing the entrance does not interrupt feedback');
+  [...active][0].finish();assert.equal(active.size,0);
+  f.choose('reading','simple');assert.equal(active.size,1);
+  f.doc.getElementById('settings-performance').emit('click');assert.equal(active.size,0);
+  f.choose('textSize','largest');assert.equal(active.size,0);
+  f.doc.getElementById('settings-performance').emit('click');assert.equal(active.size,1);
+  f.motion.matches=true;f.motionListeners.change[0]();assert.equal(active.size,0);
+  f.choose('reading','standard');assert.equal(active.size,0);
+});
+
+test('settings micro-interactions cover controls and typography without infinite or global layout animations',()=>{
+  const css=read('site-settings.css');
+  assert.match(css,/settings-content-arrive 220ms/);assert.match(css,/--settings-stagger:64ms/);
+  assert.match(css,/box-shadow 200ms ease,font-size 220ms ease,line-height 220ms ease/);
+  assert.match(css,/#histi-settings-btn:active/);assert.match(css,/\.histi-settings-reset:hover/);
+  assert.match(css,/#histi-settings-dialog button,.histi-switch-track \{ transition:/,'settings controls beat the shared :is() button specificity');
+  assert.doesNotMatch(css,/infinite|transition:all|transition:height/);
+  assert.match(css,/\.histi-settings-dialog \* \{ animation:none!important; transition:none!important/);
 });
 
 test('plain copy preserves the scale, missing answers, school safeguards, and scoring inputs',()=>{
@@ -175,8 +209,8 @@ test('all 26 pages load preferences before animation scripts and keep privacy an
   assert.equal(pages.length,26);
   for(const file of pages) {
     const html=read(file);
-    assert.equal((html.match(/site-settings\.js\?v=3/g)||[]).length,1,file);
-    assert.equal((html.match(/site-settings\.css\?v=3/g)||[]).length,1,file);
+    assert.equal((html.match(/site-settings\.js\?v=4/g)||[]).length,1,file);
+    assert.equal((html.match(/site-settings\.css\?v=4/g)||[]).length,1,file);
     assert.ok(html.indexOf('/site-settings.js')<html.indexOf('/page-transitions.js'),file);
     assert.ok(html.indexOf('/site-settings.css')<html.indexOf('/site-typography.css'),file);
     assert.match(html,/connect-src 'none'/);assert.doesNotMatch(html,/For AI:|histi-ai-notes/);
