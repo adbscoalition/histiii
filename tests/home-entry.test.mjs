@@ -169,6 +169,14 @@ test('returning home skips the intro before paint; external arrivals remain elig
 
 const homeClick=f=>f.documentEvents.click({button:0,target:{closest:()=>({href:'https://www.histi.org/',hasAttribute:()=>false,target:''})},preventDefault(){}});
 
+test('translated home links use the same one-time entry-animation handoff',()=>{
+  for(const path of ['/zh/','/es/','/zh/index.html','/es']){
+    const f=fixture({home:false});f.ready();
+    f.documentEvents.click({button:0,target:{closest:()=>({href:'https://www.histi.org'+path,hasAttribute:()=>false,target:''})},preventDefault(){}});
+    f.fireTimer(340);assert.equal(f.storage.get('histi.navigation.home'),'115000',path);
+  }
+});
+
 test('no-referrer home navigation consumes one short-lived answer-free handoff',()=>{
   const outgoing=fixture({home:false});outgoing.ready();homeClick(outgoing);
   assert.equal(outgoing.storage.size,0);outgoing.fireTimer(340);

@@ -1,4 +1,5 @@
 import { FULL_TEXT } from './full-text.js';
+export {SHARING_ZH as SHARING};
 import { TEXT_120, TEXT_60 } from './short-text.js';
 export const RECIPIENTS_ZH = {
  G1:{label:'陌生人／一般人',slug:'stranger',description:'你不认识的人，且对方没有特别需要这些信息的理由。'},

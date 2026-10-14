@@ -1,4 +1,4 @@
-import { openDialog, closeDialog } from './site-dialogs.js?v=locale-1';
+import { openDialog, closeDialog } from './site-dialogs.js?v=locale-2';
 
 const trigger = document.getElementById('privacy-live-btn');
 
@@ -26,6 +26,8 @@ if (trigger) {
       <div class="h4-proof-actions"><a href="/privacy">Read the privacy policy</a><button class="h4-proof-run" type="button">Run privacy check</button></div>
     </dialog>`;
   const panel = template.content.firstElementChild;
+  const language=document.documentElement.lang;
+  if(['zh-CN','es'].includes(language))panel.querySelector('a[href="/privacy"]').href=(language==='es'?'/es':'/zh')+'/privacy';
   document.body.append(panel);
   const field = name => panel.querySelector(`[data-proof="${name}"]`);
   const snapshot = () => {

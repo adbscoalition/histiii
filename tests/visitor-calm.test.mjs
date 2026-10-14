@@ -91,7 +91,7 @@ test('visitor extras stay off assessments and add no background layers or motion
   assert.doesNotMatch(css,/infinite|will-change|filter:|backdrop-filter|h4-slider|assessment-screen/);
   assert.match(css,/prefers-reduced-motion:reduce/);assert.match(js,/observer\.unobserve\(entry\.target\)/);
   for(const page of ['index.html','checkin-page.html']) {
-    const html=read(page);assert.match(html,/visitor-calm\.css\?v=1/);assert.match(html,/visitor-calm\.js\?v=settings-1/);
+    const html=read(page);assert.match(html,/visitor-calm\.css\?v=1/);assert.match(html,/visitor-calm\.js\?v=locale-2/);
     assert.equal((html.match(/data-pace-choice="/g)||[]).length,3);
     assert.match(html,/data-pace-output aria-live="polite"/);assert.match(html,/aria-label="Pause decorative motion" aria-pressed="false"/);
     assert.equal((html.match(/class="suite-color-field"/g)||[]).length,1);

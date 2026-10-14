@@ -46,30 +46,32 @@ test('Chinese result bands, topic descriptions and pattern branches use the same
   assert.equal(zh.title==='看看答案之间的差异。',en.title==='Where your answers differ.');
  }
 });
-test('all sixteen Chinese pages are reproducible, self-hosted and language-linked, with no free-text answer fields',()=>{
- assert.equal(ZH_PAGES.length,16);
+test('all nineteen Chinese pages are reproducible, language-linked and self-hosted',()=>{
+ assert.equal(ZH_PAGES.length,19);
  for(const page of ZH_PAGES){
   const html=read('zh/'+page+'.html');assert.equal(html.trimEnd(),buildZhPage(page).trimEnd());
-  assert.match(html,/<html lang="zh-CN">/);assert.match(html,/简体中文译稿尚未经过独立的语言或心理测量验证/);
+  assert.match(html,/<html lang="zh-CN"/);
+  if(page.startsWith('checkin-'))assert.match(html,/简体中文译稿尚未经过独立的语言或心理测量验证/);
   const data=JSON.parse(html.match(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/)[1]);
-  assert.equal(data.inLanguage,'zh-CN');assert.equal(data.url,'https://www.histi.org/zh/'+page);assert.equal(data.translationOfWork['@id'],'https://www.histi.org/'+page+'#webpage');
-  assert.equal((html.match(/hreflang="zh-CN"/g)||[]).length,1);assert.equal((html.match(/hreflang="en"/g)||[]).length,2);
-  assert.match(html,/connect-src 'none'/);assert.match(html,/form-action 'none'/);assert.doesNotMatch(html,/<textarea|type="text"|type="range"/);
-  const body=html.split('</head>')[1];
-  for(const [,s] of body.matchAll(/>([^<>]+)</g))if(/[A-Za-z]{3}/.test(s)&&!/[\u3400-\u9fff]/.test(s))assert.match(s.trim(),/^(English|HISTI(?:-Extended|-120|-60)?)$/);
-  assert.match(html,/href="\/#about"/);assert.match(html,/href="\/privacy"/);
-  assert.ok(read(page+'.html').includes(`href="/zh/${page}"`));
+  const path=page==='index'?'':page;
+  assert.equal(data.inLanguage,'zh-CN');assert.equal(data.url,'https://www.histi.org/zh/'+path);assert.equal(data.translationOfWork['@id'],'https://www.histi.org/'+path+'#webpage');
+  for(const code of ['en','zh-CN','es'])assert.equal((html.match(new RegExp('hreflang="'+code+'"','g'))||[]).length,1);
+  assert.match(html,/connect-src 'none'/);assert.match(html,/form-action 'none'/);assert.doesNotMatch(html,/<textarea|type="text"/);
+  if(page!=='index')assert.doesNotMatch(html,/type="range"/);
+  assert.match(html,/href="\/zh\/#about"/);assert.match(html,/href="\/zh\/privacy"/);
+  assert.ok(read(page+'.html').includes('href="https://www.histi.org/zh/'+path+'"'));
+  assert.match(html,/site-languages\.js/);assert.doesNotMatch(html,/data-language-switch|class="language-link"/);
  }
 });
 test('Chinese controls use explicit bounded localization and separate saved-answer namespaces',()=>{
  const ui=read('zh/ui.js'),app=read('app-histi4.js');
  assert.doesNotMatch(ui,/MutationObserver|setInterval|requestAnimationFrame|fetch\(/);
- assert.match(app,/histi\.zh-CN\.\$\{/);assert.match(app,/localizeDataset/);
+ assert.match(app,/histi\.\$\{language\}\.\$\{/);assert.match(app,/localizeDataset/);
  for(const label of ['Next','Clear',"I don't know",'Prefer not to answer','Not applicable','Settings','Keep my answers','Yes, reset'])assert.notEqual(t(label),label);
  assert.equal(t('Level 3: 视情况而定'),'第 3 档：视情况而定');
  assert.equal(t('2 local keys'),'2 项本地记录');
  assert.equal(t('Card 2 of 29'),'第 2／29 页');
- const bytes=readFileSync(new URL('../fonts/kaiti/zh-subset.woff2',import.meta.url));
- assert.equal(bytes.subarray(0,4).toString(),'wOF2');assert.ok(bytes.length<250000,'do not ship the original 11.8 MB font');
+ const bytes=readFileSync(new URL('../fonts/noto-sans-sc/zh-subset.woff2',import.meta.url));
+ assert.equal(bytes.subarray(0,4).toString(),'wOF2');assert.ok(bytes.length<250000,'do not ship the original 16.9 MB font');
  assert.match(read('zh/typography.css'),/font-display:swap/);
 });

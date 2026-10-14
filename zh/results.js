@@ -63,3 +63,5 @@ export function pattern(result,metadata){
 }
 export function coverage(result){return `已计分 ${result.answered}／${result.total} 题 · 涵盖 ${Object.values(result.categories).filter(b=>b.score!==null).length}／${Object.keys(result.categories).length} 个领域`;}
 export const plain = reading => ({description:reading.description.split('。')[0]+'。',detail:reading.detail,context:reading.context});
+export const shorten = text => text.split('。')[0]+'。';
+export const scoringDetail = (result,{pna,unknown,na}) => `本结果计入 ${result.answered}／${result.total} 题，包括 ${pna} 个“不愿回答”答案（每题计 1 分）。${unknown} 个“我不知道”和 ${na} 个“不适用”答案不计分；另有 ${result.total-result.answered-unknown-na} 题未计分。`;

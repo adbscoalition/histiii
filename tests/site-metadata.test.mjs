@@ -164,7 +164,7 @@ test('search discovery lists only current public destinations', () => {
   const sitemap = read('sitemap.xml');
   assert.match(sitemap, /xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9"/);
   const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
-  assert.deepEqual(urls, [...pages, 'privacy', 'terms',...ZH_PAGES.map(page=>'zh/'+page)].map(urlFor));
+  assert.deepEqual(urls, [...pages, 'privacy', 'terms',...['zh','es'].flatMap(locale=>ZH_PAGES.map(page=>locale+'/'+(page==='index'?'':page)))].map(urlFor));
   assert.equal(new Set(urls).size, urls.length);
   urls.forEach(url => assert.doesNotMatch(url, /checkin-v3|[?#]/));
   for (const page of ['privacy', 'terms']) {

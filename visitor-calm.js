@@ -12,6 +12,8 @@ export function paceRecommendation(value) {
 export function initVisitorCalm(root, { motion = typeof window === 'undefined' ? null : window.matchMedia('(prefers-reduced-motion: reduce)'), Observer = typeof IntersectionObserver === 'undefined' ? null : IntersectionObserver, viewportHeight = typeof window === 'undefined' ? 0 : window.innerHeight } = {}) {
   if (!['home','formats'].includes(root.body?.dataset.page) || root.documentElement.dataset.visitorCalmReady === 'true') return;
   const guides = [...root.querySelectorAll('[data-pace-guide]')];
+  const t = value => root.defaultView?.HISTI_LOCALE?.t(value) ?? value;
+  const locale = ['zh-CN','es'].includes(root.documentElement.lang) ? (root.documentElement.lang==='es'?'/es':'/zh') : '';
   if (!guides.length) return;
   root.documentElement.dataset.visitorCalmReady = 'true';
 
@@ -33,7 +35,7 @@ export function initVisitorCalm(root, { motion = typeof window === 'undefined' ?
       button.setAttribute('aria-pressed', String(paused));
       const performance = root.documentElement?.dataset?.performance === 'on';
       button.disabled = Boolean(motion?.matches || performance);
-      button.querySelector('[data-motion-label]').textContent = performance ? 'Performance mode' : motion?.matches ? 'Reduced motion' : paused ? 'Motion paused' : 'Pause motion';
+      button.querySelector('[data-motion-label]').textContent = t(performance ? 'Performance mode' : motion?.matches ? 'Reduced motion' : paused ? 'Motion paused' : 'Pause motion');
     }
     if (isQuiet()) { cancelMotion(); showAll(); }
   };
@@ -59,11 +61,11 @@ export function initVisitorCalm(root, { motion = typeof window === 'undefined' ?
       if (!recommendation || guide.dataset.pace === button.dataset.paceChoice) return;
       guide.dataset.pace = button.dataset.paceChoice;
       choices.forEach(choice => choice.setAttribute('aria-pressed', String(choice === button)));
-      output.textContent = `${recommendation.name}: ${recommendation.note}`;
-      link.setAttribute('href', recommendation.route);
-      link.querySelector('[data-pace-link-label]').textContent = `Explore ${recommendation.name}`;
+      output.textContent = `${t(recommendation.name)}: ${t(recommendation.note)}`;
+      link.setAttribute('href', locale+recommendation.route);
+      link.querySelector('[data-pace-link-label]').textContent = t(`Explore ${recommendation.name}`);
       root.querySelectorAll('.home-format,.app-card.available').forEach(card => {
-        card.dataset.paceRecommended = String(card.getAttribute('href') === recommendation.route);
+        card.dataset.paceRecommended = String(card.getAttribute('href') === locale+recommendation.route);
       });
       cancelMotion();
       settle(output, [{opacity:.35,transform:'translateY(4px)'},{opacity:1,transform:'translateY(0)'}], 340);

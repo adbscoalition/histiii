@@ -28,10 +28,11 @@ export function initVisitorPlay(root) {
   const levelButtons = [...levels.querySelectorAll('button[data-demo-level]')];
   const levelOutput = root.querySelector('#sample-level-description');
   const labels = ['Keep completely private', 'Share narrowly', 'Context-dependent', 'Share openly', 'Share completely openly'];
-  const write = (element, value) => { if (element.textContent !== value) element.textContent = value; };
+  const t = value => root.defaultView?.HISTI_LOCALE?.t(value) ?? value;
+  const write = (element, value) => { value=t(value); if (element.textContent !== value) element.textContent = value; };
   const render = () => {
     const result = previewAt(range.value);
-    range.setAttribute('aria-valuetext', result.accessible);
+    range.setAttribute('aria-valuetext', result.code+' · '+result.wording.map(t).join(' '));
     write(score, result.code);
     write(adverb, result.wording[0]);
     write(preference, result.wording[1]);

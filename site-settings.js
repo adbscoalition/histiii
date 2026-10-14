@@ -150,6 +150,13 @@
     const title = el('h2','','Settings'); title.id = 'histi-settings-title';
     const close = el('button','histi-settings-close','Close'); close.type = 'button'; close.setAttribute('aria-label','Close settings');
     close.addEventListener('click',requestClose); head.append(title,close);
+    const language = el('button','histi-settings-language'); language.type='button';
+    language.append(el('span','','Language'),el('small','',document.documentElement.lang==='zh-CN'?'简体中文':document.documentElement.lang==='es'?'Español':'English'));
+    language.addEventListener('click',()=>{
+      if (!window.HISTI_LANGUAGES) return;
+      dialog.addEventListener('close',()=>queueMicrotask(()=>window.HISTI_LANGUAGES.open()),{once:true});
+      requestClose();
+    });
     const reading = group('reading','Reading level','Plain language uses shorter explanations. Test questions and scoring stay the same.',[['standard','Standard'],['simple','Plain language']]);
     const contrast = group('contrast','Contrast','Make text and boundaries stand out more.',[['standard','Standard'],['high','High contrast']]);
     const text = group('textSize','Text size','Make reading text and question choices larger.',[['normal','Normal'],['large','Larger'],['largest','Largest']]);
@@ -170,7 +177,9 @@
       apply(); notify(saved ? 'Settings reset. Your check-in answers are unchanged.' : 'Reset for this page. This browser did not allow saving.');
     });
     foot.append(reset,status);
-    dialog.append(head,reading,contrast,text,performance,foot); document.body.append(trigger,dialog);
+    dialog.append(head,language,reading,contrast,text,performance,foot); document.body.append(trigger,dialog);
+    // Module scripts can create the dock before DOMContentLoaded initializes Settings.
+    document.querySelector('.histi-utility-dock')?.append(trigger);
     dialog.addEventListener('click',event=>{
       if (dialog.dataset.motion === 'closing') return;
       if (event.target === dialog) {

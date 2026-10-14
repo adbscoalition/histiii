@@ -24,8 +24,8 @@
   <link rel="manifest" href="/site.webmanifest">
   <link rel="stylesheet" href="/styles-public-sans-v2.css">
   <link rel="stylesheet" href="/page-transitions.css?v=refresh-3">
-  <script src="/site-settings.js?v=4"></script>
-  <script src="/page-transitions.js?v=settings-1"></script>
+  <script src="/site-settings.js?v=locale-3"></script>
+  <script src="/page-transitions.js?v=languages-1"></script>
   <link rel="stylesheet" href="/site-header.css?v=palette-2">
   <link rel="stylesheet" href="/site-color-motion.css?v=pages-1">
   <script src="/site-color-motion.js?v=bright-1" defer></script>
@@ -35,8 +35,13 @@
   <link rel="stylesheet" href="/visitor-guide.css?v=welcome-1">
   <link rel="stylesheet" href="/site-licensing.css?v=1">
   <link rel="stylesheet" href="/visitor-scroll.css?v=3">
-  <link rel="stylesheet" href="/site-settings.css?v=4">
+  <link rel="stylesheet" href="/site-settings.css?v=locale-2">
+  <link rel="stylesheet" href="/site-languages.css?v=2">
   <link rel="stylesheet" href="/site-typography.css?v=1">
+  <script type="module" src="/site-languages.js?v=2"></script>
+  <link rel="alternate" hreflang="en" href="https://www.histi.org/privacy">
+  <link rel="alternate" hreflang="zh-CN" href="https://www.histi.org/zh/privacy">
+  <link rel="alternate" hreflang="es" href="https://www.histi.org/es/privacy">
 </head>
 <body class="policy-page" data-page="privacy">
   <div class="suite-color-field" aria-hidden="true"><span></span><span></span><span></span></div>
@@ -61,8 +66,8 @@
       <header class="policy-hero">
         <p class="eyebrow">Privacy, plainly explained</p>
         <h1>Privacy Policy</h1>
-        <p class="policy-summary">HISTI is designed so your check-in answers, optional recipient label, progress, and score stay in your browser. The current check-in does not upload that state to an HISTI application server.</p>
-        <p class="policy-date">Effective October 4, 2026</p>
+        <p class="policy-summary">HISTI is designed so your check-in answers, progress, and score stay in your browser. The current check-ins do not upload that state to an HISTI application server.</p>
+        <p class="policy-date">Effective October 14, 2026</p>
       </header>
 
       <nav class="visitor-policy-nav" aria-label="Privacy policy quick links"><strong>Find what matters to you</strong><div><a href="#your-answers">Where answers stay</a><a href="#hosting">What the host sees</a><a href="#delete-data">Reset your data</a><a href="#shared-devices">Using a shared device</a><a href="#privacy-checks">Check the privacy proof</a></div></nav>
@@ -76,28 +81,28 @@
         <h2>2. Check-in data stays on your device</h2>
         <p>HISTI processes the check-in in your browser. The current app may store these items in localStorage so you can resume or review the check-in:</p>
         <ul>
-          <li>recipient type and the optional private recipient label, if you enter one;</li>
-          <li>selected answers, answer statuses, category-skip choices, and current question;</li>
+          <li>test version, language, and recipient group;</li>
+          <li>selected levels, answer statuses, and current question card;</li>
           <li>accessibility/preferences used by the check-in; and</li>
-          <li>the current result plus up to 12 locally saved result snapshots.</li>
+          <li>completion status and whether debug-generated test answers are present.</li>
         </ul>
-        <p class="policy-callout"><strong>This check-in state is not submitted to an HISTI application server.</strong> It stays in the browser profile/device where you use HISTI unless you explicitly export or share it yourself.</p>
+        <p class="policy-callout"><strong>This check-in state is not submitted to an HISTI application server.</strong> It stays in the browser profile/device where you use HISTI unless you choose to copy or share it yourself. Results are calculated locally from those answers.</p>
       </section>
 
       <section class="policy-section">
         <h2>3. No cookies</h2>
         <p><strong>HISTI does not set or use cookies for the current website or check-in.</strong> HISTI does not use advertising cookies, analytics cookies, or tracking cookies.</p>
-        <p>HISTI does use <code>localStorage</code> for local progress and result history. localStorage is browser storage, but it is not a cookie. You can inspect or clear it using HISTI’s controls or your browser’s site-data tools.</p>
+        <p>HISTI does use <code>localStorage</code> for local check-in progress. localStorage is browser storage, but it is not a cookie. You can inspect or clear it using HISTI’s controls or your browser’s site-data tools.</p>
         <p data-reading-simple="Settings are saved only in this browser. They contain your reading level, contrast, text size, and performance choice—not your answers. Reset settings does not clear your test progress.">The site-wide Settings panel stores reading level, contrast, text size, and performance mode in a separate browser-only record, <code>histi.preferences.v1</code>. These preferences contain no check-in answers and are not submitted to a server. “Reset settings” clears only that preference record; it does not clear check-in progress or results. Other open tabs on the same site can apply updated preferences through the browser’s local storage event.</p>
         <p>A single-use navigation flag in this tab’s <code>sessionStorage</code> prevents returning home from replaying the introduction. It contains no answers or personal details and is cleared when home opens.</p>
         <p>A numeric navigation position in this tab’s session storage and browser history helps distinguish Back from Forward for page animations. It does not store visited URLs, answers, or personal details, and does not add history entries.</p>
       </section>
 
       <section class="policy-section">
-        <h2>4. The optional fill-in box</h2>
-        <p>The check-in has one optional free-text field: a private label for the person or audience you have in mind. You can leave it blank or use a nickname. Do not enter a real name if you do not want that name stored locally in your browser.</p>
-        <p>The current app writes that optional label only into local browser storage. Its Content Security Policy blocks the page’s connection APIs, and the app has no endpoint that submits the label.</p>
-        <p class="policy-callout"><strong>Server-retention policy for fill-in text: 0 minutes.</strong> If a current or future HISTI-controlled application handler ever receives content from a fill-in field, HISTI’s policy is to discard that field content immediately and not persist it in HISTI application storage. The current check-in does not send the field in the first place.</p>
+        <h2>4. Choices, not real private details</h2>
+        <p>The current Full, 120, 60, and School check-ins do not have a free-text answer or recipient-name field. Choose levels or answer options only. Never enter real names, passwords, codes, IDs, or other sensitive details.</p>
+        <p>English, Simplified Chinese, and Spanish check-ins keep separate local progress for each test and recipient. Switching language does not copy, translate, overwrite, or delete your saved answers. Return to the same language, test, person, and browser to resume.</p>
+        <p>The language pop-up changes the page URL. It does not send answers to a translation service or store an additional language-preference record.</p>
       </section>
 
       <section id="hosting" class="policy-section">
@@ -109,43 +114,37 @@
           <li>requested URL/static file;</li>
           <li>request time, response status, and security/diagnostic information.</li>
         </ul>
-        <p>Those ordinary hosting requests are separate from the check-in state. HISTI does not place your answers, optional recipient label, progress, or score into those requests.</p>
+        <p>Those ordinary hosting requests are separate from the check-in state. HISTI does not place your answers, progress, or score into those requests.</p>
         <p>Vercel’s own handling of infrastructure information is described in the <a href="https://vercel.com/legal/privacy-notice" rel="noopener noreferrer">Vercel Privacy Notice</a>.</p>
       </section>
 
       <section class="policy-section">
         <h2>6. No analytics, ads, or third-party runtime trackers</h2>
-        <p>The current check-in does not load an analytics SDK, advertising tracker, third-party font service, or third-party tracking script. Idiqlat, Tiro Gurmukhi, and Instrument Sans are self-hosted and loaded as same-origin static assets.</p>
+        <p>The current check-in does not load an analytics SDK, advertising tracker, third-party font service, or third-party tracking script. Idiqlat, Tiro Gurmukhi, Instrument Sans, and the Chinese font subset are self-hosted and loaded as same-origin static assets.</p>
         <p>The production browser policy sets <code>connect-src 'none'</code> and <code>form-action 'none'</code>, blocking the normal page APIs used for fetch/XHR/WebSocket/EventSource/sendBeacon connections and form submissions.</p>
       </section>
 
       <section class="policy-section">
-        <h2>7. Exporting your data</h2>
-        <p>You can use <strong>Export my data</strong> in the check-in footer. The export is created locally in your browser and can include the two HISTI local-storage records used for progress and saved results.</p>
-        <p>HISTI provides multiple methods so one browser feature is not required:</p>
-        <ul>
-          <li><strong>Download JSON</strong> — saves a local file;</li>
-          <li><strong>Copy JSON</strong> — copies the export to your clipboard when browser permission allows it;</li>
-          <li><strong>View raw data</strong> — shows the export in a selectable read-only text area for manual copying.</li>
-        </ul>
-        <p>If those controls cannot be used, you can inspect the same local storage through your browser’s developer/site-storage tools.</p>
+        <h2>7. Inspecting local data</h2>
+        <p>The current check-ins do not include a JSON export or saved-result-history interface. You can inspect local records using your browser’s developer tools: Application → Local Storage. These tools may expose your answers to anyone using your unlocked browser.</p>
+        <p>Older HISTI versions may have left local records, including optional labels or result history. Current check-in resets do not remove unrelated or older-version records. Clear this site’s data in your browser to remove all local records for that site.</p>
       </section>
 
       <section id="delete-data" class="policy-section">
         <h2>8. Deleting your local HISTI data</h2>
-        <p>Use <strong>Reset</strong> inside HISTI to remove the HISTI progress and saved-result keys from the current browser profile. As an alternative method, clear site data for <code>www.histi.org</code> using your browser settings.</p>
+        <p>Use <strong>Reset</strong> inside a check-in to remove that test, language, and recipient’s progress and result from the current browser profile. Other check-ins and Settings are unchanged. As an alternative method, clear site data for <code>www.histi.org</code> using your browser settings.</p>
         <p>Because HISTI does not receive the check-in state, HISTI cannot remotely retrieve or delete data that exists only in your browser.</p>
       </section>
 
       <section id="shared-devices" class="policy-section">
         <h2>9. Local retention</h2>
-        <p>Local HISTI progress remains in the browser until you reset it, clear site data, or the browser/device removes it. Saved result history is limited by the app to the most recent 12 completed-result snapshots.</p>
-        <p>Local browser storage is not a secure vault. Anyone with access to your unlocked browser profile/device may be able to inspect it. On a shared device, consider exporting what you want to keep and then resetting HISTI.</p>
+        <p>Local HISTI progress remains in the browser until you reset it, clear site data, or the browser/device removes it. Progress is not synced across devices, browsers, or website domains.</p>
+        <p>Local browser storage is not a secure vault. Anyone with access to your unlocked browser profile/device may be able to inspect it. On a shared device, reset your check-in when you finish. Clear the site’s data to remove all versions and languages.</p>
       </section>
 
       <section class="policy-section">
         <h2>10. Sharing a result</h2>
-        <p>Sharing is optional. If you press Share, HISTI creates the result image/text locally and asks the browser or operating system to share it to a destination you choose. If native sharing is unavailable, HISTI may download the generated image locally instead.</p>
+        <p>You do not have to show anyone your result. The current results page does not automatically share, upload, or publish it. If you choose to save a screenshot, copy information, or send it elsewhere, review what it reveals first.</p>
         <p>Once you choose another app, service, or person as the destination, that destination’s privacy practices apply.</p>
       </section>
 
@@ -159,10 +158,9 @@
         <h2>12. Your choices and rights inside HISTI</h2>
         <ul>
           <li>keep real private information to yourself;</li>
-          <li>leave the optional private label blank;</li>
           <li>refuse any question;</li>
-          <li>skip sensitive Categories C and D from their warning screens;</li>
-          <li>go back, stop, review, export, or reset;</li>
+          <li>leave sensitive questions unanswered or use the available response options;</li>
+          <li>go back, stop, review, or reset;</li>
           <li>keep your result private or share it only when you choose.</li>
         </ul>
       </section>
@@ -171,11 +169,11 @@
         <h2>13. Alternative methods</h2>
         <p>HISTI is designed so privacy controls do not depend on one single UI path:</p>
         <ul>
-          <li><strong>Export:</strong> download, clipboard, raw-text view, or browser site-storage tools.</li>
+          <li><strong>Inspect:</strong> use the privacy-proof panel or browser site-storage tools.</li>
           <li><strong>Delete:</strong> HISTI Reset or browser “clear site data.”</li>
-          <li><strong>Review:</strong> use Review in the result screen or inspect the local export.</li>
-          <li><strong>Do not provide text:</strong> leave the optional recipient label blank.</li>
-          <li><strong>Do not answer sensitive questions:</strong> refuse individual questions or skip eligible sensitive sections.</li>
+          <li><strong>Review:</strong> use Review in the result screen or return to a question card.</li>
+          <li><strong>Do not provide text:</strong> choose levels only; there is no name or private-details field.</li>
+          <li><strong>Do not answer sensitive questions:</strong> leave individual questions unanswered or use the available response options.</li>
         </ul>
       </section>
 
@@ -193,7 +191,7 @@
       <section id="contact" class="policy-section">
         <h2>16. Contact</h2>
         <p>A dedicated HISTI contact email is being set up and will be published here once available.</p>
-        <p>Do not send check-in answers, optional private labels, passwords, codes, account details, or other sensitive information by email.</p>
+        <p>Do not send check-in answers, passwords, codes, account details, or other sensitive information by email.</p>
       </section>
 
       <footer class="policy-footer">
@@ -202,7 +200,7 @@
       </footer>
     </main>
   </div>
-  <script type="module" src="/histi4-privacy.js?v=settings-1"></script>
+  <script type="module" src="/histi4-privacy.js?v=locale-2"></script>
   <script type="module" src="/visitor-scroll.js?v=settings-1"></script>
 </body>
 </html>
