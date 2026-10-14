@@ -1,7 +1,8 @@
-import { resetTransition } from './reset-transition.js?v=1';
-import { openDialog, closeDialog, confirmReset } from './site-dialogs.js?v=motion-1';
+import { resetTransition } from './reset-transition.js?v=settings-1';
+import { openDialog, closeDialog, confirmReset } from './site-dialogs.js?v=settings-1';
 import { makeSlides, remapLegacySlideIndex, calculate as calculateFamilies, rubricPoints, displayScore } from './histi4-core.js?v=school-1';
 import { describeRelationship, describeTopic, describePattern, coverageText, referenceScore, compareReference, createResultReveal } from './histi4-results.js?v=editorial-1';
+import { plainOverall, plainTopic, plainPattern, plainRecipient } from './histi-plain-reading.js?v=1';
 
 const school = document.body.dataset.test === 'school';
 const shortForm = document.body.dataset.test === '60';
@@ -30,6 +31,12 @@ const el = (tag, className, text) => {
   if (text !== undefined) node.textContent = text;
   return node;
 };
+function readingCopy(node, standard, simple) {
+  node.dataset.readingStandard = standard;
+  node.dataset.readingSimple = simple;
+  node.textContent = document.documentElement.dataset.reading === 'simple' ? simple : standard;
+  return node;
+}
 
 function freshState() { return { index: 0, answers: {}, started: false, completed: false, debugGenerated: false, screen: 'intro', layoutVersion: 2 }; }
 function loadState() {
@@ -66,15 +73,23 @@ function show(screen, scroll = true) {
 }
 let transitionBusy = false;
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-const resultReveal = createResultReveal(() => reducedMotion.matches || document.hidden || document.body.classList.contains('reduce-motion'));
+const quiet = () => reducedMotion.matches || document.hidden || document.body.classList.contains('reduce-motion') || document.documentElement.dataset.performance === 'on';
+const resultReveal = createResultReveal(quiet);
 const revealResult = () => resultReveal.play(document.querySelector('#results-screen .result-card'));
 window.addEventListener('pagehide', resultReveal.cancel);
 document.addEventListener('visibilitychange', () => { if (document.hidden) resultReveal.cancel(); });
 reducedMotion.addEventListener('change', () => { if (reducedMotion.matches) resultReveal.cancel(); });
-const wait = ms => new Promise(resolve => window.setTimeout(resolve, ms));
+document.addEventListener('histi:preferences', () => { if (quiet()) resultReveal.cancel(); });
+const wait = ms => new Promise(resolve => {
+  if (quiet()) { resolve(); return; }
+  const done = () => { window.clearTimeout(timer); document.removeEventListener('histi:preferences', changed); resolve(); };
+  const changed = () => { if (quiet()) done(); };
+  const timer = window.setTimeout(done, ms);
+  document.addEventListener('histi:preferences', changed);
+});
 async function transitionPage(kicker, title, detail, render, focusId) {
   if (transitionBusy) return;
-  if (reducedMotion.matches || document.hidden) {
+  if (quiet()) {
     render();
     window.scrollTo(0, 0);
     $(focusId)?.focus({ preventScroll: true });
@@ -406,6 +421,7 @@ function resultCategory(key, result) {
   const meta = CATEGORY_META[key];
   const bucket = result.categories[key];
   const reading = describeTopic(key, bucket, { group, school });
+  const plain = plainTopic(key, bucket, group, school);
   if (school) { reading.scope = meta.scope; reading.prompt = meta.prompt; }
   const card = el('article', 'category-card');
   card.setAttribute('aria-labelledby', `result-topic-${key}`);
@@ -440,8 +456,8 @@ function resultCategory(key, result) {
   if (reference !== null) spectrum.append(comparison);
   spectrum.append(el('small', 'h4-category-summary', `${bucket.answered} of ${bucket.total} questions scored`));
   const story = el('div', 'result-topic-story');
-  story.append(el('p', 'result-topic-description', reading.description));
-  if (reading.detail) story.append(el('p', 'result-topic-detail', reading.detail));
+  story.append(readingCopy(el('p', 'result-topic-description'), reading.description, plain.description));
+  if (reading.detail) story.append(readingCopy(el('p', 'result-topic-detail'), reading.detail, plain.detail));
   story.append(prompt);
   const layout = el('div', 'result-topic-layout'); layout.append(spectrum, story);
   card.append(top, el('p', 'result-topic-scope', reading.scope), layout);
@@ -451,12 +467,13 @@ function renderResults(completed = false) {
   if (completed) state.completed = true;
   const result = calculate(state.answers);
   const reading = describeRelationship(result.score, group, { school });
+  const plain = plainOverall(reading, group, school);
   show('results');
   $('result-recipient').textContent = `Sharing with ${sharingWith}`;
   $('result-state').textContent = completed ? 'Your check-in result' : 'Still in progress · You can come back';
   $('result-heading').textContent = reading.title;
-  $('result-description').textContent = reading.description;
-  $('result-context').textContent = reading.context;
+  readingCopy($('result-description'), reading.description, plain.description);
+  readingCopy($('result-context'), reading.context, plain.context);
   $('result-score').textContent = displayScore(result.score);
   $('result-score').setAttribute('aria-label', result.score === null ? 'No score yet' : `${displayScore(result.score)}: ${reading.label}`);
   $('result-score-meaning').textContent = reading.label;
@@ -482,7 +499,7 @@ function renderResults(completed = false) {
   const patternHeading = el('h2', '', pattern.title); patternHeading.id = 'result-pattern-heading';
   perspective.setAttribute('aria-labelledby', patternHeading.id);
   perspective.replaceChildren(el('p', 'result-story-kicker', 'Looking at the topics'), patternHeading,
-    el('p', 'result-pattern-description', pattern.description), el('p', 'result-pattern-note', pattern.note));
+    readingCopy(el('p', 'result-pattern-description'), pattern.description, plainPattern(result, CATEGORY_META)), el('p', 'result-pattern-note', pattern.note));
   if (!school && !$('result-reference-note')) {
     const note = el('p', 'result-reference-note', `The dot is your result; the diamond is a reference for ${sharingWith}. The reference is a guide, not a verified population average or a target.`);
     note.id = 'result-reference-note';
@@ -620,7 +637,7 @@ if (debugMode) setupDebug();
 syncDebugWatermark();
 
 $('intro-recipient').textContent = recipient.label.toLowerCase();
-$('intro-description').textContent = recipient.description;
+readingCopy($('intro-description'), recipient.description, plainRecipient(group, school));
 $('slide-count').textContent = `${slides.length} ${school ? 'parts' : 'cards'}.`;
 const groupLinks = document.createDocumentFragment();
 for (const [key, info] of Object.entries(RECIPIENTS)) {

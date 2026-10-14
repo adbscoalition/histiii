@@ -1,0 +1,65 @@
+/* Floating controls sit above pinned check-in chrome, not over the Next button. */
+:root { --settings-bottom:20px; --settings-read-size:18px; --settings-choice-size:16px; }
+body.histi-has-fixed-footer { --settings-bottom:88px; }
+.histi-settings-trigger { position:fixed; z-index:85; right:max(18px,env(safe-area-inset-right)); bottom:calc(var(--settings-bottom) + env(safe-area-inset-bottom)); display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:11px 16px; border:1px solid #7e9bb0; border-radius:999px; background:var(--palette-card,#fffdf8); color:var(--palette-blue-ink,#234c71); box-shadow:0 5px 18px #203b4f18; font-size:14px; cursor:pointer; }
+.histi-settings-trigger svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.histi-settings-dialog { position:fixed; inset:auto; right:18px; bottom:calc(16px + env(safe-area-inset-bottom)); width:min(370px,calc(100vw - 32px)); max-height:calc(100svh - 32px - env(safe-area-inset-bottom)); margin:0; padding:22px; overflow-y:auto; overscroll-behavior:contain; border:1px solid #8ea7bb; border-radius:24px; background:var(--palette-card,#fffdf8); color:var(--palette-ink,#25323b); box-shadow:0 16px 52px #23394c24; }
+.histi-settings-dialog::backdrop { background:#182b4030; }
+.histi-settings-dialog[open] { animation:settings-arrive 180ms ease-out both; }
+@keyframes settings-arrive { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+.histi-settings-head { position:sticky; top:-22px; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:16px; margin:-22px -22px 18px; padding:18px 22px 14px; background:var(--palette-card,#fffdf8); border-bottom:1px solid var(--palette-line,#c6d0d9); }
+.histi-settings-head h2 { margin:0; font-size:30px; }
+.histi-settings-close { min-height:40px; padding:8px 12px; border:1px solid var(--palette-line,#a9b5bf); border-radius:999px; background:transparent; color:inherit; font-size:13px; cursor:pointer; }
+.histi-settings-field { min-width:0; margin:0 0 16px; padding:0; border:0; }
+.histi-settings-field legend { margin:0 0 7px; padding:0; font-size:16px; font-weight:600; }
+.histi-settings-help { margin:0 0 10px; color:var(--palette-muted,#50626c); font-size:13px; line-height:1.5; }
+.histi-settings-options { display:flex; flex-wrap:wrap; gap:7px; }
+.histi-settings-options button { flex:1; min-width:0; min-height:44px; padding:10px 9px; border:1px solid #a1b3c3; border-radius:12px; background:transparent; color:inherit; font-size:13px; line-height:1.35; cursor:pointer; }
+.histi-settings-options button[aria-pressed="true"] { border-color:#376687; background:#dcecf8; color:#183c5a; box-shadow:inset 0 0 0 1px #376687; }
+.histi-settings-switch { display:flex; align-items:center; justify-content:space-between; width:100%; min-height:46px; padding:10px 12px; border:1px solid #a1b3c3; border-radius:12px; background:transparent; color:inherit; font-size:14px; cursor:pointer; }
+.histi-switch-track { width:40px; padding:3px; border-radius:999px; background:#c5d0d9; }
+.histi-switch-track>span { display:block; width:16px; height:16px; border-radius:50%; background:#fff; transition:transform 160ms ease; }
+.histi-settings-switch[aria-checked="true"] .histi-switch-track { background:#294e70; }
+.histi-settings-switch[aria-checked="true"] .histi-switch-track>span { transform:translateX(18px); }
+.histi-settings-foot { padding-top:12px; border-top:1px solid var(--palette-line,#c6d0d9); }
+.histi-settings-reset { min-height:40px; padding:8px 0; border:0; background:none; color:var(--palette-blue-ink,#234c71); font-size:13px; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+.histi-settings-status { margin:7px 0 0; color:var(--palette-muted,#50626c); font-size:12px; line-height:1.6; }
+:is(.histi-settings-trigger,.histi-settings-dialog button):focus-visible { outline:3px solid #1e557e; outline-offset:3px; }
+html:is(.histi-intro-active,.histi-intro-pending,.histi-url-covered) .histi-settings-trigger { visibility:hidden; }
+
+/* Scale reading text, rather than zooming the viewport or changing pointer math. */
+html[data-text-size="large"] { --settings-read-size:19px; --settings-choice-size:18px; }
+html[data-text-size="largest"] { --settings-read-size:21px; --settings-choice-size:20px; }
+html:is([data-text-size="large"],[data-text-size="largest"]) :is(main p,main li,main dd,.card-description,.h4-choice small,.home-section p,.home-faq-answer,.start-card p,.result-topic-description,.result-topic-detail,.result-context,.result-description,.policy-section p,.policy-section li,.result-read-dialog p,.h4-proof-dialog p,.disclosure-card p) { font-size:var(--settings-read-size)!important; line-height:1.75!important; }
+html:is([data-text-size="large"],[data-text-size="largest"]) :is(.h4-status button,.h4-yn button,.h4-multi button,.h4-segment,.h4-endpoints,.h4-level-value,.h4-selected-label,.h4-control-label,.rubric-button,.none-button,.v3-level-labels,.histi-settings-options button,.histi-settings-help) { font-size:var(--settings-choice-size)!important; line-height:1.5!important; }
+html:is([data-text-size="large"],[data-text-size="largest"]) .h4-question h2 { font-size:clamp(22px,2.4vw,26px)!important; line-height:1.5!important; }
+html[data-text-size="largest"] .h4-question h2 { font-size:clamp(24px,2.7vw,29px)!important; }
+html:is([data-text-size="large"],[data-text-size="largest"]) .h4-status { flex-wrap:wrap; }
+html:is([data-text-size="large"],[data-text-size="largest"]) .histi-settings-options button { flex-basis:96px; }
+
+html[data-contrast="high"] { --palette-ink:#101c26; --palette-muted:#24394b; --palette-line:#637384; --palette-card:#ffffff; --palette-blue-ink:#173e65; --palette-iris-ink:#303776; --palette-apricot-ink:#713418; --palette-sun-ink:#51400c; --palette-rose-ink:#742249; }
+html[data-contrast="high"] body { --suite-ink:#101c26; --suite-muted:#24394b; --suite-line:#637384; --card-ink:#101c26; --card-line:#637384; }
+html[data-contrast="high"] :is(.h4-question,.result-score-panel,.histi-settings-dialog,.histi-settings-trigger) { border-color:#425a70!important; }
+html[data-contrast="high"] :is(.muted,.result-topic-scope,.result-topic-detail,.h4-endpoints,.h4-status button,.start-disclaimer,.histi-settings-help,.histi-settings-status) { color:#24394b!important; }
+html[data-contrast="high"] a:not(.primary):not(.histi-start) { text-decoration-thickness:2px; text-underline-offset:4px; }
+html[data-contrast="high"] :is(.histi-settings-options button,.histi-settings-switch) { border-color:#425a70; }
+
+/* Performance mode is a persistent, site-wide override, including pseudo-elements. */
+html[data-performance="on"] *,html[data-performance="on"] *::before,html[data-performance="on"] *::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; }
+html[data-performance="on"],html[data-performance="on"] body { scroll-behavior:auto!important; }
+html[data-performance="on"] :is(.suite-color-field,#histi-intro,.histi-card-morph,.histi-history-veil) { display:none!important; }
+html[data-performance="on"]::before,html[data-performance="on"]::after { display:none!important; }
+html[data-performance="on"] :is(.home-reveal-pending,.visitor-awaiting) { opacity:1!important; transform:none!important; }
+html[data-performance="on"] :is(.result-card,.start-card,.app-card,.histi-settings-dialog,.histi-settings-trigger) { box-shadow:none!important; backdrop-filter:none!important; }
+html[data-performance="on"]::view-transition-old(root),html[data-performance="on"]::view-transition-new(root) { animation:none!important; }
+@media(prefers-reduced-motion:reduce) { .histi-settings-dialog[open],.histi-switch-track>span { animation:none!important; transition:none!important; } }
+@media(max-width:600px) {
+  :root { --settings-bottom:14px; }
+  body.histi-has-fixed-footer { --settings-bottom:16px; }
+  body.histi-has-fixed-footer .bottom-utility-inner { padding-right:66px; }
+  .histi-settings-trigger { right:14px; padding:10px 13px; }
+  .histi-settings-trigger { width:44px; height:44px; padding:10px; justify-content:center; }
+  .histi-settings-trigger>span { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+  .histi-settings-dialog { right:14px; width:calc(100vw - 28px); padding:20px; }
+  .histi-settings-head { top:-20px; margin:-20px -20px 18px; padding-inline:20px; }
+}

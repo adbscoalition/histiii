@@ -2,7 +2,8 @@
 (() => {
   const root = document.documentElement;
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  if (!root.hasAttribute('data-home-entry') || root.classList.contains('histi-home-return') || motion.matches || window.location.hash || document.hidden) return;
+  const quiet = () => motion.matches || root.dataset?.performance === 'on';
+  if (!root.hasAttribute('data-home-entry') || root.classList.contains('histi-home-return') || quiet() || window.location.hash || document.hidden) return;
 
   let cover = null;
   let skip = null;
@@ -44,6 +45,7 @@
     window.removeEventListener('pageshow', onPageShow);
     window.removeEventListener('hashchange', finish);
     motion.removeEventListener('change', onMotion);
+    document.removeEventListener('histi:preferences', onMotion);
   }
 
   function reveal() {
@@ -64,7 +66,7 @@
   function start() {
     if (phase !== 'pending') return;
     cover = document.getElementById('histi-intro');
-    if (!cover || motion.matches || document.hidden || window.location.hash) return finish();
+    if (!cover || quiet() || document.hidden || window.location.hash) return finish();
     skip = cover.querySelector('.intro-skip');
     protectedRegions = [...document.querySelectorAll('body > header, body > main, body > footer, body > .histi-safety-notice')].map(region => [region, region.inert]);
     protectedRegions.forEach(([region]) => { region.inert = true; });
@@ -80,7 +82,7 @@
 
   function onKey(event) { if (event.key === 'Escape') finish(); }
   function onVisibility() { if (document.hidden) finish(); }
-  function onMotion() { if (motion.matches) finish(); }
+  function onMotion() { if (quiet()) finish(); }
   function onPageShow(event) { if (event.persisted) finish(); }
 
   root.classList.add('histi-intro-pending');
@@ -92,6 +94,7 @@
   window.addEventListener('pageshow', onPageShow);
   window.addEventListener('hashchange', finish);
   motion.addEventListener('change', onMotion);
+  document.addEventListener('histi:preferences', onMotion);
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
   else start();
 })();

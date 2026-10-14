@@ -68,7 +68,7 @@ test('homepage keeps six native FAQs, the check-in link, and the exact disclaime
   const read = file=>readFileSync(new URL(`../${file}`,import.meta.url),'utf8');
   const html=read('index.html'),js=read('home-disclosures.js');
   assert.equal((html.match(/<details>/g)||[]).length,6);
-  assert.match(html,/home-disclosures\.js\?v=faq-1/);
+  assert.match(html,/home-disclosures\.js\?v=settings-1/);
   assert.match(html,/aria-labelledby="ready-title"/);
   assert.match(html,/aria-label="Your next steps"/);
   assert.match(html,/Choose your check-in/);

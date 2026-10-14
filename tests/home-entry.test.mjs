@@ -4,9 +4,9 @@ import { readFileSync, existsSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 
 const read=file=>readFileSync(new URL(`../${file}`,import.meta.url),'utf8');
-const fixture=({home=true,hash='',reduced=false,referrer='',navigation='navigate',storage=new Map(),storageBlocked=false,clock=100000,assignFails=false,history,activation,complete=true,fonts}={})=>{
+const fixture=({home=true,hash='',reduced=false,performance=false,referrer='',navigation='navigate',storage=new Map(),storageBlocked=false,clock=100000,assignFails=false,history,activation,complete=true,fonts}={})=>{
   const classes=new Set(),timers=new Map(),frames=new Map(),documentEvents={},windowEvents={},motionEvents={};let id=0;
-  const root={hasAttribute:name=>home&&name==='data-home-entry',classList:{contains:value=>classes.has(value),add:(...values)=>values.forEach(v=>classes.add(v)),remove:(...values)=>values.forEach(v=>classes.delete(v))}};
+  const root={dataset:{performance:performance?'on':'off'},hasAttribute:name=>home&&name==='data-home-entry',classList:{contains:value=>classes.has(value),add:(...values)=>values.forEach(v=>classes.add(v)),remove:(...values)=>values.forEach(v=>classes.delete(v))}};
   const motion={matches:reduced,addEventListener:(name,fn)=>{motionEvents[name]=fn;}};
   const location={pathname:home?'/':'/checkin-page',hash,href:`https://www.histi.org/${home?'':'checkin-page'}${hash}`,origin:'https://www.histi.org',assign(url){if(assignFails)throw new Error('Navigation cancelled');this.assigned=url;}};
   const ghosts=[];
@@ -40,6 +40,18 @@ test('ordinary entry holds the veil until fonts and page modules settle, then re
   f.fireTimer(900);assert.equal(f.timers.size,0);
   assert.match(read('site-experience.css'),/body:not\(\.histi-home\) :is\(\.start-card,\.result-card\) \{ animation:none; \}/);
   assert.match(read('site-experience.css'),/scrollbar-gutter:stable/);
+});
+
+test('saved performance mode skips URL and refresh motion; enabling it cancels a pending entry',async()=>{
+  for(const navigation of ['navigate','reload','back_forward']) {
+    const f=fixture({home:false,navigation,performance:true});f.ready();
+    assert.equal(f.frames.size,0);assert.equal(f.timers.size,0);assert.equal(f.classes.has('histi-url-covered'),false);
+  }
+  let settleFonts;const f=fixture({home:false,complete:false,fonts:{ready:new Promise(resolve=>{settleFonts=resolve;})}});
+  f.ready();assert.equal(f.classes.has('histi-url-covered'),true);
+  f.document.documentElement.dataset.performance='on';f.documentEvents['histi:preferences']();
+  assert.equal(f.classes.has('histi-url-covered'),false);assert.equal(f.frames.size,0);assert.equal(f.timers.size,0);
+  settleFonts();await Promise.resolve();assert.equal(f.frames.size,0);
 });
 
 test('entry font failures fail open and cannot revive the animation after fallback or navigation', async()=>{
@@ -108,7 +120,7 @@ test('cross-page exit and non-home entry retain the existing full-screen transit
 test('repeated back/forward entry uses bounded timers and preserves the badge fixes',()=>{
   const f=fixture();f.ready();
   for(let i=0;i<100;i++){f.windowEvents.pageshow({persisted:true});f.windowEvents.pagehide();assert.equal(f.frames.size,0);assert.equal(f.timers.size,0);}
-  assert.deepEqual(Object.keys(f.documentEvents).sort(),['DOMContentLoaded','click']);
+  assert.deepEqual(Object.keys(f.documentEvents).sort(),['DOMContentLoaded','click','histi:preferences']);
   assert.deepEqual(Object.keys(f.windowEvents).sort(),['load','pagehide','pagereveal','pageshow','pageswap']);
   assert.doesNotMatch(read('page-transitions.js'),/setInterval|MutationObserver|innerHTML/);
   assert.equal((read('index.html').match(/class="visitor-step-code"/g)||[]).length,3);

@@ -27,7 +27,7 @@ export function initVisitorScroll(root, host = root.defaultView) {
     const text = String(value);
     if (root.documentElement.dataset.scrollGlideActive !== text) root.documentElement.dataset.scrollGlideActive = text;
   };
-  const paused = () => root.body.classList.contains('visitor-motion-paused') || root.body.classList.contains('reduce-motion');
+  const paused = () => root.body.classList.contains('visitor-motion-paused') || root.body.classList.contains('reduce-motion') || root.documentElement.dataset.performance === 'on';
   const available = () => !motion.matches && pointer.matches && !root.hidden && !paused();
   const maximum = () => Math.max(0, root.scrollingElement.scrollHeight - host.innerHeight);
   const stop = () => {
@@ -86,6 +86,7 @@ export function initVisitorScroll(root, host = root.defaultView) {
   host.addEventListener('scroll', () => { if (frame && Math.abs(host.scrollY-written) > 2) stop(); }, {passive:true});
   for (const name of ['pointerdown','touchstart','keydown','resize','hashchange','pagehide']) host.addEventListener(name, stop, {passive:true});
   root.addEventListener('focusin', stop);
+  root.addEventListener('histi:preferences', sync);
   root.addEventListener('visibilitychange', () => { if (root.hidden) stop(); });
   root.addEventListener('click', event => {
     const element = event.target?.nodeType === 1 ? event.target : event.target?.parentElement;

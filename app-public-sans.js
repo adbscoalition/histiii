@@ -1,5 +1,5 @@
-import { openPanel, closePanel, confirmReset } from './site-dialogs.js?v=motion-1';
-import { resetTransition } from './reset-transition.js?v=1';
+import { openPanel, closePanel, confirmReset } from './site-dialogs.js?v=settings-1';
+import { resetTransition } from './reset-transition.js?v=settings-1';
 import questionData from './questions-data-private-v1.js';
 
 const STORAGE_PROGRESS = 'histi.progress.v3';
@@ -666,6 +666,7 @@ function answerRecipientPhrase() {
 
 function handoffMotionEnabled() {
   return state.accessibility.motion !== false &&
+    document.documentElement.dataset.performance !== 'on' &&
     !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
@@ -676,6 +677,16 @@ function cancelHandoffAnimation() {
   handoffAnimationFrame = null;
   handoffRevealTimer = null;
 }
+document.addEventListener('histi:preferences', () => {
+  if (document.documentElement.dataset.performance !== 'on') return;
+  cancelHandoffAnimation();
+  if (state.screen === 'handoff') {
+    els.handoffTyped.textContent = `Imagine ${handoffRecipientPhrase()} is asking you these questions…`;
+    els.handoffMessage.classList.remove('is-typing');
+    els.handoffMessage.classList.add('is-raised');
+    els.handoffNext.hidden = false;
+  }
+});
 
 function startHandoff() {
   cancelHandoffAnimation();
@@ -1228,7 +1239,7 @@ function go(delta) {
   }
 
   const card = els.assessment.querySelector('.assessment-card');
-  const reduceMotion = state.accessibility.motion === false || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduceMotion = state.accessibility.motion === false || document.documentElement.dataset.performance === 'on' || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   if (!card || reduceMotion) {
     state.index = next;
@@ -1417,11 +1428,18 @@ function renderResults() {
 }
 
 function wait(ms) {
-  return new Promise(resolve => window.setTimeout(resolve, ms));
+  return new Promise(resolve => {
+    if (document.documentElement.dataset.performance === 'on') { resolve(); return; }
+    const done = () => { window.clearTimeout(timer); document.removeEventListener('histi:preferences', changed); resolve(); };
+    const changed = () => { if (document.documentElement.dataset.performance === 'on') done(); };
+    const timer = window.setTimeout(done, ms);
+    document.addEventListener('histi:preferences', changed);
+  });
 }
 
 function finishMotionEnabled() {
   return state.accessibility.motion !== false &&
+    document.documentElement.dataset.performance !== 'on' &&
     !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
@@ -1461,6 +1479,12 @@ async function finishAssessment() {
 
   // Dedicated 2-second calculating phase. No result is shown here.
   await wait(2000);
+  if (!finishMotionEnabled()) {
+    els.finishSequence.hidden = true;
+    finishSequenceRunning = false;
+    showScreen('results');
+    return;
+  }
 
   // Fade fully to black for 250 ms.
   els.finishBlackout.hidden = false;
@@ -1468,6 +1492,14 @@ async function finishAssessment() {
     [{ opacity: 0 }, { opacity: 1 }],
     { duration: 250, easing: 'linear', fill: 'forwards' }
   ).finished.catch(() => {});
+
+  if (!finishMotionEnabled()) {
+    els.finishBlackout.hidden = true;
+    els.finishSequence.hidden = true;
+    finishSequenceRunning = false;
+    showScreen('results');
+    return;
+  }
 
   // Cut to the report while the viewport is fully black.
   els.finishSequence.hidden = true;
@@ -1492,6 +1524,12 @@ async function finishAssessment() {
   els.finishBlackout.hidden = true;
 
   // Only now reveal the result itself.
+  if (!finishMotionEnabled()) {
+    els.resultScore.textContent = finalScoreText;
+    els.resultScore.style.opacity = '1';
+    finishSequenceRunning = false;
+    return;
+  }
   if (result.overall !== null) {
     const exactScore = Math.max(0, Math.min(100, Number(result.overall) || 0));
     const signedTarget = directionalValue(exactScore);
@@ -1511,6 +1549,7 @@ async function finishAssessment() {
     await wait(300);
 
     for (let value = 1; value <= wholeScore; value += 1) {
+      if (!finishMotionEnabled()) break;
       els.resultScore.textContent = `${direction}${value}`;
       await wait(10);
     }

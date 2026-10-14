@@ -14,7 +14,7 @@ test('every page has one static safety notice and the shared visual system', () 
     assert.match(html, /Never enter passwords, codes, or personal information\./, file);
     const sharedStyle = html.indexOf('/site-experience.css?v=');
     assert.ok(sharedStyle > 0 && sharedStyle < html.indexOf('/site-typography.css'), file);
-    assert.match(html, /page-transitions\.js\?v=refresh-3/, file);
+    assert.match(html, /page-transitions\.js\?v=settings-1/, file);
     assert.match(html, /class="site-header topbar histi-header"/, file);
   }
 });
@@ -46,7 +46,7 @@ test('page entrance is finite and respects reduced motion', () => {
   const js = read('page-transitions.js');
   assert.match(js, /entryTimer = setTimeout\(clearEntry, 900\)/);
   assert.match(js, /pagehide[^\n]+clearEntry/);
-  assert.match(js, /if \(motion\.matches\) return/);
+  assert.match(js, /if \(quiet\(\)\) return/);
   assert.doesNotMatch(js, /setInterval|MutationObserver/);
   const css = read('site-experience.css');
   assert.match(css, /@media\(prefers-reduced-motion:reduce\)/);
@@ -56,7 +56,7 @@ test('page entrance is finite and respects reduced motion', () => {
 test('group selector fades once without restarting or moving the cards', () => {
   const html = read('checkin-4.html');
   const css = read('site-experience.css');
-  assert.match(html, /<body class="histi-group-selector"[^>]*>/);
+  assert.match(html, /<body class="histi-group-selector histi-has-fixed-footer"[^>]*>/);
   assert.match(html, /site-experience\.css\?v=spring-1/);
   for (const font of ['idiqlat/regular', 'tiro-gurmukhi/regular', 'instrument-sans/variable']) {
     assert.ok(html.includes(`rel="preload" href="/fonts/${font}.woff2" as="font" type="font/woff2" crossorigin`));
@@ -74,7 +74,7 @@ test('existing reflection questions remain on all Full recipient pages', () => {
     const html = read(`checkin-4-${group}.html`);
     assert.match(html, /<span>245 questions<\/span>/);
     assert.match(html, /id="question-list"/);
-    assert.match(html, /app-histi4\.js\?v=editorial-1/);
+    assert.match(html, /app-histi4\.js\?v=settings-1/);
     assert.match(html, /suite-privacy-reminder/);
   }
   assert.match(read('site-experience.css'), /body\.histi-120 \{ --suite-accent:var\(--palette-blue\)/);

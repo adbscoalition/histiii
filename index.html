@@ -191,8 +191,9 @@
   <link rel="stylesheet" href="/styles-home.css?v=palette-4">
   <link rel="stylesheet" href="/site-header.css?v=palette-2">
   <link rel="stylesheet" href="/page-transitions.css?v=refresh-3">
-  <script src="/page-transitions.js?v=refresh-3"></script>
-  <script src="/home-motion.js?v=revamp-1" defer></script>
+  <script src="/site-settings.js?v=1"></script>
+  <script src="/page-transitions.js?v=settings-1"></script>
+  <script src="/home-motion.js?v=settings-1" defer></script>
   <link rel="stylesheet" href="/site-color-motion.css?v=pages-1">
   <script src="/site-color-motion.js?v=bright-1" defer></script>
   <link rel="stylesheet" href="/site-experience.css?v=spring-1">
@@ -206,8 +207,9 @@
   <link rel="stylesheet" href="/visitor-calm.css?v=1">
   <link rel="stylesheet" href="/visitor-scroll.css?v=3">
   <link rel="stylesheet" href="/histi-school.css?v=1">
+  <link rel="stylesheet" href="/site-settings.css?v=1">
   <link rel="stylesheet" href="/site-typography.css?v=hero-tiro-1">
-  <script src="/home-intro.js?v=intro-2"></script>
+  <script src="/home-intro.js?v=settings-1"></script>
 </head>
 <body class="histi-home" data-page="home">
   <div class="histi-intro" id="histi-intro" aria-label="HISTI introduction" hidden>
@@ -259,7 +261,7 @@
       <div class="hero-copy">
         <p class="home-eyebrow"><span class="quiet-dot" aria-hidden="true"></span> A private moment of reflection</p>
         <h1 id="hero-title"><span class="hero-entry-line">Your sharing.</span><br><span class="hero-people hero-entry-line">Your people.</span><br><em class="hero-entry-line">Your boundaries.</em></h1>
-        <p class="hero-lede">HISTI is a private check-in about what you feel comfortable sharing—and with whom. The name stands for Human Information-Sharing Transparency Index. Choose levels, without entering real private details.</p>
+        <p class="hero-lede" data-reading-simple="HISTI helps you think about what you would share with one person. Pick levels only. Do not enter real private details.">HISTI is a private check-in about what you feel comfortable sharing—and with whom. The name stands for Human Information-Sharing Transparency Index. Choose levels, without entering real private details.</p>
         <ul class="visitor-benefits" aria-label="Before you begin"><li><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#door"></use></svg>No account needed</li><li><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#lock"></use></svg>No private details to type</li><li><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#clock"></use></svg>Take it at your pace</li></ul>
         <div class="home-actions">
           <a class="home-button-primary" href="/checkin-page">Explore check-ins <span aria-hidden="true">↗</span></a>
@@ -342,7 +344,7 @@
 
     <section id="about" class="home-about">
       <div class="home-wrap home-section">
-        <div class="home-section-heading"><p class="home-eyebrow">How it works</p><h2>Sharing is personal.<br><em>So is the context.</em></h2><p>HISTI is a self-guided reflection on your comfort with sharing information. Think of one person, then choose how much you did or would share with them. Your result describes a private-to-open preference; it is not an exam grade or a recommendation to disclose information.</p></div>
+        <div class="home-section-heading"><p class="home-eyebrow">How it works</p><h2>Sharing is personal.<br><em>So is the context.</em></h2><p data-reading-simple="Think of one person. Choose how much you would tell them. The result shows your sharing choices, not a grade or advice to share.">HISTI is a self-guided reflection on your comfort with sharing information. Think of one person, then choose how much you did or would share with them. Your result describes a private-to-open preference; it is not an exam grade or a recommendation to disclose information.</p></div>
         <div class="home-steps">
           <article><span class="step-number"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#friends"></use></svg><span class="visitor-step-code">01</span></span><h3>Think of someone.</h3><p>Choose one relationship and keep that person in mind. It can be someone you know or an imagined person. You don’t need to enter their name.</p><nav class="people-tags" aria-label="Try a relationship"><a href="/checkin-4-g1"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#stranger"></use></svg>Stranger</a><a href="/checkin-4-g2"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#acquaintance"></use></svg>Acquaintance</a><a href="/checkin-4-g3"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#friends"></use></svg>Friend</a><a href="/checkin-4-g4"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#partner"></use></svg>Partner</a></nav></article>
           <article><span class="step-number"><svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/visitor-icons.svg#levels"></use></svg><span class="visitor-step-code">02</span></span><h3>Choose what feels closest.</h3><p>Reflect on what you did—or would—share. Select a level or description; keep the actual information private.</p><div class="sample-level cosmetic-levels" data-cosmetic-levels role="group" aria-label="Try an example sharing level"><button type="button" data-demo-level="1" aria-label="Example level 1: Keep completely private" aria-pressed="false">1</button><button type="button" data-demo-level="2" aria-label="Example level 2: Share narrowly" aria-pressed="false">2</button><button type="button" data-demo-level="3" aria-label="Example level 3: Context-dependent" aria-pressed="true">3</button><button type="button" data-demo-level="4" aria-label="Example level 4: Share openly" aria-pressed="false">4</button><button type="button" data-demo-level="5" aria-label="Example level 5: Share completely openly" aria-pressed="false">5</button></div><output id="sample-level-description" class="demo-level-caption" aria-live="polite">Context-dependent</output></article>
@@ -400,10 +402,10 @@
   </main>
 
   <footer class="home-footer home-wrap"><div><img src="/histi-logo.webp?v=facelift-1" alt="HISTI" width="76" height="41"><span>Human Information-Sharing<br>Transparency Index</span></div><nav aria-label="Footer"><a href="/checkin-page">Check-ins</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="https://github.com/adbscoalition/histiii" rel="noopener noreferrer">Source</a></nav><p class="site-license-notice"><span>Website · All rights reserved.</span><span>HISTI test · <a href="https://creativecommons.org/licenses/by-nd/4.0/" rel="license">CC BY-ND 4.0</a></span><a class="site-license-details" href="/terms#licensing">Licensing details</a></p></footer>
-  <script type="module" src="/histi4-privacy.js?v=motion-1"></script>
+  <script type="module" src="/histi4-privacy.js?v=settings-1"></script>
   <script type="module" src="/visitor-play.js?v=play-1"></script>
-  <script type="module" src="/home-disclosures.js?v=faq-1"></script>
-  <script type="module" src="/visitor-calm.js?v=1"></script>
-  <script type="module" src="/visitor-scroll.js?v=3"></script>
+  <script type="module" src="/home-disclosures.js?v=settings-1"></script>
+  <script type="module" src="/visitor-calm.js?v=settings-1"></script>
+  <script type="module" src="/visitor-scroll.js?v=settings-1"></script>
 </body>
 </html>

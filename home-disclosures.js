@@ -5,6 +5,14 @@ export function initFaq(root, { reducedMotion = () => typeof matchMedia === 'fun
   if (!list || list.dataset.faqReady === 'true') return;
   list.dataset.faqReady = 'true';
   const states = new Map([...list.querySelectorAll('details')].map(details => [details, { expanded: details.open, animation: null }]));
+  const quiet = () => reducedMotion() || root.documentElement?.dataset?.performance === 'on';
+  root.addEventListener?.('histi:preferences', () => {
+    if (!quiet()) return;
+    for (const [details,state] of states) {
+      if (state.animation) { state.animation.onfinish = null; state.animation.cancel(); state.animation = null; }
+      details.open = state.expanded; details.style.height = ''; details.style.overflow = '';
+    }
+  });
   list.addEventListener('click', event => {
     const summary = event.target.closest('summary');
     const details = summary?.parentElement;
@@ -22,7 +30,7 @@ export function initFaq(root, { reducedMotion = () => typeof matchMedia === 'fun
     details.style.height = '';
     details.style.overflow = '';
     details.open = state.expanded;
-    if (reducedMotion() || typeof details.animate !== 'function') return;
+    if (quiet() || typeof details.animate !== 'function') return;
     const end = details.getBoundingClientRect().height;
     details.open = true; // Keep the answer visible while the closing height shrinks.
     details.style.overflow = 'hidden';

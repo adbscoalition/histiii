@@ -1,6 +1,6 @@
 import setup from './questions-v3-01.js';
-import { resetTransition } from './reset-transition.js?v=1';
-import { openPanel, closePanel, confirmReset } from './site-dialogs.js?v=motion-1';
+import { resetTransition } from './reset-transition.js?v=settings-1';
+import { openPanel, closePanel, confirmReset } from './site-dialogs.js?v=settings-1';
 import identity from './questions-v3-02.js';
 import relationships from './questions-v3-03.js';
 import work from './questions-v3-04.js';

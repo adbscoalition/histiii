@@ -1,4 +1,4 @@
-import { openDialog, closeDialog } from './site-dialogs.js?v=motion-1';
+import { openDialog, closeDialog } from './site-dialogs.js?v=settings-1';
 
 const trigger = document.getElementById('privacy-live-btn');
 

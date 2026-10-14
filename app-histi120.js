@@ -1,5 +1,5 @@
-import { openPanel, closePanel, confirmReset } from './site-dialogs.js?v=motion-1';
-import { resetTransition } from './reset-transition.js?v=1';
+import { openPanel, closePanel, confirmReset } from './site-dialogs.js?v=settings-1';
+import { resetTransition } from './reset-transition.js?v=settings-1';
 import condensedData from './questions-histi120.js?v=standalone-2';
 
 // Independent storage and administration; original catalogue remains the scoring authority.

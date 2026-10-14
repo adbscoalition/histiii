@@ -89,7 +89,7 @@ test('result references are accessible, separated from user markers, and never a
     for (const group of ['g1','g2','g3','g4']) {
       const html = read(`checkin-${variant}-${group}.html`);
       assert.match(html, /histi4-results\.css\?v=editorial-1/);
-      assert.match(html, /app-histi4\.js\?v=editorial-1/);
+      assert.match(html, /app-histi4\.js\?v=settings-1/);
     }
   }
 });

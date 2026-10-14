@@ -1,6 +1,7 @@
 (() => {
   const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
-  if (motionPreference.matches || !('IntersectionObserver' in window)) return;
+  const quiet = () => motionPreference.matches || document.documentElement.dataset.performance === 'on';
+  if (quiet() || !('IntersectionObserver' in window)) return;
 
   const revealTargets = document.querySelectorAll(
     '.home-section-heading, .home-format, .home-steps article, .home-area-list article, ' +
@@ -25,9 +26,11 @@
     observer.observe(target);
   }
 
-  motionPreference.addEventListener('change', event => {
-    if (!event.matches) return;
+  const settle = () => {
+    if (!quiet()) return;
     observer.disconnect();
     for (const target of revealTargets) target.classList.remove('home-reveal-pending');
-  }, { once: true });
+  };
+  motionPreference.addEventListener('change', settle);
+  document.addEventListener('histi:preferences', settle);
 })();

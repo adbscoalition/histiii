@@ -131,7 +131,7 @@ test('the hidden AI note is removed and ordinary visible descriptions explain HI
   for (const page of pages) assert.doesNotMatch(read(page + '.html'), /For AI:|histi-ai-notes|facts for automated readers/i);
   assert.doesNotMatch(read('styles-home.css'), /histi-ai-notes|font-size:6px/);
   assert.deepEqual(entity('webpage').hasPart, [{ '@id': origin + '/#definitions' }]);
-  const hero = home.split('<p class="hero-lede">')[1].split('</p>')[0];
+  const hero = home.match(/<p class="hero-lede"[^>]*>([\s\S]*?)<\/p>/)[1];
   assert.match(hero, /Human Information-Sharing Transparency Index/);
   assert.match(hero, /without entering real private details/);
   const about = home.split('<section id="about"')[1].split('</section>')[0];

@@ -1,7 +1,7 @@
 // One reusable reset screen. Only a confirmed caller may invoke this operation.
 let overlay, detail, pending;
 const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-const reduced = () => motion.matches || document.hidden || document.body.classList.contains('reduce-motion');
+const reduced = () => motion.matches || document.hidden || document.body.classList.contains('reduce-motion') || document.documentElement?.dataset?.performance === 'on';
 
 function createScreen() {
   overlay = document.createElement('section');
@@ -34,16 +34,18 @@ export function resetTransition(render, focusTarget) {
       document.removeEventListener('visibilitychange', onHidden);
       window.removeEventListener('pagehide', onPageHide);
       motion.removeEventListener('change', onMotion);
+      document.removeEventListener('histi:preferences', onMotion);
       pending = false; focus();
       if (error) reject(error); else resolve(true);
     }
     function schedule(fn, ms) { const timer = setTimeout(() => { timers.delete(timer); try { fn(); } catch (error) { finish(error); } }, ms); timers.add(timer); }
     function onHidden() { if (document.hidden) finish(); }
-    function onMotion() { if (motion.matches) finish(); }
+    function onMotion() { if (reduced()) finish(); }
     function onPageHide() { finish(); }
     document.addEventListener('visibilitychange', onHidden);
     window.addEventListener('pagehide', onPageHide);
     motion.addEventListener('change', onMotion);
+    document.addEventListener('histi:preferences', onMotion);
     regions.forEach(([node]) => { node.inert = true; });
     detail.textContent = 'Making space for a fresh start.';
     overlay.hidden = false; void overlay.offsetWidth; overlay.classList.add('is-visible');

@@ -1,6 +1,6 @@
 // One lifecycle record per popup. No observers, frame loops, or growing listeners.
 const popups = new WeakMap();
-const reducedMotion = () => document.hidden || document.body.classList.contains('reduce-motion') || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const reducedMotion = () => document.hidden || document.body.classList.contains('reduce-motion') || document.documentElement?.dataset?.performance === 'on' || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const CLOSE_FALLBACK_MS = 240;
 
 function stopEntry(record) {

@@ -1,6 +1,7 @@
 (() => {
   const root = document.documentElement;
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const quiet = () => motion.matches || root.dataset?.performance === 'on';
   const isHome = root.hasAttribute('data-home-entry');
   const browserNavigation = window.navigation;
   const loadType = window.performance?.getEntriesByType?.('navigation')?.[0]?.type;
@@ -68,7 +69,7 @@
 
   function startRefresh(incoming) {
     reveal(); clearEntry(); clearNativeHistory();
-    if (motion.matches || document.hidden) return;
+    if (quiet() || document.hidden) return;
     const cycle = { phase: incoming ? 'primed' : 'outgoing', held: false, pageReady: false, fontsReady: false };
     refreshCycle = cycle;
     root.classList.add('histi-url-motion', 'histi-refresh', 'histi-url-covered', incoming ? 'histi-refresh-prime' : 'histi-refresh-outgoing');
@@ -224,7 +225,7 @@
   }
 
   function enter(restored = false) {
-    if (restored !== true && loadType === 'reload' && !motion.matches && !nativeHistory) {
+    if (restored !== true && loadType === 'reload' && !quiet() && !nativeHistory) {
       clearEntry();
       prepareRefreshReveal();
       return;
@@ -235,7 +236,7 @@
       if (isHome) root.classList.add('histi-home-return');
       return;
     }
-    if (motion.matches) return;
+    if (quiet()) return;
     if (nativeHistory) return;
     if (!isHome || homeReturn) root.classList.add('histi-url-covered');
     const fonts = !isHome ? document.fonts?.ready : null;
@@ -266,7 +267,7 @@
   }
 
   if (window.location.pathname.startsWith('/checkin-120')) root.classList.add('histi-url-blue');
-  if (!motion.matches) {
+  if (!quiet()) {
     // Prime the invisible veil on the homepage too; creating it on click jumps straight to opaque.
     root.classList.add('histi-url-motion');
     if (loadType === 'reload') startRefresh(true);
@@ -286,7 +287,7 @@
     if (url.origin !== window.location.origin || !/^https?:$/.test(url.protocol)) return;
     if (url.pathname === window.location.pathname && url.search === window.location.search) return;
     if (/\.[^/]+$/.test(url.pathname) && !url.pathname.endsWith('.html')) return;
-    if (motion.matches || document.hidden) { markHomeHandoff(url); return; }
+    if (quiet() || document.hidden) { markHomeHandoff(url); return; }
     event.preventDefault();
     if (destination) return;
     clearRefresh();
@@ -305,14 +306,14 @@
   window.addEventListener('pageswap', event => {
     const direction = traversalDirection(event.activation);
     if (!event.viewTransition) return;
-    if (!direction || motion.matches || document.hidden) { event.viewTransition.skipTransition(); return; }
+    if (!direction || quiet() || document.hidden) { event.viewTransition.skipTransition(); return; }
     clearNativeHistory(); reveal(true); clearEntry();
     root.classList.add(`histi-native-${direction}`);
   });
   window.addEventListener('pagereveal', event => {
     const direction = traversalDirection(browserNavigation?.activation) || historyDirection;
     if (!event.viewTransition) return;
-    if (!direction || motion.matches || document.hidden) { event.viewTransition.skipTransition(); return; }
+    if (!direction || quiet() || document.hidden) { event.viewTransition.skipTransition(); return; }
     clearNativeHistory(); reveal(); clearEntry();
     const transition = event.viewTransition;
     nativeHistory = transition;
@@ -352,13 +353,15 @@
   });
   browserNavigation?.addEventListener('navigate', event => {
     // Native reload cannot be intercepted or delayed. Start its fade while the browser loads.
-    if (event.navigationType !== 'reload' || motion.matches || document.hidden) return;
+    if (event.navigationType !== 'reload' || quiet() || document.hidden) return;
     startRefresh(false);
   });
-  motion.addEventListener('change', () => {
-    if (!motion.matches) return;
+  const stopForPreferences = () => {
+    if (!quiet()) return;
     if (destination) navigate();
     reveal(true);
     clearEntry(); clearNativeHistory();
-  });
+  };
+  motion.addEventListener('change', stopForPreferences);
+  document.addEventListener('histi:preferences', stopForPreferences);
 })();

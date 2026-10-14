@@ -8,9 +8,9 @@ const eventTarget = () => {
   const events = new Map();
   return { events, addEventListener: (name, fn) => events.set(name, fn), removeEventListener: (name, fn) => { if (events.get(name) === fn) events.delete(name); } };
 };
-const fixture = ({ home = true, returning = false, hash = '', reduced = false, hidden = false, missing = false } = {}) => {
+const fixture = ({ home = true, returning = false, hash = '', reduced = false, performance = false, hidden = false, missing = false } = {}) => {
   const classes = new Set(), timers = new Map(); let id = 0, focusCalls = 0;
-  const root = { hasAttribute: name => home && name === 'data-home-entry', classList: { contains: name => classes.has(name) || returning && name === 'histi-home-return', add: (...names) => names.forEach(n => classes.add(n)), remove: (...names) => names.forEach(n => classes.delete(n)) } };
+  const root = { dataset:{performance:performance?'on':'off'}, hasAttribute: name => home && name === 'data-home-entry', classList: { contains: name => classes.has(name) || returning && name === 'histi-home-return', add: (...names) => names.forEach(n => classes.add(n)), remove: (...names) => names.forEach(n => classes.delete(n)) } };
   const skip = eventTarget();
   const cover = { hidden: true, querySelector: () => skip, contains: node => node === skip };
   const regions = [{ inert: false }, { inert: false }, { inert: true }];
@@ -53,6 +53,12 @@ test('intro is an optional finite vignette with the real logo and three sharing 
   assert.doesNotMatch(css, /infinite|will-change|filter:|backdrop-filter/);
   assert.doesNotMatch(js, /requestAnimationFrame|setInterval|MutationObserver|createElement|innerHTML|sessionStorage|localStorage|fetch\(/);
   for (const page of ['checkin-page.html', 'checkin-4.html', 'checkin-4-g1.html', 'checkin-4-g2.html', 'checkin-4-g3.html', 'checkin-4-g4.html']) assert.doesNotMatch(read(page), /home-intro/);
+});
+
+test('performance mode skips the entry story or stops it immediately without inert regions',()=>{
+  const saved=fixture({performance:true});saved.ready();saved.assertFinished();
+  const changed=fixture();changed.ready();changed.document.documentElement.dataset.performance='on';
+  changed.document.events.get('histi:preferences')();changed.assertFinished();
 });
 
 test('0.5s fade plus 2s story precedes the split reveal and synchronized page entrance', () => {

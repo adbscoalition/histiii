@@ -24,7 +24,8 @@
   <link rel="manifest" href="/site.webmanifest">
   <link rel="stylesheet" href="/styles-public-sans-v2.css">
   <link rel="stylesheet" href="/page-transitions.css?v=refresh-3">
-  <script src="/page-transitions.js?v=refresh-3"></script>
+  <script src="/site-settings.js?v=1"></script>
+  <script src="/page-transitions.js?v=settings-1"></script>
   <link rel="stylesheet" href="/site-header.css?v=palette-2">
   <link rel="stylesheet" href="/site-color-motion.css?v=pages-1">
   <script src="/site-color-motion.js?v=bright-1" defer></script>
@@ -34,6 +35,7 @@
   <link rel="stylesheet" href="/visitor-guide.css?v=welcome-1">
   <link rel="stylesheet" href="/site-licensing.css?v=1">
   <link rel="stylesheet" href="/visitor-scroll.css?v=3">
+  <link rel="stylesheet" href="/site-settings.css?v=1">
   <link rel="stylesheet" href="/site-typography.css?v=1">
 </head>
 <body class="policy-page" data-page="privacy">
@@ -64,7 +66,7 @@
       </header>
 
       <nav class="visitor-policy-nav" aria-label="Privacy policy quick links"><strong>Find what matters to you</strong><div><a href="#your-answers">Where answers stay</a><a href="#hosting">What the host sees</a><a href="#delete-data">Reset your data</a><a href="#shared-devices">Using a shared device</a><a href="#privacy-checks">Check the privacy proof</a></div></nav>
-      <div class="suite-privacy-reminder" role="note"><span>Private by design</span><p>Reflect on sharing without sharing the information itself. Your choices and progress stay in this browser. You can skip, stop, or reset.</p><a href="/checkin-page">Explore the check-ins →</a></div>
+      <div class="suite-privacy-reminder" role="note"><span>Private by design</span><p data-reading-simple="Your answers stay in this browser. Choose levels, not real private details. You can skip, stop, or reset.">Reflect on sharing without sharing the information itself. Your choices and progress stay in this browser. You can skip, stop, or reset.</p><a href="/checkin-page">Explore the check-ins →</a></div>
       <section class="policy-section">
         <h2>1. Scope</h2>
         <p>This policy explains the privacy practices of the HISTI website and check-in at <code>www.histi.org</code>. It distinguishes information kept in your browser from ordinary technical information processed when a website is delivered over the internet.</p>
@@ -86,6 +88,7 @@
         <h2>3. No cookies</h2>
         <p><strong>HISTI does not set or use cookies for the current website or check-in.</strong> HISTI does not use advertising cookies, analytics cookies, or tracking cookies.</p>
         <p>HISTI does use <code>localStorage</code> for local progress and result history. localStorage is browser storage, but it is not a cookie. You can inspect or clear it using HISTI’s controls or your browser’s site-data tools.</p>
+        <p data-reading-simple="Settings are saved only in this browser. They contain your reading level, contrast, text size, and performance choice—not your answers. Reset settings does not clear your test progress.">The site-wide Settings panel stores reading level, contrast, text size, and performance mode in a separate browser-only record, <code>histi.preferences.v1</code>. These preferences contain no check-in answers and are not submitted to a server. “Reset settings” clears only that preference record; it does not clear check-in progress or results. Other open tabs on the same site can apply updated preferences through the browser’s local storage event.</p>
         <p>A single-use navigation flag in this tab’s <code>sessionStorage</code> prevents returning home from replaying the introduction. It contains no answers or personal details and is cleared when home opens.</p>
         <p>A numeric navigation position in this tab’s session storage and browser history helps distinguish Back from Forward for page animations. It does not store visited URLs, answers, or personal details, and does not add history entries.</p>
       </section>
@@ -199,7 +202,7 @@
       </footer>
     </main>
   </div>
-  <script type="module" src="/histi4-privacy.js?v=motion-1"></script>
-  <script type="module" src="/visitor-scroll.js?v=3"></script>
+  <script type="module" src="/histi4-privacy.js?v=settings-1"></script>
+  <script type="module" src="/visitor-scroll.js?v=settings-1"></script>
 </body>
 </html>

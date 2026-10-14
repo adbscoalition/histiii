@@ -24,7 +24,8 @@
 <link rel="manifest" href="/site.webmanifest">
   <link rel="stylesheet" href="/styles-public-sans-v2.css?v=answer-layout-audit-6">
   <link rel="stylesheet" href="/page-transitions.css?v=refresh-3">
-  <script src="/page-transitions.js?v=refresh-3"></script>
+  <script src="/site-settings.js?v=1"></script>
+  <script src="/page-transitions.js?v=settings-1"></script>
   <link rel="stylesheet" href="/site-header.css?v=palette-2">
   <link rel="stylesheet" href="/site-color-motion.css?v=pages-1">
   <script src="/site-color-motion.js?v=bright-1" defer></script>
@@ -32,9 +33,10 @@
   <link rel="stylesheet" href="/site-motion.css?v=spring-1">
   <link rel="stylesheet" href="/page-identities.css?v=pages-1">
   <link rel="stylesheet" href="/visitor-scroll.css?v=3">
+  <link rel="stylesheet" href="/site-settings.css?v=1">
   <link rel="stylesheet" href="/site-typography.css?v=1">
 </head>
-<body data-page="checkin">
+<body class="histi-has-fixed-footer" data-page="checkin">
   <div class="suite-color-field" aria-hidden="true"><span></span><span></span><span></span></div>
   <aside class="histi-safety-notice" role="note" aria-label="Keep real information private">
     <div class="histi-safety-inner"><span class="histi-safety-icon" aria-hidden="true">!</span><div class="histi-safety-copy"><strong>Never enter passwords, codes, or personal information.</strong><p>Choose levels only. No real names, IDs, or sensitive details.</p></div><a href="/privacy">Privacy</a></div>
@@ -129,7 +131,7 @@
             <span>Share your result only if you choose.</span>
           </div>
         </div>
-        <div class="suite-privacy-reminder" role="note"><span>Private by design</span><p>Reflect on sharing without sharing the information itself. Your choices and progress stay in this browser. You can skip, stop, or reset.</p><a href="/privacy">How your privacy is protected →</a></div>
+        <div class="suite-privacy-reminder" role="note"><span>Private by design</span><p data-reading-simple="Your answers stay in this browser. Choose levels, not real private details. You can skip, stop, or reset.">Reflect on sharing without sharing the information itself. Your choices and progress stay in this browser. You can skip, stop, or reset.</p><a href="/privacy">How your privacy is protected →</a></div>
         <p class="start-disclaimer"><strong>HISTI is a reflection tool.</strong> It is not a diagnosis, legal opinion, safety certificate, or measure of your character.</p>
         <p class="age-note"><strong>Main check-in: ages 13+.</strong> This version is not intended for users under age 13. HISTI does not ask for your birth date. A children’s version is coming soon.</p>
 
@@ -484,8 +486,8 @@
     </footer>
   </div>
 
-  <script type="module" src="/app-public-sans.js?v=motion-2"></script>
+  <script type="module" src="/app-public-sans.js?v=settings-1"></script>
   <script type="module" src="/histi-spectrum-scoring.js?v=1"></script>
-  <script type="module" src="/visitor-scroll.js?v=3"></script>
+  <script type="module" src="/visitor-scroll.js?v=settings-1"></script>
 </body>
 </html>

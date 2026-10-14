@@ -20,7 +20,7 @@ export function initVisitorCalm(root, { motion = typeof window === 'undefined' ?
   const toggles = [...root.querySelectorAll('[data-visitor-motion]')];
   let paused = false;
   let observer = null;
-  const isQuiet = () => paused || motion?.matches;
+  const isQuiet = () => paused || motion?.matches || root.documentElement?.dataset?.performance === 'on';
   const cancelMotion = () => { for (const animation of [...active]) animation.cancel(); active.clear(); };
   const showAll = () => {
     for (const target of pending) target.classList.remove('visitor-awaiting');
@@ -31,8 +31,9 @@ export function initVisitorCalm(root, { motion = typeof window === 'undefined' ?
     root.body.classList.toggle('visitor-motion-paused', Boolean(isQuiet()));
     for (const button of toggles) {
       button.setAttribute('aria-pressed', String(paused));
-      button.disabled = Boolean(motion?.matches);
-      button.querySelector('[data-motion-label]').textContent = motion?.matches ? 'Reduced motion' : paused ? 'Motion paused' : 'Pause motion';
+      const performance = root.documentElement?.dataset?.performance === 'on';
+      button.disabled = Boolean(motion?.matches || performance);
+      button.querySelector('[data-motion-label]').textContent = performance ? 'Performance mode' : motion?.matches ? 'Reduced motion' : paused ? 'Motion paused' : 'Pause motion';
     }
     if (isQuiet()) { cancelMotion(); showAll(); }
   };
@@ -97,6 +98,7 @@ export function initVisitorCalm(root, { motion = typeof window === 'undefined' ?
   root.addEventListener('visibilitychange', () => { if (root.hidden) cancelMotion(); });
   root.defaultView?.addEventListener('pagehide', () => { cancelMotion(); showAll(); });
   motion?.addEventListener('change', syncMotion);
+  root.addEventListener('histi:preferences', syncMotion);
   syncMotion();
 }
 
