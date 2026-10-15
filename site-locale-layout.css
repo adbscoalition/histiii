@@ -1,0 +1,50 @@
+/* Native-script layout; no external fonts, translation requests or frame loops. */
+html:is(:lang(ar),:lang(ur)) {
+ --font-ui:"Instrument Sans","Geeza Pro","Nirmala UI",system-ui,sans-serif;
+ --font-heading:var(--font-ui); --font-display:var(--font-ui);
+}
+html:lang(hi) {
+ --font-ui:"Instrument Sans","Kohinoor Devanagari","Nirmala UI",system-ui,sans-serif;
+ --font-heading:var(--font-ui); --font-display:var(--font-ui);
+}
+html:is(:lang(ar),:lang(ur),:lang(hi)) { font-synthesis:none; }
+html:is(:lang(ar),:lang(ur),:lang(hi)) :is(p,li,button,.h4-question h2,.histi-nav a,.histi-language-name) { line-height:1.85; }
+html:is(:lang(ar),:lang(ur),:lang(hi)) .histi-language-word { line-height:22px; }
+html:is(:lang(ar),:lang(ur),:lang(hi)) .h4-question h2 { font-size:clamp(22px,2.3vw,27px); line-height:1.9; }
+html:is(:lang(ar),:lang(ur),:lang(hi),:lang(tl),:lang(fr)) .home-hero #hero-title { font-size:clamp(36px,9cqw,70px); white-space:normal; }
+html:is(:lang(ar),:lang(ur),:lang(hi),:lang(tl),:lang(fr)) .hero-entry-line { max-width:100%; white-space:normal; overflow-wrap:anywhere; }
+html:is(:lang(ar),:lang(ur),:lang(hi),:lang(tl),:lang(fr)) :is(.h4-status,.h4-yn,.result-actions,.histi-nav) { flex-wrap:wrap; }
+html:is(:lang(ar),:lang(ur),:lang(hi),:lang(tl),:lang(fr)) :is(.h4-status button,.histi-settings-options button) { white-space:normal; }
+html:is(:lang(ar),:lang(ur),:lang(hi),:lang(tl),:lang(fr)) :is(.home-process-grid>*,.selector-card-grid>*,.home-area-row>*) { min-width:0; }
+html[dir="rtl"] :is(main,.h4-question,.result-topic,.histi-settings-dialog,.histi-language-dialog) { text-align:start; }
+html[dir="rtl"] :is(.start-card,.screen-heading,.h4-choice,.app-card,.featured-copy,.home-faq-question) { text-align:start!important; }
+/* Keep numerical scales left-to-right so drag coordinates, arrow keys and score
+   positions retain exactly the same meaning in every language. */
+html[dir="rtl"] :is(.h4-segment-control,.h4-endpoints,.spectrum-track,.spectrum-labels,.spectrum-values,.category-track,.category-labels,.category-score,.result-signal,.result-score-value,.score,.example-spectrum,.demo-range,.example-scale,.home-result-scale) { direction:ltr; }
+html[dir="rtl"] .h4-endpoints span { direction:rtl; unicode-bidi:plaintext; }
+html[dir="rtl"] :is(.h4-level-value,.result-comparison) { text-align:start; }
+html[dir="rtl"] .h4-question-scope { border-inline-start:2px solid var(--palette-line); padding-inline-start:12px; }
+html[dir="rtl"] .histi-nav { margin-inline:auto; }
+html[dir="rtl"] :is(.result-topic-heading,.result-comparison-score,.result-comparison-reference,.format-facts strong) { unicode-bidi:plaintext; }
+html[dir="rtl"] .histi-language-trigger { direction:rtl; }
+html:lang(ar)::after,html:lang(ar).histi-url-motion::before,html:lang(ar) .histi-history-veil::before { content:'مساحة صغيرة لك.'; }
+html:lang(hi)::after,html:lang(hi).histi-url-motion::before,html:lang(hi) .histi-history-veil::before { content:'अपने लिए थोड़ा समय।'; }
+html:lang(ur)::after,html:lang(ur).histi-url-motion::before,html:lang(ur) .histi-history-veil::before { content:'اپنے لیے تھوڑی سی جگہ۔'; }
+html:lang(tl)::after,html:lang(tl).histi-url-motion::before,html:lang(tl) .histi-history-veil::before { content:'Kaunting puwang para sa sarili.'; }
+html:lang(fr)::after,html:lang(fr).histi-url-motion::before,html:lang(fr) .histi-history-veil::before { content:'Un peu d’espace pour vous.'; }
+@media(max-width:680px) {
+ html:is(:lang(ar),:lang(ur),:lang(hi),:lang(tl),:lang(fr)) .histi-start-label { font-size:11px; }
+ html:is(:lang(ar),:lang(ur),:lang(hi),:lang(tl),:lang(fr)) .histi-start-label::after { content:none; }
+ html:is(:lang(ar),:lang(ur),:lang(hi),:lang(tl),:lang(fr)) .histi-header-actions { gap:6px; }
+}
+@media(max-width:380px) {
+ html:is(:lang(ar),:lang(ur),:lang(hi),:lang(tl),:lang(fr)) .histi-header #privacy-live-label { font-size:0!important; }
+ html:is(:lang(ar),:lang(ur),:lang(hi),:lang(tl),:lang(fr)) .histi-start-label { font-size:0!important; }
+ html:is(:lang(ar),:lang(ur),:lang(hi),:lang(tl),:lang(fr)) .histi-header #privacy-live-label::after { font-size:10px; }
+ html:is(:lang(ar),:lang(ur),:lang(hi),:lang(tl),:lang(fr)) .histi-start-label::after { font-size:11px; }
+ html:lang(ar) .histi-header #privacy-live-label::after { content:'الخصوصية'; } html:lang(ar) .histi-start-label::after { content:'ابدأ'; }
+ html:lang(hi) .histi-header #privacy-live-label::after { content:'निजता'; } html:lang(hi) .histi-start-label::after { content:'शुरू'; }
+ html:lang(ur) .histi-header #privacy-live-label::after { content:'رازداری'; } html:lang(ur) .histi-start-label::after { content:'شروع'; }
+ html:lang(tl) .histi-header #privacy-live-label::after { content:'Pribado'; } html:lang(tl) .histi-start-label::after { content:'Simulan'; }
+ html:lang(fr) .histi-header #privacy-live-label::after { content:'Privé'; } html:lang(fr) .histi-start-label::after { content:'Choisir'; }
+}

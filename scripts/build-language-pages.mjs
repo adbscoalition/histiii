@@ -2,6 +2,7 @@
 import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
+import {LANGUAGES} from '../site-language-catalog.js';
 const require=createRequire(import.meta.url),root=new URL('../',import.meta.url);
 export const TRANSLATED_PAGES=['index','privacy','terms','checkin-page',...['4','120','60'].flatMap(n=>['checkin-'+n,...[1,2,3,4].map(g=>'checkin-'+n+'-g'+g)])];
 export const pathFor=(locale,page)=>'/'+(locale?locale+'/':'')+(page==='index'?'':page);
@@ -12,8 +13,18 @@ const config={
 const decode=s=>s.replaceAll('&amp;','&').replaceAll('&quot;','"').replaceAll('&#39;',"'");
 const escape=s=>s.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
 export function buildLanguagePage(locale,page){
- if(!config[locale]||!TRANSLATED_PAGES.includes(page))throw new Error('Unknown translated page');
- const c=config[locale],{t}=require('../'+locale+'/ui.js'),copy=require('../'+locale+'/visitor-text.js');
+ const language=LANGUAGES.find(l=>l.prefix===locale&&l.prefix);
+ if(!language||!TRANSLATED_PAGES.includes(page))throw new Error('Unknown translated page');
+ const {t}=require('../'+locale+'/ui.js'),copy=require('../'+locale+'/visitor-text.js');
+ const c=config[locale]||{
+  lang:language.code,name:language.name,
+  people:['Stranger / regular person','Acquaintance','Friend','Spouse / partner'].map(t),
+  full:t('HISTI Full'),home:t('Your sharing. Your people. Your boundaries.'),
+  selector:t('Choose your check-in.'),recipient:t('Who are you thinking of?'),privacy:t('Privacy policy'),terms:t('Terms'),
+  description:t('HISTI is a private check-in about what you feel comfortable sharing—and with whom. Choose levels, without entering real private details. Answers stay in this browser.'),
+  notice:t('This translation has not been independently validated. Questions correspond to the English version and scoring rules are unchanged.'),
+  misc:t('School editions and other tests are currently available in English only.'),miscLink:t('View other tests (English) ↗')
+ };
  const tr=value=>{const s=decode(value.trim()),mapped=copy[s]??t(s);return mapped===s?value:value.replace(value.trim(),escape(mapped));};
  let html=readFileSync(new URL(page+'.html',root),'utf8').replace(/\s*<link rel="alternate" hreflang="[^"]+" href="[^"]+">/g,'').replace(/<a[^>]*data-language-switch[^>]*>[\s\S]*?<\/a>/g,'');
  const canonical='https://www.histi.org'+pathFor(locale,page),english='https://www.histi.org'+pathFor('',page);
@@ -22,23 +33,23 @@ export function buildLanguagePage(locale,page){
  const data={'@context':'https://schema.org','@type':'WebPage','@id':canonical+'#webpage',url:canonical,name:title,description:c.description,inLanguage:c.lang,isPartOf:{'@id':'https://www.histi.org/#website',name:'HISTI',alternateName:'Human Information-Sharing Transparency Index'},translationOfWork:{'@id':english+'#webpage'}};
  const metadata=`<script type="application/ld+json" id="histi-page-metadata">\n${JSON.stringify(data,null,2)}\n  </script>`;
  if(/<script type="application\/ld\+json"/.test(html))html=html.replace(/<script type="application\/ld\+json"[^>]*>[\s\S]*?<\/script>/,metadata);else html=html.replace('</head>',metadata+'\n</head>');
- html=html.replace('<html lang="en"','<html lang="'+c.lang+'"').replace(/<title>[^<]+<\/title>/,'<title>'+title+'</title>');
+ html=html.replace('<html lang="en"','<html lang="'+c.lang+'"'+(language.dir==='rtl'?' dir="rtl"':'')).replace(/<title>[^<]+<\/title>/,'<title>'+title+'</title>');
  html=html.replace(/<meta (name|property)="(description|og:description|twitter:description)" content="[^"]*">/g,(_,kind,key)=>`<meta ${kind}="${key}" content="${c.description}">`).replace(/<meta (name|property)="(title|og:title|twitter:title)" content="[^"]*">/g,(_,kind,key)=>`<meta ${kind}="${key}" content="${title}">`);
  html=html.replace(/<link rel="canonical" href="[^"]+">/,'<link rel="canonical" href="'+canonical+'">').replace(/<meta property="og:url" content="[^"]+">/,'<meta property="og:url" content="'+canonical+'">');
- html=html.replace(/<script src="\/site-settings.js\?v=[^"]+"><\/script>/,`${['index','privacy','terms'].includes(page)?`<script src="/${locale}/visitor-text.js?v=1"></script>\n  `:''}<script src="/${locale}/ui.js?v=4"></script>\n  <script src="/site-settings.js?v=utility-1"></script>`);
- html=html.replace('</head>',['en','zh-CN','es'].map((lang,i)=>`  <link rel="alternate" hreflang="${lang}" href="https://www.histi.org${pathFor(['','zh','es'][i],page)}">`).join('\n')+(locale==='zh'?'\n  <link rel="stylesheet" href="/zh/typography.css?v=4">':'')+'\n</head>');
+ html=html.replace(/<script src="\/site-settings.js\?v=[^"]+"><\/script>/,`${['index','privacy','terms'].includes(page)?`<script src="/${locale}/visitor-text.js?v=1"></script>\n  `:''}<script src="/${locale}/ui.js?v=6"></script>\n  <script src="/site-settings.js?v=languages-2"></script>`);
+ html=html.replace('</head>',LANGUAGES.map(l=>`  <link rel="alternate" hreflang="${l.code}" href="https://www.histi.org${pathFor(l.prefix,page)}">`).join('\n')+(locale==='zh'?'\n  <link rel="stylesheet" href="/zh/typography.css?v=4">':'')+(!['zh','es'].includes(locale)?'\n  <link rel="stylesheet" href="/site-locale-layout.css?v=1">':'')+'\n</head>');
  const parts=html.split('</head>');
  parts[1]=parts[1].replace(/>([^<>]+)</g,(_,text)=>'>'+tr(text)+'<').replace(/(aria-label|title|data-reading-simple|data-reading-standard)="([^"]*)"/g,(_,key,text)=>`${key}="${tr(text)}"`)
   .replace(/href="(\/(?:checkin-(?:page|4|120|60)(?:-g[1-4])?|privacy|terms)?)(#[^"]*)?"/g,(_,path,hash='')=>`href="/${locale}${path}${hash}"`)
   .replace(/href="\/(#[^"]*)"/g,`href="/${locale}/$1"`);
  html=parts.join('</head>');
- if(page==='checkin-page')html=html.replace(/      <section class="selector-library selector-misc"[\s\S]*?      <\/section>/,`      <section class="selector-library selector-misc" aria-labelledby="misc-checkins-title"><div class="selector-library-heading"><div><h2 id="misc-checkins-title">${locale==='zh'?'其他测评':'Otros tests'}</h2></div></div><p>${c.misc}</p><a class="home-text-link" href="/checkin-page#misc-checkins-title" lang="en">${c.miscLink}</a></section>`);
+ if(page==='checkin-page')html=html.replace(/      <section class="selector-library selector-misc"[\s\S]*?      <\/section>/,`      <section class="selector-library selector-misc" aria-labelledby="misc-checkins-title"><div class="selector-library-heading"><div><h2 id="misc-checkins-title">${locale==='zh'?'其他测评':locale==='es'?'Otros tests':t('Miscellaneous Tests')}</h2></div></div><p>${c.misc}</p><a class="home-text-link" href="/checkin-page#misc-checkins-title" lang="en">${c.miscLink}</a></section>`);
  if(!['index','privacy','terms'].includes(page)){
   if(page==='checkin-page')html=html.replace('<p class="visitor-help">',`<p class="translation-note">${c.notice}</p><p class="visitor-help">`);
   else html=html.replace('<section class="start-card"',`<p class="translation-note">${c.notice}</p>\n      <section class="start-card"`);
   if(group)html=html.replace('<div class="result-disclaimer">',`<p class="translation-note">${c.notice}</p><div class="result-disclaimer">`);
  }
- if(locale==='zh')html=html.replace('<h1 id="intro-title">分享对象： <span id="intro-recipient"></span>.</h1>','<h1 id="intro-title">分享对象：<span id="intro-recipient"></span></h1>');
+ if(group)html=html.replace(/<h1 id="intro-title">[\s\S]*?<\/h1>/,`<h1 id="intro-title">${t('Sharing with a')} <span id="intro-recipient">${c.people[Number(group)-1]}</span></h1>`);
  return html;
 }
 if(process.argv[1]===fileURLToPath(import.meta.url))process.stdout.write(JSON.stringify(buildLanguagePage(process.argv[2],process.argv[3])));

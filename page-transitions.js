@@ -142,7 +142,7 @@
   }
 
   function markHomeHandoff(url) {
-    const path=url.pathname.replace(/^\/(?:zh|es)(?=\/|$)/,'')||'/';
+    const path=url.pathname.replace(/^\/(?:zh|es|ar|hi|ur|tl|fr)(?=\/|$)/,'')||'/';
     if (!['/', '/index', '/index.html'].includes(path)) return;
     try {
       outgoingHomeFlag = String(Date.now() + HANDOFF_VALID_MS);

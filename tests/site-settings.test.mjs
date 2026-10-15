@@ -231,7 +231,7 @@ test('all 32 pages load preferences before animation scripts and keep privacy an
   assert.equal(pages.length,32);
   for(const file of pages) {
     const html=read(file);
-    assert.equal((html.match(/site-settings\.js\?v=utility-1/g)||[]).length,1,file);
+    assert.equal((html.match(/site-settings\.js\?v=languages-2/g)||[]).length,1,file);
     assert.equal((html.match(/site-settings\.css\?v=locale-2/g)||[]).length,1,file);
     assert.ok(html.indexOf('/site-settings.js')<html.indexOf('/page-transitions.js'),file);
     assert.ok(html.indexOf('/site-settings.css')<html.indexOf('/site-typography.css'),file);

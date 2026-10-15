@@ -1,14 +1,11 @@
 import {openDialog,closeDialog,closeDialogImmediately} from './site-dialogs.js?v=utility-1';
 
-export const LANGUAGES=Object.freeze([
- {code:'en',prefix:'',name:'English',word:'Language'},
- {code:'zh-CN',prefix:'zh',name:'简体中文',word:'语言'},
- {code:'es',prefix:'es',name:'Español',word:'Idioma'}
-]);
+import {LANGUAGES} from './site-language-catalog.js?v=1';
+export {LANGUAGES};
 const PAGES=new Set(['','privacy','terms','checkin-page',...['4','120','60'].flatMap(n=>['checkin-'+n,...[1,2,3,4].map(g=>'checkin-'+n+'-g'+g)])]);
 export function languageTarget(pathname,code,search='',hash=''){
  const language=LANGUAGES.find(l=>l.code===code)||LANGUAGES[0];
- const page=pathname.replace(/^\/(?:zh|es)(?=\/|$)/,'').replace(/^\/+|\/+$/g,'').replace(/\.html$/,'').replace(/^index$/,'');
+ const page=pathname.replace(/^\/(?:zh|es|ar|hi|ur|tl|fr)(?=\/|$)/,'').replace(/^\/+|\/+$/g,'').replace(/\.html$/,'').replace(/^index$/,'');
  const supported=PAGES.has(page),fallback=language.prefix&&!supported;
  const destination=fallback?'checkin-page':page;
  const path=(language.prefix?'/'+language.prefix:'')+'/'+destination;
@@ -28,7 +25,7 @@ if(typeof document!=='undefined'){
   for(const [tag,attributes] of [['circle',{cx:12,cy:12,r:9}],['ellipse',{cx:12,cy:12,rx:4,ry:9}],['path',{d:'M3 12h18'}]]){const n=document.createElementNS(icon.namespaceURI,tag);for(const [k,v]of Object.entries(attributes))n.setAttribute(k,v);icon.append(n);}
   const cycle=el('span','histi-language-cycle');cycle.setAttribute('aria-hidden','true');
   const words=el('span','histi-language-words');
-  [...LANGUAGES,LANGUAGES[0]].forEach((language,index)=>{const word=el('span','histi-language-word');word.textContent=language.word;word.lang=language.code;if(index<LANGUAGES.length&&language.code===current.code)word.dataset.current='';words.append(word);});
+  [...LANGUAGES,LANGUAGES[0]].forEach((language,index)=>{const word=el('span','histi-language-word');word.textContent=language.word;word.lang=language.code;word.dir=language.dir;if(index<LANGUAGES.length&&language.code===current.code)word.dataset.current='';words.append(word);});
   cycle.append(words);
   trigger.append(icon,cycle);
   const dialog=el('dialog','histi-language-dialog');dialog.id='histi-language-dialog';dialog.dataset.popupMotion='utility';dialog.setAttribute('aria-labelledby','histi-language-title');
@@ -51,8 +48,8 @@ if(typeof document!=='undefined'){
   }
   for(const language of LANGUAGES){
    const row=el('label','histi-language-option'),input=el('input');input.type='radio';input.name='histi-language';input.value=language.code;input.checked=language.code===current.code;
-   const name=el('span','histi-language-name');name.textContent=language.name;name.lang=language.code;name.dataset.noTranslate='';
-   const detail=el('small','',language.code===current.code?'Current language':language.code==='zh-CN'?'Simplified Chinese':language.code==='es'?'Spanish':'English');
+   const name=el('bdi','histi-language-name');name.textContent=language.name;name.lang=language.code;name.dir=language.dir;name.dataset.noTranslate='';
+   const detail=el('small','',language.code===current.code?'Current language':language.label);
    const check=el('span','histi-language-check','✓');check.setAttribute('aria-hidden','true');
    row.append(input,name,detail,check);field.append(row);input.addEventListener('change',()=>{selected=language.code;update();});
   }
@@ -69,7 +66,10 @@ if(typeof document!=='undefined'){
    window.HISTI_SETTINGS?.closeImmediately?.();
    if(document.querySelector('dialog[open]'))return;
    selected=current.code;update();openDialog(dialog,trigger);dialog.scrollTop=0;
-   trigger.setAttribute('aria-expanded','true');field.querySelector('input:checked')?.focus({preventScroll:true});
+   trigger.setAttribute('aria-expanded','true');
+   const checked=field.querySelector('input:checked');checked?.focus({preventScroll:true});
+   const row=checked?.closest('label');
+   if(row)field.scrollTop=Math.max(0,row.offsetTop-field.offsetTop-(field.clientHeight-row.offsetHeight)/2);
   };
   trigger.addEventListener('click',open);
   dialog.addEventListener('close',()=>{if(dialog.open)return;trigger.setAttribute('aria-expanded','false');if(!document.hidden&&!document.querySelector('dialog[open]'))trigger.focus({preventScroll:true});});

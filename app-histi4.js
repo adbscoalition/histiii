@@ -3,6 +3,7 @@ import { openDialog, closeDialog, confirmReset } from './site-dialogs.js?v=local
 import { makeSlides, remapLegacySlideIndex, calculate as calculateFamilies, rubricPoints, displayScore } from './histi4-core.js?v=school-editions-1';
 import { describeRelationship, describeTopic, describePattern, coverageText, referenceScore, compareReference, createResultReveal } from './histi4-results.js?v=editorial-1';
 import { plainOverall, plainTopic, plainPattern, plainRecipient } from './histi-plain-reading.js?v=1';
+import {languageFor} from './site-language-catalog.js?v=1';
 
 const school = document.body.dataset.test === 'school';
 const schoolEdition = document.body.dataset.schoolEdition;
@@ -10,7 +11,7 @@ if (school && !['middle','high'].includes(schoolEdition)) throw new Error('Choos
 const shortForm = document.body.dataset.test === '60';
 const abridged = shortForm || document.body.dataset.test === '120';
 const language = document.documentElement.lang;
-const locale = language === 'zh-CN' ? 'zh' : language === 'es' ? 'es' : null;
+const locale = languageFor(language).prefix || null;
 const t = value => window.HISTI_LOCALE?.t(value) ?? value;
 const translate = node => window.HISTI_LOCALE?.translate(node);
 const sourceData = await import(school ? `./histi-school-${schoolEdition}-data.js?v=1` : shortForm ? './histi60-family-data.js?v=1' : abridged ? './histi120-family-data.js?v=1' : './histi4-data.js');
@@ -142,7 +143,7 @@ async function transitionPage(kicker, title, detail, render, focusId) {
 function transitionSlide(index) {
   const slide = slides[index];
   const category = CATEGORY_META[slide.category];
-  return transitionPage(`${school ? 'Part' : 'Slide'} ${index + 1} of ${slides.length}`, slide.label || category.label, `${recipient.label} · ${slide.type === 'yn' ? 'Quick yes or no choices' : 'Choose the closest levels'}`, () => {
+  return transitionPage(`${school ? 'Part' : 'Slide'} ${index + 1} of ${slides.length}`, slide.label || category.label, `${recipient.label} · ${t(slide.type === 'yn' ? 'Quick yes or no choices' : 'Choose the closest levels')}`, () => {
     state.index = index;
     renderSlide(false);
   }, 'slide-title');
@@ -661,7 +662,8 @@ function setupDebug() {
 if (debugMode) setupDebug();
 syncDebugWatermark();
 
-$('intro-recipient').textContent = locale==='es' ? sharingWith : recipient.label.toLowerCase();
+if(locale)$('intro-title').textContent=t(`Sharing with ${sharingWith}`);
+else $('intro-recipient').textContent=recipient.label.toLowerCase();
 readingCopy($('intro-description'), recipient.description, plainRecipient(group, school));
 $('slide-count').textContent = `${slides.length} ${school ? 'parts' : 'cards'}.`;
 const groupLinks = document.createDocumentFragment();

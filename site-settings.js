@@ -151,7 +151,9 @@
     const close = el('button','histi-settings-close','Close'); close.type = 'button'; close.setAttribute('aria-label','Close settings');
     close.addEventListener('click',requestClose); head.append(title,close);
     const language = el('button','histi-settings-language'); language.type='button';
-    language.append(el('span','','Language'),el('small','',document.documentElement.lang==='zh-CN'?'简体中文':document.documentElement.lang==='es'?'Español':'English'));
+    const languageNames={'zh-CN':'简体中文',es:'Español',ar:'العربية',hi:'हिन्दी',ur:'اردو',tl:'Tagalog',fr:'Français',en:'English'};
+    const languageName=el('bdi','',languageNames[document.documentElement.lang]||'English');languageName.dir='auto';
+    language.append(el('span','','Language'),languageName);
     language.addEventListener('click',()=>{
       if (!window.HISTI_LANGUAGES || languageRequested || dialog.dataset.motion === 'closing') return;
       languageRequested = true;

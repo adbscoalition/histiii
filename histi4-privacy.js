@@ -27,7 +27,8 @@ if (trigger) {
     </dialog>`;
   const panel = template.content.firstElementChild;
   const language=document.documentElement.lang;
-  if(['zh-CN','es'].includes(language))panel.querySelector('a[href="/privacy"]').href=(language==='es'?'/es':'/zh')+'/privacy';
+  const locale={'zh-CN':'zh',es:'es',ar:'ar',hi:'hi',ur:'ur',tl:'tl',fr:'fr'}[language];
+  if(locale)panel.querySelector('a[href="/privacy"]').href='/'+locale+'/privacy';
   document.body.append(panel);
   const field = name => panel.querySelector(`[data-proof="${name}"]`);
   const snapshot = () => {
