@@ -1,4 +1,4 @@
-import {openDialog,closeDialog} from './site-dialogs.js?v=locale-2';
+import {openDialog,closeDialog,closeDialogImmediately} from './site-dialogs.js?v=utility-1';
 
 export const LANGUAGES=Object.freeze([
  {code:'en',prefix:'',name:'English',word:'Language'},
@@ -27,9 +27,11 @@ if(typeof document!=='undefined'){
   const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');icon.setAttribute('viewBox','0 0 24 24');icon.setAttribute('aria-hidden','true');
   for(const [tag,attributes] of [['circle',{cx:12,cy:12,r:9}],['ellipse',{cx:12,cy:12,rx:4,ry:9}],['path',{d:'M3 12h18'}]]){const n=document.createElementNS(icon.namespaceURI,tag);for(const [k,v]of Object.entries(attributes))n.setAttribute(k,v);icon.append(n);}
   const cycle=el('span','histi-language-cycle');cycle.setAttribute('aria-hidden','true');
-  LANGUAGES.forEach((language,index)=>{const word=el('span');word.textContent=language.word;word.lang=language.code;word.style.setProperty('--language-delay',index*3+'s');if(language.code===current.code)word.dataset.current='';cycle.append(word);});
+  const words=el('span','histi-language-words');
+  [...LANGUAGES,LANGUAGES[0]].forEach((language,index)=>{const word=el('span','histi-language-word');word.textContent=language.word;word.lang=language.code;if(index<LANGUAGES.length&&language.code===current.code)word.dataset.current='';words.append(word);});
+  cycle.append(words);
   trigger.append(icon,cycle);
-  const dialog=el('dialog','histi-language-dialog');dialog.id='histi-language-dialog';dialog.setAttribute('aria-labelledby','histi-language-title');
+  const dialog=el('dialog','histi-language-dialog');dialog.id='histi-language-dialog';dialog.dataset.popupMotion='utility';dialog.setAttribute('aria-labelledby','histi-language-title');
   const head=el('div','histi-language-head'),title=el('h2','','Language');title.id='histi-language-title';
   const close=el('button','histi-language-close','Close');close.type='button';close.setAttribute('aria-label',t('Close language settings'));close.addEventListener('click',()=>{void closeDialog(dialog);});head.append(title,close);
   const intro=el('p','histi-language-intro','Make yourself at home.');
@@ -54,20 +56,25 @@ if(typeof document!=='undefined'){
    const check=el('span','histi-language-check','✓');check.setAttribute('aria-hidden','true');
    row.append(input,name,detail,check);field.append(row);input.addEventListener('change',()=>{selected=language.code;update();});
   }
-  apply.setAttribute('aria-describedby',note.id);apply.addEventListener('click',event=>{if(apply.getAttribute('aria-disabled')==='true')event.preventDefault();});
+  apply.setAttribute('aria-describedby',note.id);apply.addEventListener('click',event=>{
+   if(apply.getAttribute('aria-disabled')==='true'){event.preventDefault();return;}
+   // Dismiss the top-layer panel while the normal page veil fades in behind it.
+   void closeDialog(dialog);
+  });
   dialog.append(head,intro,field,availability,apply,note);document.body.append(dialog);
   let dock=document.querySelector('.histi-utility-dock');
   if(!dock){dock=el('div','histi-utility-dock');document.body.append(dock);}
-  dock.append(trigger);const settings=document.getElementById('histi-settings-btn');if(settings)dock.append(settings);
+  dock.append(trigger);
   const open=()=>{
+   window.HISTI_SETTINGS?.closeImmediately?.();
    if(document.querySelector('dialog[open]'))return;
    selected=current.code;update();openDialog(dialog,trigger);dialog.scrollTop=0;
    trigger.setAttribute('aria-expanded','true');field.querySelector('input:checked')?.focus({preventScroll:true});
   };
   trigger.addEventListener('click',open);
-  dialog.addEventListener('close',()=>{trigger.setAttribute('aria-expanded','false');});
+  dialog.addEventListener('close',()=>{if(dialog.open)return;trigger.setAttribute('aria-expanded','false');if(!document.hidden&&!document.querySelector('dialog[open]'))trigger.focus({preventScroll:true});});
   dialog.addEventListener('click',event=>{if(event.target!==dialog)return;const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)void closeDialog(dialog);});
-  window.HISTI_LANGUAGES={open};update();
+  window.HISTI_LANGUAGES={open,closeImmediately:()=>closeDialogImmediately(dialog)};update();
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 }

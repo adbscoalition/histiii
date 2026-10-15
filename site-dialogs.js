@@ -22,11 +22,15 @@ function animateFromButton(popup, record, trigger) {
   const dx = Math.max(-56, Math.min(56, source.x + source.width / 2 - target.x - target.width / 2));
   const dy = Math.max(-56, Math.min(56, source.y + source.height / 2 - target.y - target.height / 2));
   const origin = `${Math.max(0, Math.min(100, (source.x + source.width / 2 - target.x) / target.width * 100))}% ${Math.max(0, Math.min(100, (source.y + source.height / 2 - target.y) / target.height * 100))}%`;
-  const entry = popup.animate([
+  const utility = popup.dataset?.popupMotion === 'utility';
+  const entry = popup.animate(utility ? [
+    { opacity:0, transform:'translateY(10px) scale(.985)', transformOrigin:'bottom left' },
+    { opacity:1, transform:'none', transformOrigin:'bottom left' }
+  ] : [
     { opacity: 0, transform: `translate(${dx}px,${dy}px) scale(.93)`, transformOrigin: origin },
     { opacity: 1, transform: 'translate(0,0) scale(1.012)', transformOrigin: origin, offset: .75 },
     { opacity: 1, transform: 'none', transformOrigin: origin }
-  ], { duration: 460, easing: 'cubic-bezier(.22,.8,.25,1)', fill: 'backwards' });
+  ], { duration: utility ? 300 : 460, easing: utility ? 'cubic-bezier(.16,1,.3,1)' : 'cubic-bezier(.22,.8,.25,1)', fill: 'backwards' });
   record.entry = entry;
   entry.finished.then(() => { if (record.entry === entry) record.entry = null; entry.cancel(); }, () => {});
   if (typeof trigger.animate === 'function') {
@@ -93,6 +97,8 @@ function dismiss(popup, native, value = '') {
   const record = prepare(popup, native);
   if (record.pending) return record.pending;
   if (native ? !popup.open : popup.hidden) return Promise.resolve(false);
+  const pose = popup.dataset?.popupMotion === 'utility' && !reducedMotion() && typeof popup.animate === 'function' ? window.getComputedStyle(popup) : null;
+  const utilityPose = pose ? {opacity:pose.opacity,transform:pose.transform} : null;
   stopEntry(record);
   record.value = value;
   if (reducedMotion()) {
@@ -102,6 +108,11 @@ function dismiss(popup, native, value = '') {
   record.pending = new Promise(resolve => { record.resolve = resolve; });
   popup.classList.add('suite-popup-closing');
   record.timer = setTimeout(() => finish(popup, native), CLOSE_FALLBACK_MS);
+  if (utilityPose) {
+    const exit=popup.animate([utilityPose,{opacity:0,transform:'translateY(8px) scale(.985)'}],{duration:180,easing:'cubic-bezier(.4,0,1,1)',fill:'both'});
+    record.entry=exit;
+    exit.finished.then(()=>{if(record.pending&&record.entry===exit)finish(popup,native);},()=>{});
+  }
   return record.pending;
 }
 
@@ -117,6 +128,13 @@ export function openDialog(popup, trigger = document.activeElement) {
 }
 
 export function closeDialog(popup, value = '') { return dismiss(popup, true, value); }
+
+// Utility panels replace each other atomically; cancel an unfinished exit too.
+export function closeDialogImmediately(popup) {
+  if (!popup) return;
+  const record=prepare(popup,true);record.value='';
+  finish(popup,true);
+}
 
 export function openPanel(popup, trigger = document.activeElement) {
   if (!popup) return;

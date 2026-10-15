@@ -71,7 +71,12 @@ test('Chinese controls use explicit bounded localization and separate saved-answ
  assert.equal(t('Level 3: 视情况而定'),'第 3 档：视情况而定');
  assert.equal(t('2 local keys'),'2 项本地记录');
  assert.equal(t('Card 2 of 29'),'第 2／29 页');
- const bytes=readFileSync(new URL('../fonts/noto-sans-sc/zh-subset.woff2',import.meta.url));
- assert.equal(bytes.subarray(0,4).toString(),'wOF2');assert.ok(bytes.length<250000,'do not ship the original 16.9 MB font');
- assert.match(read('zh/typography.css'),/font-display:swap/);
+ const bytes=readFileSync(new URL('../fonts/kaiti/zh-subset.woff2',import.meta.url));
+ assert.equal(bytes.subarray(0,4).toString(),'wOF2');assert.ok(bytes.length<250000,'subset the user font instead of shipping the original 11 MB');
+ const css=read('zh/typography.css');
+ assert.match(css,/font-display:swap/);
+ assert.match(css,/unicode-range:U\+3000-303F,U\+3400-9FFF,U\+FF00-FFEF/);
+ assert.match(css,/"HISTI KaiTi","Instrument Sans",system-ui,sans-serif!important/);
+ assert.doesNotMatch(css,/Noto Sans|Public Sans/);
+ assert.match(read('scripts/subset-kaiti.py'),/font\.recalcTimestamp = False/);
 });

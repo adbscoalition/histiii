@@ -23,7 +23,7 @@
   try { preferences = normalizePreferences(JSON.parse(window.localStorage.getItem(STORAGE_KEY) || 'null')); }
   catch { preferences = normalizePreferences(null); }
   let trigger, dialog, status, performanceButton;
-  let appliedReading, closeTimer = null, statusAnimation = null;
+  let appliedReading, closeTimer = null, statusAnimation = null, languageRequested = false;
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const quiet = () => preferences.performance || motion.matches || document.hidden;
   const choices = [];
@@ -153,8 +153,8 @@
     const language = el('button','histi-settings-language'); language.type='button';
     language.append(el('span','','Language'),el('small','',document.documentElement.lang==='zh-CN'?'简体中文':document.documentElement.lang==='es'?'Español':'English'));
     language.addEventListener('click',()=>{
-      if (!window.HISTI_LANGUAGES) return;
-      dialog.addEventListener('close',()=>queueMicrotask(()=>window.HISTI_LANGUAGES.open()),{once:true});
+      if (!window.HISTI_LANGUAGES || languageRequested || dialog.dataset.motion === 'closing') return;
+      languageRequested = true;
       requestClose();
     });
     const reading = group('reading','Reading level','Plain language uses shorter explanations. Test questions and scoring stay the same.',[['standard','Standard'],['simple','Plain language']]);
@@ -178,8 +178,6 @@
     });
     foot.append(reset,status);
     dialog.append(head,language,reading,contrast,text,performance,foot); document.body.append(trigger,dialog);
-    // Module scripts can create the dock before DOMContentLoaded initializes Settings.
-    document.querySelector('.histi-utility-dock')?.append(trigger);
     dialog.addEventListener('click',event=>{
       if (dialog.dataset.motion === 'closing') return;
       if (event.target === dialog) {
@@ -192,18 +190,26 @@
     });
     performanceButton.addEventListener('click',()=>change('performance',!preferences.performance));
     trigger.addEventListener('click',()=>{
+      window.HISTI_LANGUAGES?.closeImmediately?.();
       if (document.querySelector('dialog[open]')) return;
       clearMotion();
       dialog.showModal(); dialog.scrollTop = 0; trigger.setAttribute('aria-expanded','true'); close.focus({preventScroll:true});
       if (!quiet()) { dialog.dataset.motion = 'opening'; dialog.dataset.contentMotion = 'true'; }
     });
-    dialog.addEventListener('cancel',event=>{ event.preventDefault(); requestClose(); });
+    dialog.addEventListener('cancel',event=>{ event.preventDefault(); languageRequested=false; requestClose(); });
     dialog.addEventListener('animationend',event=>{
       if (event.target !== dialog) return;
       if (event.animationName === 'settings-depart' && dialog.dataset.motion === 'closing') finishClose();
       else if (event.animationName === 'settings-arrive' && dialog.dataset.motion === 'opening') clearMotion();
     });
-    dialog.addEventListener('close',()=>{ cancelStatusMotion(); clearMotion(); trigger.setAttribute('aria-expanded','false'); if (!document.hidden) trigger.focus({preventScroll:true}); });
+    dialog.addEventListener('close',()=>{
+      if (dialog.open) return;
+      cancelStatusMotion(); clearMotion(); trigger.setAttribute('aria-expanded','false');
+      const requested=languageRequested; languageRequested=false;
+      if (requested && !document.hidden) queueMicrotask(()=>{if(!dialog.open)window.HISTI_LANGUAGES?.open();});
+      else if (!document.hidden && !document.querySelector('dialog[open]')) trigger.focus({preventScroll:true});
+    });
+    window.HISTI_SETTINGS={closeImmediately:()=>{languageRequested=false;finishClose();}};
     apply(true);
     window.HISTI_LOCALE?.translate(dialog);
     window.HISTI_LOCALE?.translate(trigger);

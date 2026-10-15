@@ -48,7 +48,7 @@ function fixture({stored=null,blocked=false}={}) {
   doc.querySelector=selector=>selector==='dialog[open]'?doc.body.all().find(n=>n.tagName==='DIALOG'&&n.open)||null:null;
   doc.getElementById=id=>doc.body.all().find(n=>n.id===id)||null;
   const host={matchMedia:()=>motion,getComputedStyle:()=>({opacity:'.6',transform:'matrix(1, 0, 0, 1, 4, 3)'}),setTimeout:(fn,ms)=>{const id=++timerId;timers.set(id,{fn,ms});return id;},clearTimeout:id=>timers.delete(id),localStorage:{getItem:key=>{if(blocked)throw Error('Blocked');return storage.get(key)||null;},setItem:(key,value)=>{if(blocked)throw Error('Blocked');writes.push([key,value]);storage.set(key,value);},removeItem:key=>{if(blocked)throw Error('Blocked');storage.delete(key);}},addEventListener:(type,fn)=>{(windowListeners[type] ||= []).push(fn);}};
-  const context={document:doc,window:host,CustomEvent:class {constructor(type,options){this.type=type;this.detail=options.detail;}}};
+  const context={document:doc,window:host,queueMicrotask,CustomEvent:class {constructor(type,options){this.type=type;this.detail=options.detail;}}};
   const run=()=>runInNewContext(read('site-settings.js'),context);
   const ready=()=>{doc.readyState='complete';doc.dispatchEvent({type:'DOMContentLoaded'});};
   const choose=(key,value)=>{const button=doc.body.all().find(n=>n.dataset.setting===key&&n.dataset.value===value);assert.ok(button);doc.getElementById('histi-settings-dialog').emit('click',{target:button});};
@@ -159,6 +159,28 @@ test('save feedback has one finite animation, replaced on rapid changes and canc
   f.choose('reading','standard');assert.equal(active.size,0);
 });
 
+test('settings and language handoff closes first, coalesces clicks, and cancels forced handoffs',async()=>{
+  const f=fixture();f.ready();
+  const trigger=f.doc.getElementById('histi-settings-btn'),dialog=f.doc.getElementById('histi-settings-dialog');
+  const language=f.doc.body.all().find(n=>n.className==='histi-settings-language');
+  let openings=0,forced=0;
+  f.host.HISTI_LANGUAGES={open(){assert.equal(dialog.open,false);openings++;},closeImmediately(){forced++;}};
+  trigger.emit('click');assert.equal(forced,1);
+  language.emit('click');language.emit('click');
+  assert.equal(f.timers.size,1);assert.equal(openings,0);
+  dialog.emit('animationend',{animationName:'settings-depart'});
+  await Promise.resolve();assert.equal(openings,1);assert.equal(f.timers.size,0);
+  trigger.emit('click');language.emit('click');
+  f.host.HISTI_SETTINGS.closeImmediately();await Promise.resolve();
+  assert.equal(openings,1,'external replacement must not reopen language');
+  trigger.emit('click');language.emit('click');
+  dialog.emit('cancel',{preventDefault(){}});
+  dialog.emit('animationend',{animationName:'settings-depart'});
+  await Promise.resolve();assert.equal(openings,1,'Escape cancels an unfinished handoff');
+  trigger.emit('click');dialog.emit('close');
+  assert.equal(dialog.dataset.motion,'opening','queued native close events do not interrupt a reopened panel');
+});
+
 test('settings micro-interactions cover controls and typography without infinite or global layout animations',()=>{
   const css=read('site-settings.css');
   assert.match(css,/settings-content-arrive 220ms/);assert.match(css,/--settings-stagger:64ms/);
@@ -209,7 +231,7 @@ test('all 32 pages load preferences before animation scripts and keep privacy an
   assert.equal(pages.length,32);
   for(const file of pages) {
     const html=read(file);
-    assert.equal((html.match(/site-settings\.js\?v=locale-3/g)||[]).length,1,file);
+    assert.equal((html.match(/site-settings\.js\?v=utility-1/g)||[]).length,1,file);
     assert.equal((html.match(/site-settings\.css\?v=locale-2/g)||[]).length,1,file);
     assert.ok(html.indexOf('/site-settings.js')<html.indexOf('/page-transitions.js'),file);
     assert.ok(html.indexOf('/site-settings.css')<html.indexOf('/site-typography.css'),file);

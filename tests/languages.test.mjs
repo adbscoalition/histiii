@@ -77,7 +77,14 @@ test('language UI is bounded, local-only, accessible and pauses for performance/
  assert.doesNotMatch(js,/setInterval|setTimeout|requestAnimationFrame|MutationObserver|fetch\(|localStorage|sessionStorage|innerHTML/);
  assert.match(js,/type='radio'/);assert.match(js,/if\(document\.getElementById\('histi-language-btn'\)\)return/);
  assert.match(css,/data-performance="on"/);assert.match(css,/prefers-reduced-motion:reduce/);assert.match(css,/width:66px/);
- assert.match(read('site-settings.js'),/document\.querySelector\('\.histi-utility-dock'\)\?\.append\(trigger\)/);
+ assert.doesNotMatch(read('site-settings.js'),/\.append\(trigger\)/);
+ assert.match(js,/dock\.append\(trigger\)/);
+ assert.match(css,/\.histi-utility-dock \{[^}]*left:max\(18px,env\(safe-area-inset-left\)\); right:auto/);
+ assert.match(css,/\.histi-language-dialog \{[^}]*left:max\(18px,env\(safe-area-inset-left\)\); right:auto/);
+ assert.match(css,/\.histi-settings-dialog:not\(\[open\]\)\)*/);
+ assert.match(css,/\.histi-language-words \{[^}]*animation:histi-language-roll/);
+ assert.match(js,/\[\.\.\.LANGUAGES,LANGUAGES\[0\]\]/);
+ assert.match(js,/window\.HISTI_SETTINGS\?\.closeImmediately\?\.\(\)/);
  for(const l of ['zh','es'])for(const text of ['Language','Switch language','Settings','Prefer not to answer','Keep my answers'])assert.notEqual(require('../'+l+'/ui.js').t(text),text);
  assert.match(read('fonts/noto-sans-sc/OFL.txt'),/SIL OPEN FONT LICENSE/);
  assert.match(read('fonts/noto-sans-sc/README.md'),/67bc647ce1910e92f461bcc82aae30f21d21a9cc/);

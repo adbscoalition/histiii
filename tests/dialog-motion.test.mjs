@@ -33,8 +33,8 @@ function harness() {
     close(value = '') { this.open = false; this.returnValue = value; this.invoker?.focus(); queueMicrotask(() => this.dispatch('close')); }
   }
   const document = { body: new Element('body'), hidden: false, activeElement: new Element('button'), createElement: tag => new Element(tag) };
-  const api = vm.runInNewContext(read('site-dialogs.js').replaceAll('export function ', 'function ') + '\n({openDialog,closeDialog,openPanel,closePanel,confirmReset})', {
-    document, window: { matchMedia: () => ({ matches: reduced }) },
+  const api = vm.runInNewContext(read('site-dialogs.js').replaceAll('export function ', 'function ') + '\n({openDialog,closeDialog,closeDialogImmediately,openPanel,closePanel,confirmReset})', {
+    document, window: { matchMedia: () => ({ matches: reduced }), getComputedStyle:()=>({opacity:'.7',transform:'matrix(1, 0, 0, 1, 0, 3)'}) },
     setTimeout: fn => { timers.set(++nextTimer, fn); return nextTimer; }, clearTimeout: id => timers.delete(id), Promise, WeakMap
   });
   const flush = () => { for (const [id, fn] of [...timers]) { timers.delete(id); fn(); } };
@@ -92,6 +92,34 @@ test('reduced motion and hidden tabs close immediately without timers', async ()
   await h.closeDialog(dialog);
   assert.equal(dialog.open, false);
   assert.equal(h.timers.size, 0);
+});
+
+test('utility panels replace atomically and clean up every interrupted motion',async()=>{
+  const h=harness(),dialog=new h.Element(),trigger=h.document.activeElement;
+  dialog.dataset={popupMotion:'utility'};
+  const running=new Set(),requests=[];
+  dialog.getBoundingClientRect=()=>({x:18,y:100,width:390,height:500});
+  trigger.getBoundingClientRect=()=>({x:18,y:620,width:120,height:44});
+  const animate=(frames,options)=>{
+    let reject;
+    const effect={finished:new Promise((_,no)=>{reject=no;}),cancel(){running.delete(effect);reject(Error('Cancelled'));}};
+    requests.push({frames,options});running.add(effect);return effect;
+  };
+  dialog.animate=animate;trigger.animate=animate;
+  for(let i=0;i<100;i++){
+    h.openDialog(dialog,trigger);
+    assert.equal(requests.at(-2).options.duration,300);
+    assert.equal(requests.at(-2).frames.length,2,'no overshooting entry frames');
+    const pending=h.closeDialog(dialog);
+    assert.equal(requests.at(-1).options.duration,180);
+    assert.equal(requests.at(-1).frames[0].opacity,'.7','exit begins at current rendered pose');
+    h.closeDialogImmediately(dialog);await pending;
+    assert.equal(dialog.open,false);assert.equal(h.timers.size,0);assert.equal(running.size,0);
+    await Promise.resolve();
+  }
+  assert.equal([...dialog.listeners.values()].flat().length,3);
+  h.reduce(true);h.openDialog(dialog,trigger);await h.closeDialog(dialog);
+  assert.equal(running.size,0);assert.equal(h.timers.size,0);
 });
 
 test('legacy panel exits wait for the fade and restore focus', async () => {

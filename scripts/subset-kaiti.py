@@ -26,6 +26,7 @@ subsetter = subset.Subsetter(options=options)
 subsetter.populate(unicodes=characters)
 subsetter.subset(font)
 font.flavor = "woff2"
+font.recalcTimestamp = False
 args.output.parent.mkdir(parents=True, exist_ok=True)
 font.save(args.output)
 print(f"{len(characters)} glyphs; {args.output.stat().st_size:,} bytes; original font untouched")
